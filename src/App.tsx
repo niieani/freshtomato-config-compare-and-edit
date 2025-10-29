@@ -367,10 +367,15 @@ export function App() {
   const leftEntries = leftConfig?.entries ?? null;
   const rightEntries = rightConfig?.entries ?? null;
 
-  const diffLeftRight = useMemo(
-    () => computeDiff(leftEntries, rightEntries),
-    [leftEntries, rightEntries],
-  );
+  const diffLeftRight = useMemo(() => {
+    if (!leftEntries) {
+      return computeDiff(null, null);
+    }
+    if (!rightConfig) {
+      return computeDiff(leftEntries, leftEntries);
+    }
+    return computeDiff(leftEntries, rightEntries);
+  }, [leftEntries, rightEntries, rightConfig?.id]);
 
   const diffLeftFinal = useMemo(
     () => computeDiff(leftEntries, Object.keys(finalEntries).length ? finalEntries : null),
