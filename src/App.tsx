@@ -2412,10 +2412,10 @@ function ListInput({ value, onChange, readOnly }: ListInputProps) {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <div
         className={classNames(
-          "flex min-h-[42px] flex-wrap items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2",
+          "flex w-full min-h-[42px] flex-wrap items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2",
           items.length === 0 ? "text-xs text-slate-500" : undefined,
         )}
       >
@@ -2443,21 +2443,22 @@ function ListInput({ value, onChange, readOnly }: ListInputProps) {
         )}
       </div>
       {canEdit ? (
-        <div className="flex gap-2">
+        <div className="flex w-full items-center gap-2">
           <input
             type="text"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Add value"
-            className="flex-1 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="min-w-0 flex-1 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
           />
           <button
             type="button"
             onClick={commitDraft}
-            className="rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-sky-600 text-base font-semibold text-white shadow-sm transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+            aria-label="Add value"
           >
-            Add
+            +
           </button>
         </div>
       ) : null}

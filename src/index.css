@@ -13,4 +13,9 @@
   ::selection {
     @apply bg-sky-500/40 text-white;
   }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-slate-500;
+  }
 }
