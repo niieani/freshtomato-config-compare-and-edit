@@ -135,7 +135,7 @@ function toUiValue(
 function formatDefaultRaw(
   entry: CatalogEntry | CatalogPatternEntry | null,
 ): string | undefined {
-  if (entry.defaultValue === undefined) {
+  if (entry?.defaultValue === undefined) {
     return undefined;
   }
   return toRawString(entry, entry.defaultValue);

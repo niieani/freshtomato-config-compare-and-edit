@@ -1096,6 +1096,11 @@ export function App() {
     ? filteredPages.find((page) => page.id === activePageId) ?? null
     : filteredPages[0] ?? null;
 
+  const visibleEntries = useMemo(
+    () => selectedPage?.entries ?? [],
+    [selectedPage],
+  );
+
   const [collapsedGroups, setCollapsedGroups] = useState<
     Record<string, boolean>
   >({});
@@ -1317,9 +1322,53 @@ export function App() {
     [finalEntries, leftConfig?.name, rightConfig?.name],
   );
 
+  const handleExportJson = useCallback(() => {
+    const sortedEntries = Object.keys(finalEntries)
+      .sort()
+      .reduce<Record<string, string>>((acc, key) => {
+        const value = finalEntries[key];
+        if (value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
+    const blob = new Blob([JSON.stringify(sortedEntries, null, 2)], {
+      type: "application/json",
+    });
+    const name =
+      leftConfig?.name.replace(/\.cfg$/i, "") ??
+      rightConfig?.name.replace(/\.cfg$/i, "") ??
+      "nvram-export";
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[-:T]/g, "")
+      .slice(0, 14);
+    const a = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = `${name}-${timestamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [finalEntries, leftConfig?.name, rightConfig?.name]);
+
   const handleCopyScript = useCallback(async () => {
     await navigator.clipboard.writeText(scriptText);
   }, [scriptText]);
+
+  const handleCopyVisibleKeys = useCallback(async () => {
+    const text = visibleEntries.map((entry) => entry.key).join("\n");
+    await navigator.clipboard.writeText(text);
+  }, [visibleEntries]);
+
+  const handleCopyVisiblePairs = useCallback(async () => {
+    const lines = visibleEntries.map((entry) => {
+      const value = finalEntries[entry.key] ?? "";
+      return `${entry.key}=${value}`;
+    });
+    await navigator.clipboard.writeText(lines.join("\n"));
+  }, [finalEntries, visibleEntries]);
 
   useEffect(() => {
     if (!pendingScroll) return;
@@ -1438,35 +1487,56 @@ export function App() {
   return (
     <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100">
       <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-white">
-                FreshTomato NVRAM Workspace
+                FreshTomato Config Compare and Edit
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-slate-400">
                 Inspect, compare, and craft configuration backups visually.
-                Start by dropping a FreshTomato{" "}
+                Start by dropping a FreshTomato Router{" "}
                 <code className="rounded bg-slate-900 px-2 py-1">.cfg</code>{" "}
                 file.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {summaryCards.map((card) => (
-                <div
-                  key={card.label}
-                  className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-center"
+            <div className="flex flex-col items-stretch gap-4 sm:items-end">
+              <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+                <a
+                  href="https://github.com/niieani/freshtomato-config-compare-and-edit"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-slate-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
                 >
+                  <GitHubIcon className="h-4 w-4" />
+                  View on GitHub
+                </a>
+                <a
+                  href="https://github.com/sponsors/niieani?o=esb"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/70"
+                >
+                  Sponsor @niieani
+                </a>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {summaryCards.map((card) => (
                   <div
-                    className={classNames("text-lg font-semibold", card.tone)}
+                    key={card.label}
+                    className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-center"
                   >
-                    {card.value}
+                    <div
+                      className={classNames("text-lg font-semibold", card.tone)}
+                    >
+                      {card.value}
+                    </div>
+                    <div className="text-[12px] uppercase tracking-wide text-slate-500">
+                      {card.label}
+                    </div>
                   </div>
-                  <div className="text-[12px] uppercase tracking-wide text-slate-500">
-                    {card.label}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
@@ -1772,7 +1842,9 @@ export function App() {
                     .slice(0, 12)
                     .map((entry) => {
                       const anchorId = anchorByKey.get(entry.key);
-                      const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+                      const handleClick = (
+                        event: MouseEvent<HTMLAnchorElement>,
+                      ) => {
                         event.preventDefault();
                         navigateToField(entry.key);
                       };
@@ -1837,7 +1909,7 @@ export function App() {
                     }
                     className="rounded-lg border border-sky-500/60 bg-sky-500/15 px-3 py-2 text-sm font-medium text-sky-200 transition hover:border-sky-400 hover:bg-sky-500/25"
                   >
-                    Export as {leftConfig?.header ?? "HDR2"}
+                    Export as .cfg ({leftConfig?.header ?? "HDR2"})
                   </button>
                   <button
                     onClick={() =>
@@ -1847,7 +1919,14 @@ export function App() {
                     }
                     className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-300 transition hover:border-slate-600 hover:bg-slate-800"
                   >
-                    Export as {leftConfig?.header === "HDR1" ? "HDR2" : "HDR1"}
+                    Export as .cfg (
+                    {leftConfig?.header === "HDR1" ? "HDR2" : "HDR1"})
+                  </button>
+                  <button
+                    onClick={handleExportJson}
+                    className="rounded-lg border border-rose-500/60 bg-rose-500/15 px-3 py-2 text-sm font-medium text-rose-200 transition hover:border-rose-400 hover:bg-rose-500/25"
+                  >
+                    Export as JSON
                   </button>
                 </div>
               </div>
@@ -1878,10 +1957,47 @@ export function App() {
                   </div>
                 ) : null}
               </div>
+
+              <div className="rounded-xl border border-slate-900 bg-slate-900/60 p-4">
+                <h4 className="text-sm font-semibold text-slate-200">Tools</h4>
+                <p className="mt-1 text-xs text-slate-400">
+                  Operates on the currently visible fields in the workspace.
+                </p>
+                <div className="mt-3 grid gap-2">
+                  <button
+                    onClick={handleCopyVisibleKeys}
+                    className="w-full rounded-lg border border-sky-500/60 bg-sky-500/15 px-3 py-2 text-sm font-medium text-sky-200 transition hover:border-sky-400 hover:bg-sky-500/25"
+                  >
+                    Copy visible keys
+                  </button>
+                  <button
+                    onClick={handleCopyVisiblePairs}
+                    className="w-full rounded-lg border border-indigo-500/60 bg-indigo-500/15 px-3 py-2 text-sm font-medium text-indigo-200 transition hover:border-indigo-400 hover:bg-indigo-500/25"
+                  >
+                    Copy visible key value pairs
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </aside>
       </div>
+      <footer className="border-t border-slate-900 bg-slate-950/80 px-6 py-4">
+        <div className="mx-auto flex max-w-7xl justify-center text-xs text-slate-500">
+          <span>
+            made by{" "}
+            <a
+              href="https://github.com/niieani"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-300 hover:text-sky-200"
+            >
+              @niieani
+            </a>{" "}
+            (Bazyli Brzóska)
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -1940,6 +2056,19 @@ function SwapIcon({ className }: { className?: string }) {
       <path d="M17 17H6" />
       <path d="M6 17l3 3" />
       <path d="M6 17l3-3" />
+    </svg>
+  );
+}
+
+function GitHubIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className ?? "h-5 w-5"}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.38 7.85 10.9.58.1.79-.24.79-.55 0-.27-.01-1.16-.02-2.1-3.19.69-3.87-1.37-3.87-1.37-.53-1.35-1.29-1.71-1.29-1.71-1.06-.72.08-.7.08-.7 1.18.08 1.8 1.21 1.8 1.21 1.04 1.78 2.74 1.27 3.41.97.1-.76.41-1.27.75-1.56-2.55-.29-5.23-1.27-5.23-5.66 0-1.25.45-2.27 1.19-3.07-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.18 1.18.92-.26 1.9-.39 2.88-.4.98 0 1.96.14 2.88.4 2.21-1.49 3.18-1.18 3.18-1.18.63 1.58.23 2.75.11 3.04.74.8 1.19 1.82 1.19 3.07 0 4.41-2.68 5.37-5.24 5.65.42.36.8 1.07.8 2.16 0 1.56-.01 2.82-.01 3.21 0 .31.21.66.8.55A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
     </svg>
   );
 }
