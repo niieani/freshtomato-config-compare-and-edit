@@ -2,9 +2,11 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ChangeEvent,
   type DragEvent,
+  type MouseEvent,
   type KeyboardEvent,
 } from "react";
 import { decodeCfg, encodeCfg } from "@/nvram/nvram-cfg";
@@ -158,6 +160,12 @@ interface PortForwardIpv6Rule {
 
 type PortForwardRule = PortForwardIpv4Rule | PortForwardIpv6Rule;
 
+interface NavigateToFieldOptions {
+  preserveFilters?: boolean;
+  updateHash?: boolean;
+  behavior?: ScrollBehavior;
+}
+
 function resolveControlType(field: ResolvedField): ControlType {
   if (field.options && field.options.length > 0) return "select";
   switch (field.type) {
@@ -278,6 +286,21 @@ function formatDisplay(value: any, controlType: ControlType): string {
 
 function classNames(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
+}
+
+function normaliseAnchorBase(key: string) {
+  const trimmed = key.trim().toLowerCase();
+  const sanitized = trimmed
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  if (sanitized.length > 0) {
+    return sanitized;
+  }
+  const fallback = Array.from(key)
+    .map((char) => char.codePointAt(0)?.toString(16).padStart(2, "0") ?? "00")
+    .join("");
+  return fallback.slice(0, 64) || "field";
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -577,6 +600,14 @@ export function App() {
   const [showRawValues, setShowRawValues] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showScript, setShowScript] = useState(false);
+  const [forcedVisibleKey, setForcedVisibleKey] = useState<string | null>(null);
+  const [pendingScroll, setPendingScroll] = useState<{
+    key: string;
+    behavior: ScrollBehavior;
+  } | null>(null);
+  const [activeAnchorKey, setActiveAnchorKey] = useState<string | null>(null);
+  const manualHashNavigationRef = useRef<string | null>(null);
+  const handledInitialHashRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -792,6 +823,22 @@ export function App() {
     return Array.from(keys).sort();
   }, [leftEntries, rightEntries, finalEntries, selections]);
 
+  const { anchorByKey, keyByAnchor } = useMemo(() => {
+    const anchorByKeyMap = new Map<string, string>();
+    const keyByAnchorMap = new Map<string, string>();
+    const counts = new Map<string, number>();
+    for (const key of allKeys) {
+      const base = normaliseAnchorBase(key);
+      const currentCount = counts.get(base) ?? 0;
+      counts.set(base, currentCount + 1);
+      const suffix = currentCount === 0 ? "" : `-${currentCount + 1}`;
+      const anchorId = `field-${base}${suffix}`;
+      anchorByKeyMap.set(key, anchorId);
+      keyByAnchorMap.set(anchorId, key);
+    }
+    return { anchorByKey: anchorByKeyMap, keyByAnchor: keyByAnchorMap };
+  }, [allKeys]);
+
   const fieldViews = useMemo(() => {
     const pages = new Map<string, FieldView[]>();
     for (const key of allKeys) {
@@ -881,6 +928,16 @@ export function App() {
     selections,
   ]);
 
+  const keyToPageId = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const [pageId, entries] of fieldViews.entries()) {
+      for (const entry of entries) {
+        map.set(entry.key, pageId);
+      }
+    }
+    return map;
+  }, [fieldViews]);
+
   const [showEmptyPages, setShowEmptyPages] = useState(false);
 
   const filteredPages = useMemo(() => {
@@ -930,21 +987,25 @@ export function App() {
       );
 
       const filtered = entries.filter((entry) => {
-        const matchesQuery =
-          !query ||
-          entry.key.toLowerCase().includes(query) ||
-          entry.field.label.toLowerCase().includes(query) ||
-          entry.field.description.toLowerCase().includes(query);
+        const isForced = forcedVisibleKey === entry.key;
 
-        if (!matchesQuery) return false;
+        if (!isForced) {
+          const matchesQuery =
+            !query ||
+            entry.key.toLowerCase().includes(query) ||
+            entry.field.label.toLowerCase().includes(query) ||
+            entry.field.description.toLowerCase().includes(query);
 
-        const filterMatches =
-          diffFilter === "all" ? true : entry.diff.status === diffFilter;
+          if (!matchesQuery) return false;
 
-        if (!filterMatches) return false;
+          const filterMatches =
+            diffFilter === "all" ? true : entry.diff.status === diffFilter;
 
-        if (focusPending) {
-          return entry.finalDiff.status !== "same";
+          if (!filterMatches) return false;
+
+          if (focusPending) {
+            return entry.finalDiff.status !== "same";
+          }
         }
 
         return true;
@@ -996,6 +1057,7 @@ export function App() {
     diffFilter,
     fieldViews,
     focusPending,
+    forcedVisibleKey,
     searchTerm,
     showEmptyPages,
   ]);
@@ -1080,6 +1142,48 @@ export function App() {
   const scriptText = useMemo(
     () => generateNvramScript(finalEntries, diffLeftFinal.entries),
     [diffLeftFinal.entries, finalEntries],
+  );
+
+  const navigateToField = useCallback(
+    (fieldKey: string, options?: NavigateToFieldOptions) => {
+      const anchorId = anchorByKey.get(fieldKey);
+      if (!anchorId) return;
+      const preserveFilters = options?.preserveFilters ?? false;
+      const behavior: ScrollBehavior = options?.behavior ?? "smooth";
+
+      if (!preserveFilters) {
+        setSearchTerm((prev) => (prev === "" ? prev : ""));
+        setDiffFilter((prev) => (prev === "all" ? prev : "all"));
+        setFocusPending((prev) => (prev ? false : prev));
+        setForcedVisibleKey(fieldKey);
+      }
+
+      const pageId = keyToPageId.get(fieldKey);
+      if (pageId) {
+        setActivePageId((prev) => (prev === pageId ? prev : pageId));
+      }
+
+      setPendingScroll({ key: fieldKey, behavior });
+      setActiveAnchorKey(fieldKey);
+
+      if (options?.updateHash !== false && typeof window !== "undefined") {
+        manualHashNavigationRef.current = anchorId;
+        if (window.location.hash.slice(1) !== anchorId) {
+          window.location.hash = anchorId;
+        } else {
+          window.history.replaceState(null, "", `#${anchorId}`);
+        }
+      }
+    },
+    [
+      anchorByKey,
+      keyToPageId,
+      setActivePageId,
+      setDiffFilter,
+      setFocusPending,
+      setPendingScroll,
+      setSearchTerm,
+    ],
   );
 
   const handleUpdateSelection = useCallback(
@@ -1177,6 +1281,97 @@ export function App() {
   const handleCopyScript = useCallback(async () => {
     await navigator.clipboard.writeText(scriptText);
   }, [scriptText]);
+
+  useEffect(() => {
+    if (!pendingScroll) return;
+    if (typeof window === "undefined") return;
+    const targetKey = pendingScroll.key;
+    const behavior = pendingScroll.behavior;
+    const anchorId = anchorByKey.get(targetKey);
+    if (!anchorId) {
+      setPendingScroll(null);
+      setForcedVisibleKey((current) =>
+        current === targetKey ? null : current,
+      );
+      return;
+    }
+    let attempts = 0;
+    let cancelled = false;
+    let timeoutId: number | null = null;
+
+    const attempt = () => {
+      if (cancelled) return;
+      const element = document.getElementById(anchorId);
+      if (element) {
+        element.scrollIntoView({
+          behavior,
+          block: "start",
+          inline: "nearest",
+        });
+        setPendingScroll(null);
+        if (forcedVisibleKey === targetKey) {
+          timeoutId = window.setTimeout(() => {
+            setForcedVisibleKey((current) =>
+              current === targetKey ? null : current,
+            );
+          }, 500);
+        }
+        return;
+      }
+      if (attempts < 40) {
+        attempts += 1;
+        window.requestAnimationFrame(attempt);
+      } else {
+        setPendingScroll(null);
+        setForcedVisibleKey((current) =>
+          current === targetKey ? null : current,
+        );
+      }
+    };
+
+    window.requestAnimationFrame(attempt);
+
+    return () => {
+      cancelled = true;
+      if (timeoutId !== null) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [anchorByKey, forcedVisibleKey, pendingScroll]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleHashChange = () => {
+      const hash = window.location.hash.slice(1);
+      if (manualHashNavigationRef.current === hash) {
+        manualHashNavigationRef.current = null;
+        return;
+      }
+      manualHashNavigationRef.current = null;
+      if (!hash) {
+        setActiveAnchorKey(null);
+        return;
+      }
+      const targetKey = keyByAnchor.get(hash);
+      if (!targetKey) return;
+      navigateToField(targetKey, { updateHash: false });
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, [keyByAnchor, navigateToField]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (handledInitialHashRef.current) return;
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    const targetKey = keyByAnchor.get(hash);
+    if (!targetKey) return;
+    handledInitialHashRef.current = true;
+    navigateToField(targetKey, { updateHash: false, behavior: "auto" });
+  }, [keyByAnchor, navigateToField]);
 
   const summaryCards = [
     {
@@ -1441,7 +1636,7 @@ export function App() {
                     onChange={(event) => setFocusPending(event.target.checked)}
                     className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-sky-500"
                   />
-                  Only edits
+                  Only edited
                 </label>
                 <label className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-2 text-xs uppercase tracking-wide text-slate-400">
                   <input
@@ -1479,16 +1674,24 @@ export function App() {
 
                 {selectedPage.entries.length > 0 ? (
                   <div className="space-y-3">
-                    {selectedPage.entries.map((entry) => (
-                      <FieldCard
-                        key={entry.key}
-                        entry={entry}
-                        onSelectionChange={handleUpdateSelection}
-                        onRemoveCustom={handleRemoveCustomKey}
-                        hasRight={!!rightConfig}
-                        rawMode={showRawValues}
-                      />
-                    ))}
+                    {selectedPage.entries.map((entry) => {
+                      const anchorId =
+                        anchorByKey.get(entry.key) ??
+                        `field-${normaliseAnchorBase(entry.key)}`;
+                      return (
+                        <FieldCard
+                          key={entry.key}
+                          entry={entry}
+                          onSelectionChange={handleUpdateSelection}
+                          onRemoveCustom={handleRemoveCustomKey}
+                          hasRight={!!rightConfig}
+                          rawMode={showRawValues}
+                          anchorId={anchorId}
+                          onNavigate={navigateToField}
+                          isAnchorTarget={activeAnchorKey === entry.key}
+                        />
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="rounded-xl border border-slate-900 bg-slate-900/60 px-4 py-8 text-center text-sm text-slate-400">
@@ -1528,22 +1731,39 @@ export function App() {
                   {diffLeftFinal.entries
                     .filter((entry) => entry.status !== "same")
                     .slice(0, 12)
-                    .map((entry) => (
-                      <li
-                        key={entry.key}
-                        className="flex items-center justify-between gap-2"
-                      >
-                        <span className="truncate">{entry.key}</span>
-                        <span
-                          className={classNames(
-                            "whitespace-nowrap rounded-full px-2 py-0.5 text-[11px]",
-                            DIFF_BADGE_THEME[entry.status],
-                          )}
+                    .map((entry) => {
+                      const anchorId = anchorByKey.get(entry.key);
+                      const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
+                        event.preventDefault();
+                        navigateToField(entry.key);
+                      };
+                      return (
+                        <li
+                          key={entry.key}
+                          className="flex items-center justify-between gap-2"
                         >
-                          {FINAL_STATUS_LABEL[entry.status]}
-                        </span>
-                      </li>
-                    ))}
+                          {anchorId ? (
+                            <a
+                              href={`#${anchorId}`}
+                              onClick={handleClick}
+                              className="truncate text-sky-300 transition hover:text-sky-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+                            >
+                              {entry.key}
+                            </a>
+                          ) : (
+                            <span className="truncate">{entry.key}</span>
+                          )}
+                          <span
+                            className={classNames(
+                              "whitespace-nowrap rounded-full px-2 py-0.5 text-[11px]",
+                              DIFF_BADGE_THEME[entry.status],
+                            )}
+                          >
+                            {FINAL_STATUS_LABEL[entry.status]}
+                          </span>
+                        </li>
+                      );
+                    })}
                   {totalPending === 0 ? <li>No changes yet.</li> : null}
                   {totalPending > 12 ? (
                     <li className="text-slate-500">
@@ -1864,6 +2084,9 @@ interface FieldCardProps {
   onRemoveCustom: (key: string) => void;
   hasRight: boolean;
   rawMode: boolean;
+  anchorId: string;
+  onNavigate: (key: string, options?: NavigateToFieldOptions) => void;
+  isAnchorTarget: boolean;
 }
 
 function FieldCard({
@@ -1872,6 +2095,9 @@ function FieldCard({
   onRemoveCustom,
   hasRight,
   rawMode,
+  anchorId,
+  onNavigate,
+  isAnchorTarget,
 }: FieldCardProps) {
   const { key, field, diff, finalDiff, selection } = entry;
   const isFallback = field.raw === null;
@@ -2015,11 +2241,27 @@ function FieldCard({
   );
 
   return (
-    <article className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-sm shadow-slate-950/30">
+    <article
+      id={anchorId}
+      className={classNames(
+        "rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-sm shadow-slate-950/30 scroll-mt-28 transition-shadow",
+        isAnchorTarget ? "ring-2 ring-sky-500/60 shadow-sky-500/20" : null,
+      )}
+    >
       <header className="flex flex-col gap-3 min-[460px]:flex-row min-[460px]:items-center min-[460px]:justify-between min-[460px]:gap-4 md:gap-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-semibold text-white" title={field.label}>
-            {key}
+          <h3 className="text-sm font-semibold text-white">
+            <a
+              href={`#${anchorId}`}
+              title={field.label}
+              onClick={(event) => {
+                event.preventDefault();
+                onNavigate(key, { preserveFilters: true });
+              }}
+              className="-mx-1 rounded px-1 transition hover:text-sky-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+            >
+              {key}
+            </a>
           </h3>
           <span
             className={classNames(
