@@ -1126,7 +1126,13 @@ export function App() {
             !query ||
             entry.key.toLowerCase().includes(query) ||
             entry.field.label.toLowerCase().includes(query) ||
-            entry.field.description.toLowerCase().includes(query);
+            entry.field.description.toLowerCase().includes(query) ||
+            (entry.leftRaw
+              ? entry.leftRaw.toLowerCase().includes(query)
+              : false) ||
+            (entry.rightRaw
+              ? entry.rightRaw.toLowerCase().includes(query)
+              : false);
 
           if (!matchesQuery) return false;
 
@@ -1875,7 +1881,7 @@ export function App() {
               <div className="relative">
                 <input
                   type="search"
-                  placeholder="Search by key, label, or description…"
+                  placeholder="Search key, label, description, or raw values…"
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-inner shadow-slate-200 transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-100 dark:shadow-slate-950"
