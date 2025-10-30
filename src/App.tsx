@@ -1205,7 +1205,7 @@ export function App() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         <aside className="hidden w-60 shrink-0 border-r border-slate-900 bg-slate-950/60 backdrop-blur md:flex md:flex-col">
           <div className="p-4">
             <div className="flex items-center justify-between">
@@ -1330,9 +1330,9 @@ export function App() {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
-            <div className="grid gap-4 sm:grid-cols-[1fr_auto_auto] sm:items-center">
+        <main className="flex-1">
+          <div className="sticky top-0 z-30 border-b border-slate-900/60 bg-slate-950/90 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-slate-950/70">
+            <div className="mx-auto flex max-w-7xl flex-col gap-4">
               <div className="relative">
                 <input
                   type="search"
@@ -1342,17 +1342,22 @@ export function App() {
                   className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 shadow-inner shadow-slate-950 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
                 />
               </div>
-              <DiffFilterToggle value={diffFilter} onChange={setDiffFilter} />
-              <label className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-2 text-xs uppercase tracking-wide text-slate-400">
-                <input
-                  type="checkbox"
-                  checked={focusPending}
-                  onChange={(event) => setFocusPending(event.target.checked)}
-                  className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-sky-500"
-                />
-                Show only pending edits
-              </label>
+              <div className="flex flex-wrap items-center gap-4">
+                <DiffFilterToggle value={diffFilter} onChange={setDiffFilter} />
+                <label className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-2 text-xs uppercase tracking-wide text-slate-400">
+                  <input
+                    type="checkbox"
+                    checked={focusPending}
+                    onChange={(event) => setFocusPending(event.target.checked)}
+                    className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-sky-500"
+                  />
+                  Show only pending edits
+                </label>
+              </div>
             </div>
+          </div>
+
+          <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
 
             {selectedPage ? (
               <section>
