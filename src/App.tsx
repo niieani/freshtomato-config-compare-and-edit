@@ -2791,21 +2791,21 @@ function ValueColumn({
         className={classNames(
           "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border transition-colors duration-200",
           checked
-            ? "border-sky-500 bg-sky-500/80"
-            : "border-rose-500 bg-rose-500/30",
+            ? "border-sky-600 bg-sky-500 dark:border-sky-400 dark:bg-sky-500/60"
+            : "border-rose-400 bg-rose-100 dark:border-rose-500/60 dark:bg-rose-500/30",
         )}
       >
         <span
           className={classNames(
-            "absolute left-[2px] h-4 w-4 translate-x-0 rounded-full bg-white transition-transform duration-200",
+            "absolute left-[2px] h-4 w-4 translate-x-0 rounded-full bg-white shadow-sm transition-transform duration-200",
             checked ? "translate-x-4" : "",
           )}
         />
       </span>
       <span
         className={classNames(
-          "text-xs font-semibold tracking-wide",
-          checked ? "text-sky-300" : "text-rose-300",
+          "text-xs font-semibold tracking-wide transition-colors duration-200",
+          checked ? "text-sky-700 dark:text-sky-300" : "text-rose-600 dark:text-rose-300",
         )}
       >
         {checked ? "ENABLED" : "DISABLED"}
@@ -2979,13 +2979,13 @@ function ValueColumn({
             className={classNames(
               "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border transition-colors duration-200 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-500",
               checked
-                ? "border-sky-500 bg-sky-500/80"
-                : "border-rose-500/60 bg-rose-500/30",
+                ? "border-sky-600 bg-sky-500 hover:bg-sky-500/90 dark:border-sky-400 dark:bg-sky-500/60 dark:hover:bg-sky-500/70"
+                : "border-rose-400 bg-rose-100 hover:bg-rose-200 dark:border-rose-500/60 dark:bg-rose-500/30 dark:hover:bg-rose-500/40",
             )}
           >
             <span
               className={classNames(
-                "absolute left-[2px] h-4 w-4 rounded-full bg-white transition-transform duration-200",
+                "absolute left-[2px] h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200",
                 checked ? "translate-x-4" : "translate-x-0",
               )}
             />
@@ -2993,7 +2993,7 @@ function ValueColumn({
           <span
             className={classNames(
               "text-xs font-semibold tracking-wide transition-colors duration-200",
-              checked ? "text-sky-300" : "text-rose-300",
+              checked ? "text-sky-700 dark:text-sky-300" : "text-rose-600 dark:text-rose-300",
             )}
           >
             {checked ? "ENABLED" : "DISABLED"}
@@ -4128,21 +4128,21 @@ function ValueColumn({
         className={classNames(
           "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border transition-colors duration-200",
           checked
-            ? "border-sky-500 bg-sky-500/80"
-            : "border-rose-500 bg-rose-500/30",
+            ? "border-sky-600 bg-sky-500 dark:border-sky-400 dark:bg-sky-500/60"
+            : "border-rose-400 bg-rose-100 dark:border-rose-500/60 dark:bg-rose-500/30",
         )}
       >
         <span
           className={classNames(
-            "absolute left-[2px] h-4 w-4 translate-x-0 rounded-full bg-white transition-transform duration-200",
+            "absolute left-[2px] h-4 w-4 translate-x-0 rounded-full bg-white shadow-sm transition-transform duration-200",
             checked ? "translate-x-4" : "",
           )}
         />
       </span>
       <span
         className={classNames(
-          "text-xs font-semibold tracking-wide",
-          checked ? "text-sky-300" : "text-rose-300",
+          "text-xs font-semibold tracking-wide transition-colors duration-200",
+          checked ? "text-sky-700 dark:text-sky-300" : "text-rose-600 dark:text-rose-300",
         )}
       >
         {checked ? "ENABLED" : "DISABLED"}
@@ -4316,13 +4316,13 @@ function ValueColumn({
             className={classNames(
               "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border transition-colors duration-200 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-500",
               checked
-                ? "border-sky-500 bg-sky-500/80"
-                : "border-rose-500/60 bg-rose-500/30",
+                ? "border-sky-600 bg-sky-500 hover:bg-sky-500/90 dark:border-sky-400 dark:bg-sky-500/60 dark:hover:bg-sky-500/70"
+                : "border-rose-400 bg-rose-100 hover:bg-rose-200 dark:border-rose-500/60 dark:bg-rose-500/30 dark:hover:bg-rose-500/40",
             )}
           >
             <span
               className={classNames(
-                "absolute left-[2px] h-4 w-4 rounded-full bg-white transition-transform duration-200",
+                "absolute left-[2px] h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200",
                 checked ? "translate-x-4" : "translate-x-0",
               )}
             />
@@ -4330,7 +4330,7 @@ function ValueColumn({
           <span
             className={classNames(
               "text-xs font-semibold tracking-wide transition-colors duration-200",
-              checked ? "text-sky-300" : "text-rose-300",
+              checked ? "text-sky-700 dark:text-sky-300" : "text-rose-600 dark:text-rose-300",
             )}
           >
             {checked ? "ENABLED" : "DISABLED"}
