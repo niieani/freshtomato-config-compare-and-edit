@@ -1025,12 +1025,41 @@ export function App() {
 
   const handleUpdateSelection = useCallback(
     (key: string, state: SelectionState) => {
-      setSelections((prev) => ({
-        ...prev,
-        [key]: state,
-      }));
+      setSelections((prev) => {
+        const previous = prev[key];
+        let nextState: SelectionState = state;
+
+        if (state.option === "custom") {
+          const customValue = state.customRaw ?? "";
+          const leftValue = leftEntries?.[key];
+          const rightValue = rightEntries?.[key];
+          const matchesLeft = leftValue !== undefined && customValue === leftValue;
+          const matchesRight = rightValue !== undefined && customValue === rightValue;
+
+          if (matchesLeft && matchesRight) {
+            nextState = previous?.option === "right" ? { option: "right" } : { option: "left" };
+          } else if (matchesLeft) {
+            nextState = { option: "left" };
+          } else if (matchesRight) {
+            nextState = { option: "right" };
+          }
+        }
+
+        if (
+          previous &&
+          previous.option === nextState.option &&
+          previous.customRaw === nextState.customRaw
+        ) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [key]: nextState,
+        };
+      });
     },
-    [],
+    [leftEntries, rightEntries],
   );
 
   const handleRemoveCustomKey = useCallback((key: string) => {
