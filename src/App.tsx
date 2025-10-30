@@ -95,6 +95,7 @@ interface FieldView {
   diff: DiffEntry;
   finalDiff: DiffEntry;
   selection: SelectionState | undefined;
+  originCategory?: "onlyLeft" | "onlyRight" | "other" | "custom";
 }
 
 const DIFF_BADGE_THEME: Record<DiffStatus, string> = {
@@ -402,6 +403,38 @@ function fallbackField(key: string): ResolvedField {
 
 const UNCATEGORISED_PAGE_LABEL = "Uncatalogued Keys";
 
+type UncataloguedCategory = "onlyLeft" | "onlyRight" | "other" | "custom";
+
+const UNCATEGORISED_VARIANTS: Record<
+  UncataloguedCategory,
+  { id: string; title: string; order: number }
+> = {
+  onlyLeft: {
+    id: "__uncatalogued__only_left",
+    title: "uncatalogued-only-left",
+    order: 0,
+  },
+  onlyRight: {
+    id: "__uncatalogued__only_right",
+    title: "uncatalogued-only-right",
+    order: 1,
+  },
+  other: {
+    id: "__uncatalogued__other",
+    title: "uncatalogued-other",
+    order: 2,
+  },
+  custom: {
+    id: "__uncatalogued__custom",
+    title: "uncatalogued-custom",
+    order: 3,
+  },
+};
+
+const UNCATALOGUED_VARIANT_BY_ID = new Map(
+  Object.values(UNCATEGORISED_VARIANTS).map((variant) => [variant.id, variant]),
+);
+
 export function App() {
   const [leftConfig, setLeftConfig] = useState<LoadedConfig | null>(null);
   const [rightConfig, setRightConfig] = useState<LoadedConfig | null>(null);
@@ -615,7 +648,7 @@ export function App() {
     const pages = new Map<string, FieldView[]>();
     for (const key of allKeys) {
       const resolved = resolveField(key) ?? fallbackField(key);
-      const pageId = resolved.page ?? UNCATEGORISED_PAGE_ID;
+      let pageId = resolved.page ?? UNCATEGORISED_PAGE_ID;
 
       const diff = diffLeftRight.byKey.get(key) ?? {
         key,
@@ -640,15 +673,41 @@ export function App() {
                       : "changed") as DiffStatus)),
       };
 
+      const leftRaw = leftEntries?.[key];
+      const rightRaw = rightEntries?.[key];
+      const workingRaw = finalEntries[key];
+      const selectionState = selections[key];
+
+      let originCategory: FieldView["originCategory"];
+      if (pageId === UNCATEGORISED_PAGE_ID) {
+        const isCustomEntry =
+          !!selectionState &&
+          leftRaw === undefined &&
+          rightRaw === undefined &&
+          resolved.raw === null;
+        if (isCustomEntry) {
+          originCategory = "custom";
+        } else if (leftRaw !== undefined && rightRaw === undefined) {
+          originCategory = "onlyLeft";
+        } else if (rightRaw !== undefined && leftRaw === undefined) {
+          originCategory = "onlyRight";
+        } else {
+          originCategory = "other";
+        }
+        originCategory = originCategory ?? "other";
+        pageId = UNCATEGORISED_VARIANTS[originCategory].id;
+      }
+
       const entry: FieldView = {
         key,
         field: resolved,
-        leftRaw: leftEntries?.[key],
-        rightRaw: rightEntries?.[key],
-        workingRaw: finalEntries[key],
+        leftRaw,
+        rightRaw,
+        workingRaw,
         diff,
         finalDiff,
-        selection: selections[key],
+        selection: selectionState,
+        originCategory,
       };
 
       if (!pages.has(pageId)) {
@@ -674,12 +733,13 @@ export function App() {
       groupKey: string;
       groupLabel: string;
       hasMatches: boolean;
+      sortOrder: number;
     }> = [];
 
     const getGroupMeta = (pageId: string, title: string) => {
-      if (pageId === UNCATEGORISED_PAGE_ID) {
+      if (pageId === UNCATEGORISED_PAGE_ID || UNCATALOGUED_VARIANT_BY_ID.has(pageId)) {
         return {
-          groupKey: "__uncatalogued__",
+          groupKey: "uncatalogued",
           groupLabel: "Uncatalogued",
         };
       }
@@ -692,8 +752,12 @@ export function App() {
     };
 
     for (const [pageId, entries] of fieldViews.entries()) {
-      const title =
-        pageId === UNCATEGORISED_PAGE_ID ? UNCATEGORISED_PAGE_LABEL : prettifyPageId(pageId);
+      const variantMeta = UNCATALOGUED_VARIANT_BY_ID.get(pageId);
+      const title = variantMeta
+        ? variantMeta.title
+        : pageId === UNCATEGORISED_PAGE_ID
+          ? UNCATEGORISED_PAGE_LABEL
+          : prettifyPageId(pageId);
 
       const filtered = entries.filter((entry) => {
         const matchesQuery =
@@ -717,10 +781,9 @@ export function App() {
       });
 
       const { groupKey, groupLabel } = getGroupMeta(pageId, title);
-      const displayTitle =
-        groupKey !== "__uncatalogued__" && title.startsWith(`${groupKey}-`)
-          ? title.slice(groupKey.length + 1)
-          : title;
+      const prefix = `${groupKey}-`;
+      const displayTitle = title.startsWith(prefix) ? title.slice(prefix.length) : title;
+      const sortOrder = variantMeta?.order ?? 0;
 
       if (filtered.length > 0) {
         result.push({
@@ -731,6 +794,7 @@ export function App() {
           groupKey,
           groupLabel,
           hasMatches: true,
+          sortOrder,
         });
       } else if (pageId === activePageId) {
         result.push({
@@ -741,12 +805,13 @@ export function App() {
           groupKey,
           groupLabel,
           hasMatches: false,
+          sortOrder,
         });
       }
     }
 
     const normaliseGroupKey = (key: string) =>
-      key === "__uncatalogued__" ? "zzzzzzzz" : key;
+      key === "uncatalogued" ? "zzzzzzzz" : key;
 
     result.sort((a, b) => {
       const groupCompare = normaliseGroupKey(a.groupKey).localeCompare(
@@ -754,6 +819,10 @@ export function App() {
       );
       if (groupCompare !== 0) {
         return groupCompare;
+      }
+      const orderCompare = a.sortOrder - b.sortOrder;
+      if (orderCompare !== 0) {
+        return orderCompare;
       }
       return a.title.localeCompare(b.title);
     });
@@ -860,7 +929,7 @@ export function App() {
       ...prev,
       [name]: { option: "custom", customRaw: "" },
     }));
-    setActivePageId(UNCATEGORISED_PAGE_ID);
+    setActivePageId(UNCATEGORISED_VARIANTS.custom.id);
   }, [finalEntries, selections]);
 
   const handleDownloadCfg = useCallback(
