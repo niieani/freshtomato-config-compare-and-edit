@@ -1828,26 +1828,21 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
 
   return (
     <article className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-sm shadow-slate-950/30">
-      <header className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
-        <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-sm font-semibold text-white" title={field.label}>
-              {key}
-            </h3>
-            <span
-              className={classNames(
-                "inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium",
-                PRIMARY_DIFF_BADGE_THEME[diff.status],
-              )}
-            >
-              {diff.status === "changed" ? "DIFFERENT" : diff.status.toUpperCase()}
-            </span>
-          </div>
-          {field.description ? (
-            <p className="text-xs leading-relaxed text-slate-400">{field.description}</p>
-          ) : null}
+      <header className="flex flex-col gap-3 min-[460px]:flex-row min-[460px]:items-center min-[460px]:justify-between min-[460px]:gap-4 md:gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-sm font-semibold text-white" title={field.label}>
+            {key}
+          </h3>
+          <span
+            className={classNames(
+              "inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium",
+              PRIMARY_DIFF_BADGE_THEME[diff.status],
+            )}
+          >
+            {diff.status === "changed" ? "DIFFERENT" : diff.status.toUpperCase()}
+          </span>
         </div>
-        <div className="flex flex-col items-start gap-2 md:items-end md:gap-2 md:min-w-[320px]">
+        <div className="flex flex-col items-start gap-2 min-[460px]:items-end md:gap-2 md:min-w-[320px]">
           <div className="flex flex-wrap items-center gap-2 md:flex-nowrap md:justify-end">
             {finalBadge}
             <SelectionChips
@@ -1861,6 +1856,9 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
           </div>
         </div>
       </header>
+      {field.description ? (
+        <p className="mt-1 text-xs leading-relaxed text-slate-400">{field.description}</p>
+      ) : null}
 
       <div className="mt-4 grid gap-3 md:grid-cols-3">
         <ValueColumn
@@ -2089,20 +2087,41 @@ function ValueColumn({
     }
 
     if (controlType === "boolean") {
+      const checked =
+        value === true ||
+        value === 1 ||
+        value === "1" ||
+        value === "true" ||
+        (typeof value === "string" && value.toLowerCase?.() === "on");
       return (
         <label className="inline-flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2">
           <input
             type="checkbox"
-            checked={Boolean(value)}
+            checked={checked}
             onChange={(event) => onBooleanChange?.(event.target.checked)}
             className="peer sr-only"
             aria-label={field.label || field.key || title}
           />
-          <span className="relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border border-rose-500/60 bg-rose-500/30 transition-colors duration-200 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-500 peer-checked:border-sky-500 peer-checked:bg-sky-500/80">
-            <span className="absolute left-[2px] h-4 w-4 translate-x-0 rounded-full bg-white transition-transform duration-200 peer-checked:translate-x-4" />
+          <span
+            className={classNames(
+              "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border transition-colors duration-200 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-500",
+              checked ? "border-sky-500 bg-sky-500/80" : "border-rose-500/60 bg-rose-500/30",
+            )}
+          >
+            <span
+              className={classNames(
+                "absolute left-[2px] h-4 w-4 rounded-full bg-white transition-transform duration-200",
+                checked ? "translate-x-4" : "translate-x-0",
+              )}
+            />
           </span>
-          <span className="text-xs font-semibold tracking-wide text-rose-300 transition-colors duration-200 peer-checked:text-sky-300">
-            {Boolean(value) ? "ENABLED" : "DISABLED"}
+          <span
+            className={classNames(
+              "text-xs font-semibold tracking-wide transition-colors duration-200",
+              checked ? "text-sky-300" : "text-rose-300",
+            )}
+          >
+            {checked ? "ENABLED" : "DISABLED"}
           </span>
         </label>
       );
