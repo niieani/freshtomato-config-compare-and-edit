@@ -33,7 +33,7 @@ Interactive browser-based tool for inspecting, comparing, and editing FreshTomat
 ## Using the Workspace
 
 - **Primary upload** – Drag a FreshTomato `.cfg` file into the left drop-zone to decode it via `nvram-cfg.ts`. The UI hydrates every field with metadata, grouping settings by their firmware page.
-- **Comparison upload** – Drop a second `.cfg` to surface changed, added, and removed keys. Filter by change type, search across labels and descriptions, or jump between pages from the sidebar.
+- **Comparison upload** – Drop a second `.cfg` to surface different, added, and removed keys. Filter by change type, search across labels and descriptions, or jump between pages from the sidebar.
 - **Per-field control** – For each key choose _Use Left_, _Use Right_, _Remove_, or customise the value directly. Booleans, enumerations, and numbers render with specialised controls; unknown keys fall back to raw editing.
 - **Exports** – Preview pending edits, generate a curated `.cfg` (HDR1/HDR2) using `encodeCfg`, or copy a CLI script with `nvram set/unset` commands ready for SSH sessions.
 - **Custom keys** – Add adhoc entries that aren’t in the catalog; they appear under “Uncatalogued Keys” and can be edited or removed like any other field.

@@ -1,4 +1,4 @@
-export type DiffStatus = "unchanged" | "changed" | "added" | "removed";
+export type DiffStatus = "same" | "different" | "added" | "removed";
 
 export interface DiffEntry {
   key: string;
@@ -20,8 +20,8 @@ export function computeDiff(
   right: NvramEntries | null,
 ): DiffSummary {
   const counts: Record<DiffStatus, number> = {
-    unchanged: 0,
-    changed: 0,
+    same: 0,
+    different: 0,
     added: 0,
     removed: 0,
   };
@@ -47,9 +47,9 @@ export function computeDiff(
     } else if (leftValue !== undefined && rightValue === undefined) {
       status = "removed";
     } else if (leftValue === rightValue) {
-      status = "unchanged";
+      status = "same";
     } else {
-      status = "changed";
+      status = "different";
     }
 
     counts[status] += 1;

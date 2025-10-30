@@ -89,7 +89,7 @@ function parseStoredConfig(raw: string): LoadedConfig | null {
   }
 }
 
-type DiffFilter = "all" | "changed" | "added" | "removed";
+type DiffFilter = "all" | "different" | "added" | "removed";
 
 interface FieldView {
   key: string;
@@ -104,15 +104,22 @@ interface FieldView {
 }
 
 const DIFF_BADGE_THEME: Record<DiffStatus, string> = {
-  unchanged: "bg-slate-800/40 text-slate-200 border border-slate-700/60",
-  changed: "bg-amber-500/15 text-amber-200 border border-amber-400/40",
+  same: "bg-slate-800/40 text-slate-200 border border-slate-700/60",
+  different: "bg-amber-500/15 text-amber-200 border border-amber-400/40",
   added: "bg-emerald-500/15 text-emerald-200 border border-emerald-400/40",
   removed: "bg-rose-500/15 text-rose-200 border border-rose-400/40",
 };
 
 const PRIMARY_DIFF_BADGE_THEME: Record<DiffStatus, string> = {
   ...DIFF_BADGE_THEME,
-  changed: "bg-indigo-500/20 text-indigo-200 border border-indigo-400/50",
+  different: "bg-indigo-500/20 text-indigo-200 border border-indigo-400/50",
+};
+
+const FINAL_STATUS_LABEL: Record<DiffStatus, string> = {
+  same: "SAME",
+  different: "EDITED",
+  added: "ADDED",
+  removed: "REMOVED",
 };
 
 type ControlType =
@@ -488,7 +495,7 @@ function escapeForShell(value: string): string {
 function generateNvramScript(entries: NvramEntries, diffToLeft: DiffEntry[]): string {
   const lines: string[] = [];
   for (const entry of diffToLeft) {
-    if (entry.status === "unchanged") continue;
+    if (entry.status === "same") continue;
     if (entry.status === "removed") {
       lines.push(`nvram unset ${entry.key}`);
       continue;
@@ -563,7 +570,7 @@ export function App() {
   const [selections, setSelections] = useState<Record<string, SelectionState>>({});
   const [activePageId, setActivePageId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [diffFilter, setDiffFilter] = useState<DiffFilter>("changed");
+  const [diffFilter, setDiffFilter] = useState<DiffFilter>("different");
   const [focusPending, setFocusPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showScript, setShowScript] = useState(false);
@@ -776,23 +783,25 @@ export function App() {
         key,
         left: leftEntries?.[key],
         right: rightEntries?.[key],
-        status: "unchanged" as DiffStatus,
+        status: "same" as DiffStatus,
       };
+
+      const fallbackFinalStatus: DiffStatus =
+        finalEntries[key] === undefined && leftEntries?.[key] === undefined
+          ? "same"
+          : leftEntries?.[key] === finalEntries[key]
+            ? "same"
+            : finalEntries[key] === undefined
+              ? "removed"
+              : leftEntries?.[key] === undefined
+                ? "added"
+                : "different";
 
       const finalDiff = diffLeftFinal.byKey.get(key) ?? {
         key,
         left: leftEntries?.[key],
         right: finalEntries[key],
-        status:
-          finalEntries[key] === undefined && leftEntries?.[key] === undefined
-            ? ("unchanged" as DiffStatus)
-            : (leftEntries?.[key] === finalEntries[key]
-                ? ("unchanged" as DiffStatus)
-                : ((finalEntries[key] === undefined
-                    ? "removed"
-                    : leftEntries?.[key] === undefined
-                      ? "added"
-                      : "changed") as DiffStatus)),
+        status: fallbackFinalStatus,
       };
 
       const leftRaw = leftEntries?.[key];
@@ -886,7 +895,7 @@ export function App() {
           : prettifyPageId(pageId);
       const totalCount = entries.length;
       const pendingCount = entries.reduce(
-        (count, entry) => count + (entry.finalDiff.status !== "unchanged" ? 1 : 0),
+        (count, entry) => count + (entry.finalDiff.status !== "same" ? 1 : 0),
         0,
       );
 
@@ -905,7 +914,7 @@ export function App() {
         if (!filterMatches) return false;
 
         if (focusPending) {
-          return entry.finalDiff.status !== "unchanged";
+          return entry.finalDiff.status !== "same";
         }
 
         return true;
@@ -1016,7 +1025,7 @@ export function App() {
     }
   }, [activePageId, filteredPages]);
 
-  const totalPending = diffLeftFinal.entries.filter((entry) => entry.status !== "unchanged").length;
+  const totalPending = diffLeftFinal.entries.filter((entry) => entry.status !== "same").length;
 
   const scriptText = useMemo(
     () => generateNvramScript(finalEntries, diffLeftFinal.entries),
@@ -1113,8 +1122,8 @@ export function App() {
 
   const summaryCards = [
     {
-      label: "Changed",
-      value: diffLeftRight.counts.changed,
+      label: "Different",
+      value: diffLeftRight.counts.different,
       tone: "text-amber-300",
     },
     {
@@ -1406,7 +1415,7 @@ export function App() {
                 </p>
                 <ul className="mt-2 space-y-1 text-xs text-slate-300">
                   {diffLeftFinal.entries
-                    .filter((entry) => entry.status !== "unchanged")
+                    .filter((entry) => entry.status !== "same")
                     .slice(0, 12)
                     .map((entry) => (
                       <li key={entry.key} className="flex items-center justify-between gap-2">
@@ -1417,7 +1426,7 @@ export function App() {
                             DIFF_BADGE_THEME[entry.status],
                           )}
                         >
-                          {entry.status}
+                          {FINAL_STATUS_LABEL[entry.status]}
                         </span>
                       </li>
                     ))}
@@ -1682,7 +1691,7 @@ interface DiffFilterToggleProps {
 function DiffFilterToggle({ value, onChange }: DiffFilterToggleProps) {
   const options: Array<{ value: DiffFilter; label: string }> = [
     { value: "all", label: "All fields" },
-    { value: "changed", label: "Changed" },
+    { value: "different", label: "Different" },
     { value: "added", label: "Added" },
     { value: "removed", label: "Removed" },
   ];
@@ -1815,14 +1824,14 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
     onSelectionChange(key, { option: "custom", customRaw: field.fromUi(workingValue) });
   };
 
-  const finalBadge = finalDiff.status !== "unchanged" && (
+  const finalBadge = finalDiff.status !== "same" && (
     <span
       className={classNames(
         "inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium",
         DIFF_BADGE_THEME[finalDiff.status],
       )}
     >
-      {finalDiff.status.toUpperCase()}
+      {FINAL_STATUS_LABEL[finalDiff.status]}
     </span>
   );
 
@@ -1839,7 +1848,7 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
               PRIMARY_DIFF_BADGE_THEME[diff.status],
             )}
           >
-            {diff.status === "changed" ? "DIFFERENT" : diff.status.toUpperCase()}
+            {diff.status === "different" ? "DIFFERENT" : diff.status.toUpperCase()}
           </span>
         </div>
         <div className="flex flex-col items-start gap-2 min-[460px]:items-end md:gap-2 md:min-w-[320px]">

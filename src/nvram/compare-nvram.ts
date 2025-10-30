@@ -20,7 +20,7 @@ interface KeyLocation {
 }
 
 interface ComparisonResult {
-  changed: Array<{
+  different: Array<{
     key: string;
     page: string;
     oldValue: any;
@@ -36,7 +36,7 @@ interface ComparisonResult {
     page: string;
     value: any;
   }>;
-  unchanged: number;
+  same: number;
 }
 
 /**
@@ -73,13 +73,13 @@ function compareNvram(oldData: PageData, newData: PageData): ComparisonResult {
   const newKeyMap = buildUniqueKeyMap(newData);
 
   const result: ComparisonResult = {
-    changed: [],
+    different: [],
     added: [],
     removed: [],
-    unchanged: 0
+    same: 0
   };
 
-  // Find changed and unchanged keys
+  // Find different and same keys
   for (const [key, oldLocation] of oldKeyMap) {
     const newLocation = newKeyMap.get(key);
 
@@ -91,16 +91,16 @@ function compareNvram(oldData: PageData, newData: PageData): ComparisonResult {
         value: oldLocation.value
       });
     } else if (oldLocation.value !== newLocation.value) {
-      // Value changed
-      result.changed.push({
+      // Value different
+      result.different.push({
         key,
         page: oldLocation.page,
         oldValue: oldLocation.value,
         newValue: newLocation.value
       });
     } else {
-      // Unchanged
-      result.unchanged++;
+      // Same
+      result.same++;
     }
   }
 
@@ -121,7 +121,7 @@ function compareNvram(oldData: PageData, newData: PageData): ComparisonResult {
     return a.key.localeCompare(b.key);
   };
 
-  result.changed.sort(sortFn);
+  result.different.sort(sortFn);
   result.added.sort(sortFn);
   result.removed.sort(sortFn);
 
@@ -142,27 +142,27 @@ function formatResults(result: ComparisonResult, oldFile: string, newFile: strin
   lines.push(`${newName}: ${newFile}`);
   lines.push('');
   lines.push('Summary:');
-  lines.push(`  Changed: ${result.changed.length}`);
+  lines.push(`  Different: ${result.different.length}`);
   lines.push(`  Added:   ${result.added.length}`);
   lines.push(`  Removed: ${result.removed.length}`);
-  lines.push(`  Unchanged: ${result.unchanged}`);
+  lines.push(`  Same: ${result.same}`);
   lines.push('');
 
-  if (result.changed.length > 0) {
+  if (result.different.length > 0) {
     lines.push('='.repeat(80));
-    lines.push('CHANGED VALUES');
+    lines.push('DIFFERENT VALUES');
     lines.push('='.repeat(80));
 
-    // Group changes by page
-    const changesByPage = new Map<string, typeof result.changed>();
-    for (const item of result.changed) {
-      if (!changesByPage.has(item.page)) {
-        changesByPage.set(item.page, []);
+    // Group differences by page
+    const differencesByPage = new Map<string, typeof result.different>();
+    for (const item of result.different) {
+      if (!differencesByPage.has(item.page)) {
+        differencesByPage.set(item.page, []);
       }
-      changesByPage.get(item.page)!.push(item);
+      differencesByPage.get(item.page)!.push(item);
     }
 
-    for (const [page, items] of changesByPage) {
+    for (const [page, items] of differencesByPage) {
       lines.push('');
       lines.push(`Page: ${page}`);
       for (const item of items) {
@@ -224,7 +224,7 @@ function formatResults(result: ComparisonResult, oldFile: string, newFile: strin
     lines.push('');
   }
 
-  if (result.changed.length === 0 && result.added.length === 0 && result.removed.length === 0) {
+  if (result.different.length === 0 && result.added.length === 0 && result.removed.length === 0) {
     lines.push('No differences found - configurations are identical!');
     lines.push('');
   }
@@ -235,7 +235,7 @@ function formatResults(result: ComparisonResult, oldFile: string, newFile: strin
 interface DiffItem {
   key: string;
   page: string;
-  type: 'changed' | 'added' | 'removed';
+  type: 'different' | 'added' | 'removed';
   oldValue?: any;
   newValue?: any;
   value?: any;
@@ -449,7 +449,7 @@ function buildDescription(
   const descriptor = propInfo?.descriptor;
   const propDescription = descriptor?.description;
 
-  if (diff.type === 'changed') {
+  if (diff.type === 'different') {
     name = `  ${diff.key}`;
 
     if (descriptor) {
@@ -556,7 +556,7 @@ function checkDependencies(
     if (diff.type === 'removed') {
       delete finalState[diff.key];
     } else {
-      const value = diff.type === 'changed' ? diff.newValue : diff.value;
+      const value = diff.type === 'different' ? diff.newValue : diff.value;
       finalState[diff.key] = String(value);
     }
   }
@@ -609,11 +609,11 @@ async function runInteractive(result: ComparisonResult, oldName: string, newName
   const allDiffs: DiffItem[] = [];
 
   // Collect all differences
-  for (const item of result.changed) {
+  for (const item of result.different) {
     allDiffs.push({
       key: item.key,
       page: item.page,
-      type: 'changed',
+      type: 'different',
       oldValue: item.oldValue,
       newValue: item.newValue
     });
@@ -662,7 +662,7 @@ async function runInteractive(result: ComparisonResult, oldName: string, newName
     // Add a separator for the page
     choices.push({
       name: `─── ${page} ───`,
-      value: { key: '', page, type: 'changed' } as DiffItem,
+      value: { key: '', page, type: 'different' } as DiffItem,
       description: ''
     });
 
@@ -743,8 +743,8 @@ async function runInteractive(result: ComparisonResult, oldName: string, newName
   const commands: string[] = [];
 
   for (const diff of selectedDiffs) {
-    if (diff.type === 'changed' || diff.type === 'added') {
-      const value = diff.type === 'changed' ? diff.newValue : diff.value;
+    if (diff.type === 'different' || diff.type === 'added') {
+      const value = diff.type === 'different' ? diff.newValue : diff.value;
       commands.push(`nvram set ${diff.key}="${value}"`);
     } else if (diff.type === 'removed') {
       // For removed values, we unset them
@@ -829,7 +829,7 @@ async function main() {
     console.log('');
 
     // Check for differences
-    const hasDifferences = result.changed.length > 0 ||
+    const hasDifferences = result.different.length > 0 ||
                           result.added.length > 0 ||
                           result.removed.length > 0;
 

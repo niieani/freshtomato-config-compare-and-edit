@@ -153,10 +153,10 @@ defaults: defaults/nvram-data.json
 production: production/nvram-data.json
 
 Summary:
-  Changed: 94
+  Different: 94
   Added:   193
   Removed: 43
-  Unchanged: 1318
+  Same: 1318
 
 ### 4. `nvram-cfg.ts` - Encode/Decode Router Backup Files
 
@@ -182,7 +182,7 @@ Key details:
 - Mirrors the Broadcom nvram obfuscation and padding rules so generated files can be restored via the firmware UI.
 
 ================================================================================
-CHANGED VALUES
+DIFFERENT VALUES
 ================================================================================
 
 Page: admin-access.asp
