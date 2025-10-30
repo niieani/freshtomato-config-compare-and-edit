@@ -5523,6 +5523,26 @@ export const ne_shlimit: NvramProperty<Shlimit> = {
   page: "admin-access.asp",
   type: "structured-string",
   defaultValue: { mode: 1, hits: 3, seconds: 60 },
+  structuredSchema: {
+    kind: "object",
+    fields: {
+      mode: {
+        type: "integer",
+        label: "Mode",
+        defaultValue: 1,
+      },
+      hits: {
+        type: "integer",
+        label: "Hits",
+        defaultValue: 3,
+      },
+      seconds: {
+        type: "integer",
+        label: "Seconds",
+        defaultValue: 60,
+      },
+    },
+  },
   transform: {
     toUi: (value) => {
       const [mode = "0", hits = "3", seconds = "60"] = value.split(",");
@@ -13090,5 +13110,4 @@ export const ddnsx: PatternedNvramProperty<
     },
   },
 };
-
 

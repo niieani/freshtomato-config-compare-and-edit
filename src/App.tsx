@@ -8,7 +8,13 @@ import {
   type KeyboardEvent,
 } from "react";
 import { decodeCfg, encodeCfg } from "@/nvram/nvram-cfg";
-import { multilineScriptTransformer } from "@/nvram/nvram-catalog-types";
+import {
+  multilineScriptTransformer,
+  type StructuredPrimitiveField,
+  type StructuredPrimitiveType,
+  type StructuredSchema,
+  type StructuredObjectSchemaDefinition,
+} from "@/nvram/nvram-catalog-types";
 import {
   computeDiff,
   type DiffEntry,
@@ -214,7 +220,7 @@ function coerceDisplayValue(
         return uiValue.filter(isPlainObject) as Array<Record<string, unknown>>;
       }
       if (isPlainObject(uiValue)) {
-        return [uiValue];
+        return uiValue;
       }
       return [];
     }
@@ -253,11 +259,108 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 type StructuredFieldType = "boolean" | "number" | "string";
+type StructuredEditorMode = "array" | "object" | "primitive-array";
 
 function inferStructuredFieldType(value: unknown): StructuredFieldType {
   if (typeof value === "boolean") return "boolean";
   if (typeof value === "number" && Number.isFinite(value)) return "number";
   return "string";
+}
+
+function primitiveToStructuredFieldType(type: StructuredPrimitiveType): StructuredFieldType {
+  if (type === "boolean") return "boolean";
+  if (type === "number" || type === "integer") return "number";
+  return "string";
+}
+
+function isStructuredObjectSchemaDefinition(
+  schema: StructuredSchema | StructuredObjectSchemaDefinition | StructuredPrimitiveField | undefined,
+): schema is StructuredObjectSchemaDefinition {
+  return Boolean(schema) && typeof schema === "object" && "kind" in schema && schema.kind === "object";
+}
+
+function isStructuredPrimitiveField(
+  schema: StructuredSchema | StructuredObjectSchemaDefinition | StructuredPrimitiveField | undefined,
+): schema is StructuredPrimitiveField {
+  return Boolean(schema) && typeof schema === "object" && "type" in schema && !("kind" in schema);
+}
+
+function defaultValueForPrimitiveField(field: StructuredPrimitiveField) {
+  if (field.defaultValue !== undefined) return field.defaultValue;
+  switch (field.type) {
+    case "boolean":
+      return false;
+    case "string":
+      return "";
+    case "number":
+    case "integer":
+    default:
+      return undefined;
+  }
+}
+
+function normaliseRecordWithSchema(
+  record: Record<string, unknown> | null | undefined,
+  schema: StructuredObjectSchemaDefinition,
+): Record<string, unknown> {
+  const source = isPlainObject(record) ? record : {};
+  const normalised: Record<string, unknown> = {};
+  for (const [key, field] of Object.entries(schema.fields)) {
+    if (key in source) {
+      normalised[key] = (source as Record<string, unknown>)[key];
+    } else {
+      normalised[key] = defaultValueForPrimitiveField(field);
+    }
+  }
+  for (const [key, value] of Object.entries(source as Record<string, unknown>)) {
+    if (!(key in schema.fields)) {
+      normalised[key] = value;
+    }
+  }
+  return normalised;
+}
+
+function detectStructuredMode(field: ResolvedField, entry: FieldView): StructuredEditorMode {
+  const schema = field.structuredSchema;
+  if (schema) {
+    if (schema.kind === "object") {
+      return "object";
+    }
+    if (schema.kind === "array") {
+      if (isStructuredObjectSchemaDefinition(schema.items)) {
+        return "array";
+      }
+      if (isStructuredPrimitiveField(schema.items)) {
+        return "primitive-array";
+      }
+    }
+  }
+  const candidateUiValues: unknown[] = [
+    field.toUi(entry.workingRaw),
+    field.toUi(entry.leftRaw),
+    field.toUi(entry.rightRaw),
+  ];
+
+  if (field.defaultRaw !== undefined) {
+    candidateUiValues.push(field.toUi(field.defaultRaw));
+  }
+
+  for (const candidate of candidateUiValues) {
+    if (Array.isArray(candidate)) {
+      return "array";
+    }
+    if (isPlainObject(candidate)) {
+      return "object";
+    }
+  }
+
+  if (field.raw && "defaultValue" in field.raw && field.raw.defaultValue !== undefined) {
+    const defaultValue = field.raw.defaultValue;
+    if (Array.isArray(defaultValue)) return "array";
+    if (isPlainObject(defaultValue)) return "object";
+  }
+
+  return "array";
 }
 
 function formatBytes(bytes: number): string {
@@ -1569,6 +1672,7 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
   const { key, field, diff, finalDiff, selection } = entry;
   const isFallback = field.raw === null;
   const controlType = resolveControlType(field);
+  const structuredMode = controlType === "structured" ? detectStructuredMode(field, entry) : undefined;
   const leftValue = coerceDisplayValue(field, entry.leftRaw, controlType);
   const rightValue = coerceDisplayValue(field, entry.rightRaw, controlType);
   const workingValue = coerceDisplayValue(field, entry.workingRaw, controlType);
@@ -1674,6 +1778,8 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
           readOnly
           options={field.options}
           className={sidesIdentical ? "md:col-span-2" : undefined}
+          structuredMode={structuredMode}
+          structuredSchema={field.structuredSchema}
         />
         {!sidesIdentical ? (
           <ValueColumn
@@ -1690,6 +1796,8 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
             field={field}
             readOnly
             options={field.options}
+            structuredMode={structuredMode}
+            structuredSchema={field.structuredSchema}
           />
         ) : null}
         <ValueColumn
@@ -1706,6 +1814,8 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
           fieldKey={key}
           options={field.options}
           className={sidesIdentical ? "md:col-span-1" : undefined}
+          structuredMode={structuredMode}
+          structuredSchema={field.structuredSchema}
         />
       </div>
     </article>
@@ -1728,6 +1838,8 @@ interface ValueColumnProps {
   fieldKey?: string;
   options?: ResolvedField["options"];
   className?: string;
+  structuredMode?: StructuredEditorMode;
+  structuredSchema?: StructuredSchema;
 }
 
 function ValueColumn({
@@ -1746,8 +1858,39 @@ function ValueColumn({
   fieldKey,
   options,
   className,
+  structuredMode,
+  structuredSchema,
 }: ValueColumnProps) {
   const portForwardVariant: PortForwardVariant = field.key === "ipv6_portforward" ? "ipv6" : "ipv4";
+  const schema = structuredSchema;
+  const resolvedStructuredMode: StructuredEditorMode =
+    structuredMode ??
+    (schema
+      ? schema.kind === "object"
+        ? "object"
+        : schema.kind === "array" && isStructuredPrimitiveField(schema.items)
+          ? "primitive-array"
+          : "array"
+      : "array");
+  const primitiveArraySchema =
+    schema && schema.kind === "array" && isStructuredPrimitiveField(schema.items) ? schema.items : undefined;
+  const objectSchema =
+    schema && schema.kind === "object"
+      ? schema
+      : schema && schema.kind === "array" && isStructuredObjectSchemaDefinition(schema.items)
+        ? schema.items
+        : undefined;
+  const editorModeForRecords: "array" | "object" =
+    resolvedStructuredMode === "primitive-array" ? "array" : resolvedStructuredMode;
+  const toStructuredRecords = (input: unknown): Array<Record<string, unknown>> => {
+    if (Array.isArray(input)) {
+      return input.filter(isPlainObject) as Array<Record<string, unknown>>;
+    }
+    if (isPlainObject(input)) {
+      return [input as Record<string, unknown>];
+    }
+    return [];
+  };
 
   const renderBooleanVisual = (checked: boolean) => (
     <div className="flex items-center gap-2">
@@ -1800,10 +1943,28 @@ function ValueColumn({
         return <ListInput value={items} readOnly />;
       }
       if (controlType === "structured") {
-        const records = Array.isArray(value)
-          ? (value as Array<Record<string, unknown>>)
-          : [];
-        return <StructuredStringEditor value={records} readOnly />;
+        if (primitiveArraySchema) {
+          const items = Array.isArray(value)
+            ? (value as Array<string | number | boolean>)
+            : value == null
+              ? []
+              : [value].filter((item): item is string | number | boolean => typeof item !== "object");
+          return (
+            <StructuredPrimitiveArrayEditor schema={primitiveArraySchema} values={items} readOnly />
+          );
+        }
+        const records = toStructuredRecords(value);
+        const normalisedRecords = objectSchema
+          ? records.map((record) => normaliseRecordWithSchema(record, objectSchema))
+          : records;
+        return (
+          <StructuredStringEditor
+            value={normalisedRecords}
+            readOnly
+            mode={editorModeForRecords}
+            schema={schema}
+          />
+        );
       }
       if (controlType === "ip" || controlType === "mac" || controlType === "netmask" || controlType === "hex") {
         const display = value == null || value === "" ? "—" : String(value);
@@ -1937,13 +2098,44 @@ function ValueColumn({
     }
 
     if (controlType === "structured") {
-      const records = Array.isArray(value)
-        ? (value as Array<Record<string, unknown>>)
-        : [];
+      if (primitiveArraySchema) {
+        const items = Array.isArray(value)
+          ? (value as Array<string | number | boolean>)
+          : value == null
+            ? []
+            : [value].filter((item): item is string | number | boolean => typeof item !== "object");
+        const handlePrimitiveChange = (next: Array<string | number | boolean>) => {
+          onCustomChange?.(next);
+        };
+        return (
+          <StructuredPrimitiveArrayEditor
+            schema={primitiveArraySchema}
+            values={items}
+            onChange={handlePrimitiveChange}
+          />
+        );
+      }
+      const records = toStructuredRecords(value);
+      const normalisedRecords = objectSchema
+        ? records.map((record) => normaliseRecordWithSchema(record, objectSchema))
+        : records;
       const handleChange = (next: Array<Record<string, unknown>>) => {
-        onCustomChange?.(next);
+        if (!onCustomChange) return;
+        if (editorModeForRecords === "object") {
+          const nextRecord = next.find(isPlainObject) ?? {};
+          onCustomChange(nextRecord);
+        } else {
+          onCustomChange(next);
+        }
       };
-      return <StructuredStringEditor value={records} onChange={handleChange} />;
+      return (
+        <StructuredStringEditor
+          value={normalisedRecords}
+          onChange={handleChange}
+          mode={editorModeForRecords}
+          schema={schema}
+        />
+      );
     }
 
     if (controlType === "select" && options && options.length > 0) {
@@ -2109,16 +2301,39 @@ function ListInput({ value, onChange, readOnly }: ListInputProps) {
 
 interface StructuredStringEditorProps {
   value: ReadonlyArray<Record<string, unknown>>;
+  mode?: StructuredEditorMode;
+  schema?: StructuredSchema;
   onChange?: (next: Array<Record<string, unknown>>) => void;
   readOnly?: boolean;
 }
 
-function StructuredStringEditor({ value, onChange, readOnly }: StructuredStringEditorProps) {
-  const records = Array.isArray(value) ? value : [];
+function StructuredStringEditor({ value, onChange, readOnly, mode = "array", schema }: StructuredStringEditorProps) {
+  const objectSchema =
+    schema && schema.kind === "object"
+      ? schema
+      : schema && schema.kind === "array" && isStructuredObjectSchemaDefinition(schema.items)
+        ? schema.items
+        : undefined;
+  const records = useMemo(() => {
+    if (mode === "object") {
+      const first = value[0];
+      const baseRecord = isPlainObject(first) ? (first as Record<string, unknown>) : {};
+      return objectSchema ? [normaliseRecordWithSchema(baseRecord, objectSchema)] : [baseRecord];
+    }
+    const list = Array.isArray(value)
+      ? value.map((entry) => (isPlainObject(entry) ? (entry as Record<string, unknown>) : {}))
+      : [];
+    return objectSchema ? list.map((entry) => normaliseRecordWithSchema(entry, objectSchema)) : list;
+  }, [mode, objectSchema, value]);
   const canEdit = Boolean(onChange) && !readOnly;
 
   const fieldTypes = useMemo(() => {
     const map = new Map<string, StructuredFieldType>();
+    if (objectSchema) {
+      for (const [key, definition] of Object.entries(objectSchema.fields)) {
+        map.set(key, primitiveToStructuredFieldType(definition.type));
+      }
+    }
     for (const record of records) {
       if (!isPlainObject(record)) continue;
       for (const [key, raw] of Object.entries(record)) {
@@ -2139,42 +2354,59 @@ function StructuredStringEditor({ value, onChange, readOnly }: StructuredStringE
     return map;
   }, [records]);
 
+  const fieldLabels = useMemo(() => {
+    if (!objectSchema) return undefined;
+    const labelMap = new Map<string, string>();
+    for (const [key, definition] of Object.entries(objectSchema.fields)) {
+      labelMap.set(key, definition.label ?? key);
+    }
+    return labelMap;
+  }, [objectSchema]);
+
   const handleRecordChange = useCallback(
     (index: number, nextRecord: Record<string, unknown>) => {
       if (!canEdit || !onChange) return;
-      const base = Array.isArray(value) ? value : [];
-      const next = base.map((record, idx) => (idx === index ? nextRecord : record));
-      onChange(next);
+      const baseRecord = objectSchema ? normaliseRecordWithSchema(nextRecord, objectSchema) : nextRecord;
+      const next = records.map((record, idx) => (idx === index ? baseRecord : record));
+      onChange(mode === "object" ? next.slice(0, 1) : next);
     },
-    [canEdit, onChange, value],
+    [canEdit, mode, objectSchema, onChange, records],
   );
 
   const handleRecordRemove = useCallback(
     (index: number) => {
       if (!canEdit || !onChange) return;
-      const base = Array.isArray(value) ? value : [];
-      const next = base.filter((_, idx) => idx !== index);
-      onChange(next);
+      const next = records.filter((_, idx) => idx !== index);
+      onChange(mode === "object" ? next.slice(0, 1) : next);
     },
-    [canEdit, onChange, value],
+    [canEdit, mode, onChange, records],
   );
 
+  const canAddMoreRecords = mode === "array" || records.length === 0;
+
   const handleAddRecord = () => {
-    if (!canEdit || !onChange) return;
-    const template: Record<string, unknown> = {};
-    if (fieldTypes.size > 0) {
-      for (const [key, type] of fieldTypes.entries()) {
-        if (type === "boolean") {
-          template[key] = false;
-        } else if (type === "number") {
-          template[key] = undefined;
-        } else {
-          template[key] = "";
-        }
-      }
+    if (!canEdit || !onChange || !canAddMoreRecords) return;
+    const template: Record<string, unknown> = objectSchema
+      ? normaliseRecordWithSchema({}, objectSchema)
+      : (() => {
+          if (fieldTypes.size === 0) return {};
+          const draft: Record<string, unknown> = {};
+          for (const [key, type] of fieldTypes.entries()) {
+            if (type === "boolean") {
+              draft[key] = false;
+            } else if (type === "number") {
+              draft[key] = undefined;
+            } else {
+              draft[key] = "";
+            }
+          }
+          return draft;
+        })();
+    if (mode === "array") {
+      onChange([...records, template]);
+    } else {
+      onChange([template]);
     }
-    const base = Array.isArray(value) ? value : [];
-    onChange([...base, template]);
   };
 
   if (!records.length) {
@@ -2189,7 +2421,11 @@ function StructuredStringEditor({ value, onChange, readOnly }: StructuredStringE
           <button
             type="button"
             onClick={handleAddRecord}
-            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+            disabled={!canAddMoreRecords}
+            className={classNames(
+              "inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60",
+              !canAddMoreRecords ? "cursor-not-allowed opacity-40 hover:bg-sky-600" : "hover:bg-sky-500",
+            )}
           >
             Add entry
           </button>
@@ -2212,9 +2448,10 @@ function StructuredStringEditor({ value, onChange, readOnly }: StructuredStringE
             <dl className="grid gap-2 sm:grid-cols-2">
               {Object.entries(record).map(([key, raw]) => {
                 const display = raw === undefined || raw === null || raw === "" ? "—" : String(raw);
+                const label = fieldLabels?.get(key) ?? key;
                 return (
                   <div key={key}>
-                    <dt className="text-[10px] uppercase tracking-wide text-slate-500">{key}</dt>
+                    <dt className="text-[10px] uppercase tracking-wide text-slate-500">{label}</dt>
                     <dd>{display}</dd>
                   </div>
                 );
@@ -2234,17 +2471,22 @@ function StructuredStringEditor({ value, onChange, readOnly }: StructuredStringE
           index={index}
           record={isPlainObject(record) ? record : {}}
           fieldTypes={fieldTypes}
+          fieldLabels={fieldLabels}
+          schema={objectSchema}
+          allowCustomFields={!objectSchema}
           onChange={(nextRecord) => handleRecordChange(index, nextRecord)}
-          onRemove={() => handleRecordRemove(index)}
+          onRemove={mode === "array" ? () => handleRecordRemove(index) : undefined}
         />
       ))}
-      <button
-        type="button"
-        onClick={handleAddRecord}
-        className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
-      >
-        Add entry
-      </button>
+      {canAddMoreRecords ? (
+        <button
+          type="button"
+          onClick={handleAddRecord}
+          className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+        >
+          Add entry
+        </button>
+      ) : null}
     </div>
   );
 }
@@ -2253,17 +2495,34 @@ interface StructuredRecordEditorProps {
   index: number;
   record: Record<string, unknown>;
   fieldTypes: ReadonlyMap<string, StructuredFieldType>;
+  fieldLabels?: ReadonlyMap<string, string>;
+  schema?: StructuredObjectSchemaDefinition;
+  allowCustomFields: boolean;
   onChange: (next: Record<string, unknown>) => void;
-  onRemove: () => void;
+  onRemove?: () => void;
 }
 
-function StructuredRecordEditor({ index, record, fieldTypes, onChange, onRemove }: StructuredRecordEditorProps) {
+function StructuredRecordEditor({
+  index,
+  record,
+  fieldTypes,
+  fieldLabels,
+  schema,
+  allowCustomFields,
+  onChange,
+  onRemove,
+}: StructuredRecordEditorProps) {
   const [newFieldKey, setNewFieldKey] = useState("");
   const [newFieldType, setNewFieldType] = useState<StructuredFieldType>("string");
   const [newFieldValue, setNewFieldValue] = useState("");
   const [newFieldBoolean, setNewFieldBoolean] = useState(false);
 
   const keys = useMemo(() => {
+    if (schema) {
+      const ordered = Object.keys(schema.fields);
+      const extras = Object.keys(record).filter((key) => !(key in schema.fields));
+      return [...ordered, ...extras];
+    }
     const set = new Set<string>();
     for (const key of fieldTypes.keys()) {
       set.add(key);
@@ -2272,16 +2531,21 @@ function StructuredRecordEditor({ index, record, fieldTypes, onChange, onRemove 
       set.add(key);
     }
     return Array.from(set);
-  }, [fieldTypes, record]);
+  }, [fieldTypes, record, schema]);
 
   const handleFieldChange = (key: string, type: StructuredFieldType, raw: string) => {
     const next: Record<string, unknown> = { ...record };
     if (type === "number") {
+      const definition = schema?.fields?.[key];
       if (raw === "") {
-        next[key] = undefined;
+        next[key] = definition?.defaultValue ?? undefined;
       } else {
-        const parsed = Number(raw);
-        next[key] = Number.isNaN(parsed) ? undefined : parsed;
+        const parser =
+          definition?.type === "integer"
+            ? (value: string) => Number.parseInt(value, 10)
+            : (value: string) => Number(value);
+        const parsed = parser(raw);
+        next[key] = Number.isNaN(parsed) ? definition?.defaultValue ?? undefined : parsed;
       }
     } else {
       next[key] = raw;
@@ -2295,12 +2559,14 @@ function StructuredRecordEditor({ index, record, fieldTypes, onChange, onRemove 
   };
 
   const handleRemoveField = (key: string) => {
+    if (!allowCustomFields && schema && key in schema.fields) return;
     const next: Record<string, unknown> = { ...record };
     delete next[key];
     onChange(next);
   };
 
   const handleAddField = () => {
+    if (!allowCustomFields) return;
     const trimmedKey = newFieldKey.trim();
     if (!trimmedKey) return;
     const next: Record<string, unknown> = { ...record };
@@ -2328,38 +2594,44 @@ function StructuredRecordEditor({ index, record, fieldTypes, onChange, onRemove 
         <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
           Entry {index + 1}
         </span>
-        <button
-          type="button"
-          onClick={onRemove}
-          className="text-xs text-rose-300 underline-offset-4 hover:underline"
-        >
-          Remove
-        </button>
+        {onRemove ? (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="text-xs text-rose-300 underline-offset-4 hover:underline"
+          >
+            Remove
+          </button>
+        ) : null}
       </header>
       <div className="grid gap-3 sm:grid-cols-2">
         {keys.map((key) => {
           const type = fieldTypes.get(key) ?? inferStructuredFieldType(record[key]);
           const rawValue = record[key];
+          const label = fieldLabels?.get(key) ?? key;
+          const canRemoveField = allowCustomFields || !(schema && key in schema.fields);
           if (type === "boolean") {
             return (
               <div key={key} className="flex flex-col gap-1 text-xs text-slate-300">
-                <span className="text-[10px] uppercase tracking-wide text-slate-500">{key}</span>
+                <span className="text-[10px] uppercase tracking-wide text-slate-500">{label}</span>
                 <label className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
                   <input
                     type="checkbox"
                     checked={Boolean(rawValue)}
                     onChange={(event) => handleBooleanChange(key, event.target.checked)}
-                    aria-label={key}
+                    aria-label={label}
                   />
                   <span className="text-sm text-slate-200">{Boolean(rawValue) ? "True" : "False"}</span>
                 </label>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveField(key)}
-                  className="self-start text-[10px] text-rose-300 underline-offset-4 hover:underline"
-                >
-                  Remove field
-                </button>
+                {canRemoveField ? (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveField(key)}
+                    className="self-start text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                  >
+                    Remove field
+                  </button>
+                ) : null}
               </div>
             );
           }
@@ -2367,14 +2639,38 @@ function StructuredRecordEditor({ index, record, fieldTypes, onChange, onRemove 
           if (type === "number") {
             return (
               <div key={key} className="flex flex-col gap-1 text-xs text-slate-300">
-                <span className="text-[10px] uppercase tracking-wide text-slate-500">{key}</span>
+                <span className="text-[10px] uppercase tracking-wide text-slate-500">{label}</span>
                 <input
                   type="number"
                   value={typeof rawValue === "number" && Number.isFinite(rawValue) ? rawValue : ""}
                   onChange={(event) => handleFieldChange(key, "number", event.target.value)}
                   className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
-                  aria-label={key}
+                  aria-label={label}
                 />
+                {canRemoveField ? (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveField(key)}
+                    className="self-start text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                  >
+                    Remove field
+                  </button>
+                ) : null}
+              </div>
+            );
+          }
+
+          return (
+            <div key={key} className="flex flex-col gap-1 text-xs text-slate-300">
+              <span className="text-[10px] uppercase tracking-wide text-slate-500">{label}</span>
+              <input
+                type="text"
+                value={rawValue == null ? "" : String(rawValue)}
+                onChange={(event) => handleFieldChange(key, "string", event.target.value)}
+                className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                aria-label={label}
+              />
+              {canRemoveField ? (
                 <button
                   type="button"
                   onClick={() => handleRemoveField(key)}
@@ -2382,77 +2678,242 @@ function StructuredRecordEditor({ index, record, fieldTypes, onChange, onRemove 
                 >
                   Remove field
                 </button>
-              </div>
-            );
-          }
-
-          return (
-            <div key={key} className="flex flex-col gap-1 text-xs text-slate-300">
-              <span className="text-[10px] uppercase tracking-wide text-slate-500">{key}</span>
-              <input
-                type="text"
-                value={rawValue == null ? "" : String(rawValue)}
-                onChange={(event) => handleFieldChange(key, "string", event.target.value)}
-                className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
-                aria-label={key}
-              />
-              <button
-                type="button"
-                onClick={() => handleRemoveField(key)}
-                className="self-start text-[10px] text-rose-300 underline-offset-4 hover:underline"
-              >
-                Remove field
-              </button>
+              ) : null}
             </div>
           );
         })}
       </div>
-      <div className="flex flex-col gap-2 rounded-lg border border-dashed border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-300">
-        <span className="text-[10px] uppercase tracking-wide text-slate-500">Add field</span>
-        <div className="flex flex-wrap gap-2">
-          <input
-            type="text"
-            value={newFieldKey}
-            onChange={(event) => setNewFieldKey(event.target.value)}
-            placeholder="Field name"
-            className="flex-1 min-w-[140px] rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
-          />
-          <select
-            value={newFieldType}
-            onChange={(event) => setNewFieldType(event.target.value as StructuredFieldType)}
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
-          >
-            <option value="string">String</option>
-            <option value="number">Number</option>
-            <option value="boolean">Boolean</option>
-          </select>
-          {newFieldType === "boolean" ? (
-            <label className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
-              <input
-                type="checkbox"
-                checked={newFieldBoolean}
-                onChange={(event) => setNewFieldBoolean(event.target.checked)}
-              />
-              <span className="text-sm text-slate-200">{newFieldBoolean ? "True" : "False"}</span>
-            </label>
-          ) : (
+      {allowCustomFields ? (
+        <div className="flex flex-col gap-2 rounded-lg border border-dashed border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Add field</span>
+          <div className="flex flex-wrap gap-2">
             <input
-              type={newFieldType === "number" ? "number" : "text"}
-              value={newFieldValue}
-              onChange={(event) => setNewFieldValue(event.target.value)}
-              placeholder="Value"
-              className="flex-1 min-w-[120px] rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              type="text"
+              value={newFieldKey}
+              onChange={(event) => setNewFieldKey(event.target.value)}
+              placeholder="Field name"
+              className="flex-1 min-w-[140px] rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
             />
-          )}
-          <button
-            type="button"
-            onClick={handleAddField}
-            className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
-          >
-            Add
-          </button>
+            <select
+              value={newFieldType}
+              onChange={(event) => setNewFieldType(event.target.value as StructuredFieldType)}
+              className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            >
+              <option value="string">String</option>
+              <option value="number">Number</option>
+              <option value="boolean">Boolean</option>
+            </select>
+            {newFieldType === "boolean" ? (
+              <label className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
+                <input
+                  type="checkbox"
+                  checked={newFieldBoolean}
+                  onChange={(event) => setNewFieldBoolean(event.target.checked)}
+                />
+                <span className="text-sm text-slate-200">{newFieldBoolean ? "True" : "False"}</span>
+              </label>
+            ) : (
+              <input
+                type={newFieldType === "number" ? "number" : "text"}
+                value={newFieldValue}
+                onChange={(event) => setNewFieldValue(event.target.value)}
+                placeholder="Value"
+                className="flex-1 min-w-[120px] rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              />
+            )}
+            <button
+              type="button"
+              onClick={handleAddField}
+              className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+            >
+              Add field
+            </button>
+          </div>
         </div>
+      ) : null}
+    </div>
+  );
+}
+
+interface StructuredPrimitiveArrayEditorProps {
+  schema: StructuredPrimitiveField;
+  values: ReadonlyArray<string | number | boolean>;
+  onChange?: (next: Array<string | number | boolean>) => void;
+  readOnly?: boolean;
+}
+
+function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: StructuredPrimitiveArrayEditorProps) {
+  const canEdit = Boolean(onChange) && !readOnly;
+  const items = Array.isArray(values) ? values : [];
+  const label = schema.label ?? "Value";
+
+  const handleStringChange = (index: number, raw: string) => {
+    if (!onChange) return;
+    const next = items.map((value, idx) => (idx === index ? raw : value));
+    onChange(next);
+  };
+
+  const handleNumberChange = (index: number, raw: string) => {
+    if (!onChange) return;
+    if (raw === "") return;
+    const parser = schema.type === "integer" ? (value: string) => Number.parseInt(value, 10) : (value: string) => Number(value);
+    const parsed = parser(raw);
+    if (Number.isNaN(parsed)) return;
+    const next = items.map((value, idx) => (idx === index ? parsed : value));
+    onChange(next);
+  };
+
+  const handleBooleanChange = (index: number, checked: boolean) => {
+    if (!onChange) return;
+    const next = items.map((value, idx) => (idx === index ? checked : value));
+    onChange(next);
+  };
+
+  const handleRemove = (index: number) => {
+    if (!onChange) return;
+    onChange(items.filter((_, idx) => idx !== index));
+  };
+
+  const handleAdd = () => {
+    if (!onChange) return;
+    const base = defaultValueForPrimitiveField(schema);
+    let entry: string | number | boolean;
+    if (base !== undefined) {
+      entry = base;
+    } else if (schema.type === "boolean") {
+      entry = false;
+    } else if (schema.type === "number" || schema.type === "integer") {
+      entry = 0;
+    } else {
+      entry = "";
+    }
+    onChange([...items, entry]);
+  };
+
+  if (!canEdit) {
+    if (items.length === 0) {
+      return (
+        <div className="rounded-xl border border-dashed border-slate-800 bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-400">
+          No entries available.
+        </div>
+      );
+    }
+    return (
+      <div className="space-y-2">
+        {items.map((value, index) => (
+          <div
+            key={`primitive-ro-${index}`}
+            className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-200"
+          >
+            <span className="text-[10px] uppercase tracking-wide text-slate-500">
+              {label} {index + 1}
+            </span>
+            <span>{value === "" ? "—" : String(value)}</span>
+          </div>
+        ))}
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-2">
+        {items.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-slate-800 bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-400">
+            No entries available. Add one to get started.
+          </div>
+        ) : (
+          items.map((value, index) => {
+            if (schema.type === "boolean") {
+              return (
+                <div
+                  key={`primitive-${index}`}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2"
+                >
+                  <label className="flex flex-1 items-center justify-between gap-2 text-xs text-slate-300">
+                    <span className="text-[10px] uppercase tracking-wide text-slate-500">
+                      {label} {index + 1}
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(value)}
+                      onChange={(event) => handleBooleanChange(index, event.target.checked)}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(index)}
+                    className="text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              );
+            }
+
+            if (schema.type === "number" || schema.type === "integer") {
+              return (
+                <div
+                  key={`primitive-${index}`}
+                  className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2"
+                >
+                  <div className="flex flex-1 flex-col gap-1 text-xs text-slate-300">
+                    <span className="text-[10px] uppercase tracking-wide text-slate-500">
+                      {label} {index + 1}
+                    </span>
+                    <input
+                      type="number"
+                      value={typeof value === "number" && Number.isFinite(value) ? value : ""}
+                      onChange={(event) => handleNumberChange(index, event.target.value)}
+                      className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(index)}
+                    className="text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={`primitive-${index}`}
+                className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2"
+              >
+                <div className="flex flex-1 flex-col gap-1 text-xs text-slate-300">
+                  <span className="text-[10px] uppercase tracking-wide text-slate-500">
+                    {label} {index + 1}
+                  </span>
+                  <input
+                    type="text"
+                    value={typeof value === "string" ? value : ""}
+                    onChange={(event) => handleStringChange(index, event.target.value)}
+                    className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRemove(index)}
+                  className="text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                >
+                  Remove
+                </button>
+              </div>
+            );
+          })
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={handleAdd}
+        className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+      >
+        Add entry
+      </button>
     </div>
   );
 }

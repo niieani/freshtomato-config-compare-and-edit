@@ -4,6 +4,7 @@ import type {
   PatternedNvramProperty,
   ValueTransformer,
   Validator,
+  StructuredSchema,
 } from "@/nvram/nvram-catalog-types";
 import * as nvramCatalog from "@/nvram/nvram";
 
@@ -27,6 +28,7 @@ export interface CatalogMatch {
   options?: ReadonlyArray<NvramOption<any>>;
   transform?: ValueTransformer<any>;
   validation?: Validator<any>;
+  structuredSchema?: StructuredSchema;
   patternParams?: Record<string, string | number>;
   raw: RawCatalogEntry | null;
   sourceName: string;
@@ -177,6 +179,7 @@ function resolvePatternMatch(key: string): CatalogMatch | null {
       options: entry.ui?.options,
       transform: entry.transform,
       validation: entry.validation,
+      structuredSchema: entry.structuredSchema,
       patternParams: params,
       raw: entry,
       sourceName: name,
@@ -202,6 +205,7 @@ export function resolveField(key: string): ResolvedField | null {
       options: direct.ui?.options,
       transform: direct.transform,
       validation: direct.validation,
+      structuredSchema: direct.structuredSchema,
       raw: direct,
       sourceName: direct.key,
     };

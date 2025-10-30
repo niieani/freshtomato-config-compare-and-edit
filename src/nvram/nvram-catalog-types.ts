@@ -37,6 +37,47 @@ export interface ValueTransformer<T> {
   /** Converts from the structured type back to the raw NVRAM string. */
   fromUi: (value: T) => NvramValue;
 }
+
+/** Primitive values supported in structured schemas. */
+export type StructuredPrimitiveType = "string" | "number" | "integer" | "boolean";
+
+export interface StructuredPrimitiveField {
+  type: StructuredPrimitiveType;
+  label?: string;
+  /**
+   * Default value used when creating new records.
+   * Should match the specified primitive type.
+   */
+  defaultValue?: string | number | boolean;
+  /** When true, the field may be omitted from the UI. */
+  optional?: boolean;
+}
+
+export interface StructuredObjectSchemaDefinition {
+  kind: "object";
+  /**
+   * Fixed set of scalar fields that make up the structured object.
+   * Keys represent the NVRAM property names inside the structured value.
+   */
+  fields: {
+    [key: string]: StructuredPrimitiveField;
+  };
+}
+
+export interface StructuredArrayOfObjectsSchema {
+  kind: "array";
+  items: StructuredObjectSchemaDefinition;
+}
+
+export interface StructuredArrayOfPrimitivesSchema {
+  kind: "array";
+  items: StructuredPrimitiveField;
+}
+
+export type StructuredSchema =
+  | StructuredObjectSchemaDefinition
+  | StructuredArrayOfObjectsSchema
+  | StructuredArrayOfPrimitivesSchema;
 /**
  * Base interface for all NVRAM property definitions.
  */
@@ -63,6 +104,8 @@ interface NvramPropertyBase<T> {
   validation?: Validator<T>;
   /** Optional transformation logic for complex data types. */
   transform?: ValueTransformer<T>;
+  /** Optional UI schema definition for structured values. */
+  structuredSchema?: StructuredSchema;
   /** UI-specific metadata. */
   ui?: {
     /** The label displayed next to the control in the web interface. */
