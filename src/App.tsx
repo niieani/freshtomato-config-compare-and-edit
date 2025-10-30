@@ -598,6 +598,19 @@ function generateNvramScript(entries: NvramEntries, diffToLeft: DiffEntry[]): st
   return lines.join("\n");
 }
 
+function buildRouterHref(
+  ipAddress: string,
+  pagePath: string,
+  username: string,
+  password: string | null,
+): string {
+  const normalisedPath = pagePath.replace(/^\//, "");
+  const credentials = password
+    ? `${encodeURIComponent(username)}:${encodeURIComponent(password)}@`
+    : "";
+  return `http://${credentials}${ipAddress}/${normalisedPath}`;
+}
+
 function fallbackField(key: string): ResolvedField {
   const label = labelFromKey(key);
   return {
@@ -922,6 +935,35 @@ export function App() {
 
   const leftEntries = leftConfig?.entries ?? null;
   const rightEntries = rightConfig?.entries ?? null;
+
+  const leftLanIpRaw = leftEntries?.["lan_ipaddr"];
+  const rightLanIpRaw = rightEntries?.["lan_ipaddr"];
+  const leftLanIp =
+    leftLanIpRaw && leftLanIpRaw.trim() !== "" ? leftLanIpRaw.trim() : null;
+  const rightLanIp =
+    rightLanIpRaw && rightLanIpRaw.trim() !== "" ? rightLanIpRaw.trim() : null;
+
+  const leftHttpUsernameRaw = leftEntries?.["http_username"];
+  const rightHttpUsernameRaw = rightEntries?.["http_username"];
+  const leftHttpPasswordRaw = leftEntries?.["http_passwd"];
+  const rightHttpPasswordRaw = rightEntries?.["http_passwd"];
+
+  const leftHttpUsername =
+    leftHttpUsernameRaw && leftHttpUsernameRaw.trim() !== ""
+      ? leftHttpUsernameRaw.trim()
+      : "root";
+  const rightHttpUsername =
+    rightHttpUsernameRaw && rightHttpUsernameRaw.trim() !== ""
+      ? rightHttpUsernameRaw.trim()
+      : "root";
+  const leftHttpPassword =
+    leftHttpPasswordRaw && leftHttpPasswordRaw.trim() !== ""
+      ? leftHttpPasswordRaw.trim()
+      : null;
+  const rightHttpPassword =
+    rightHttpPasswordRaw && rightHttpPasswordRaw.trim() !== ""
+      ? rightHttpPasswordRaw.trim()
+      : null;
 
   const diffLeftRight = useMemo(() => {
     if (!leftEntries) {
@@ -1810,31 +1852,111 @@ export function App() {
                   >
                     {group.pages.map((page) => {
                       const isActive = page.id === (selectedPage?.id ?? null);
+                      const pagePath = page.id.endsWith(".asp") ? page.id : null;
+                      const pageTitle = page.displayTitle || page.title;
+
+                      const externalLinks: JSX.Element[] = [];
+                      if (pagePath) {
+                        const sharedLan =
+                          leftLanIp &&
+                          rightLanIp &&
+                          leftLanIp === rightLanIp
+                            ? leftLanIp
+                            : null;
+                        if (sharedLan) {
+                          const sharedPassword =
+                            leftHttpPassword ?? rightHttpPassword ?? null;
+                          const sharedUsername =
+                            leftHttpPassword != null
+                              ? leftHttpUsername
+                              : rightHttpPassword != null
+                              ? rightHttpUsername
+                              : leftHttpUsername;
+                          const sharedHref = buildRouterHref(
+                            sharedLan,
+                            pagePath,
+                            sharedUsername,
+                            sharedPassword,
+                          );
+                          externalLinks.push(
+                            <PageExternalLink
+                              key="shared"
+                              href={sharedHref}
+                              title={`Open ${pageTitle} (${sharedLan})`}
+                              variant="shared"
+                            />,
+                          );
+                        } else {
+                          if (leftLanIp) {
+                            const href = buildRouterHref(
+                              leftLanIp,
+                              pagePath,
+                              leftHttpUsername,
+                              leftHttpPassword,
+                            );
+                            externalLinks.push(
+                              <PageExternalLink
+                                key="left"
+                                href={href}
+                                title={`Open ${pageTitle} on left router (${leftLanIp})`}
+                                variant="left"
+                              />,
+                            );
+                          }
+                          if (rightLanIp) {
+                            const href = buildRouterHref(
+                              rightLanIp,
+                              pagePath,
+                              rightHttpUsername,
+                              rightHttpPassword,
+                            );
+                            externalLinks.push(
+                              <PageExternalLink
+                                key="right"
+                                href={href}
+                                title={`Open ${pageTitle} on right router (${rightLanIp})`}
+                                variant="right"
+                              />,
+                            );
+                          }
+                        }
+                      }
+
                       return (
-                        <button
+                        <div
                           key={page.id}
-                          onClick={() => setActivePageId(page.id)}
                           className={classNames(
-                            "flex w-full items-center justify-between rounded-lg py-2 pl-6 pr-4 text-left text-sm transition",
+                            "group flex w-full items-center gap-2 rounded-lg py-2 pl-6 pr-4 text-sm transition",
                             isActive
                               ? "bg-slate-200 text-slate-900 dark:bg-slate-900/80 dark:text-white"
                               : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/40 dark:hover:text-slate-200",
                           )}
                         >
-                          <span className="flex-1 truncate">
-                            {page.displayTitle}
-                          </span>
-                          <span className="ml-3 flex items-center gap-1">
-                            {page.pendingCount > 0 ? (
-                              <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-amber-100 px-2 text-xs font-medium text-amber-700 dark:bg-amber-500/20 dark:text-amber-200">
-                                {page.pendingCount}
-                              </span>
-                            ) : null}
-                            <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-sky-100 px-2 text-xs text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
-                              {page.totalCount}
+                          <button
+                            type="button"
+                            onClick={() => setActivePageId(page.id)}
+                            className="flex flex-1 items-center justify-between gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                          >
+                            <span className="flex-1 truncate">
+                              {page.displayTitle}
                             </span>
-                          </span>
-                        </button>
+                            <span className="flex items-center gap-1">
+                              {page.pendingCount > 0 ? (
+                                <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-amber-100 px-2 text-xs font-medium text-amber-700 dark:bg-amber-500/20 dark:text-amber-200">
+                                  {page.pendingCount}
+                                </span>
+                              ) : null}
+                              <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-sky-100 px-2 text-xs text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
+                                {page.totalCount}
+                              </span>
+                            </span>
+                          </button>
+                          {externalLinks.length > 0 ? (
+                            <div className="flex items-center gap-1">
+                              {externalLinks}
+                            </div>
+                          ) : null}
+                        </div>
                       );
                     })}
                   </div>
@@ -2291,6 +2413,73 @@ function GitHubIcon({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.38 7.85 10.9.58.1.79-.24.79-.55 0-.27-.01-1.16-.02-2.1-3.19.69-3.87-1.37-3.87-1.37-.53-1.35-1.29-1.71-1.29-1.71-1.06-.72.08-.7.08-.7 1.18.08 1.8 1.21 1.8 1.21 1.04 1.78 2.74 1.27 3.41.97.1-.76.41-1.27.75-1.56-2.55-.29-5.23-1.27-5.23-5.66 0-1.25.45-2.27 1.19-3.07-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.18 1.18.92-.26 1.9-.39 2.88-.4.98 0 1.96.14 2.88.4 2.21-1.49 3.18-1.18 3.18-1.18.63 1.58.23 2.75.11 3.04.74.8 1.19 1.82 1.19 3.07 0 4.41-2.68 5.37-5.24 5.65.42.36.8 1.07.8 2.16 0 1.56-.01 2.82-.01 3.21 0 .31.21.66.8.55A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
+    </svg>
+  );
+}
+
+interface PageExternalLinkProps {
+  href: string;
+  title: string;
+  variant: "shared" | "left" | "right";
+}
+
+function PageExternalLink({ href, title, variant }: PageExternalLinkProps) {
+  const toneClasses: Record<PageExternalLinkProps["variant"], string> = {
+    shared:
+      "text-slate-500 hover:text-slate-600 focus-visible:ring-slate-300/50 dark:text-slate-400 dark:hover:text-slate-200 dark:focus-visible:ring-slate-600/50",
+    left:
+      "text-slate-500 hover:text-sky-500 focus-visible:ring-sky-300/50 dark:text-slate-400 dark:hover:text-sky-300 dark:focus-visible:ring-sky-500/50",
+    right:
+      "text-slate-500 hover:text-rose-500 focus-visible:ring-rose-300/50 dark:text-slate-400 dark:hover:text-rose-300 dark:focus-visible:ring-rose-500/50",
+  };
+  const accentDotClasses: Partial<Record<PageExternalLinkProps["variant"], string>> =
+    {
+      left: "bg-sky-400/70 dark:bg-sky-500/70",
+      right: "bg-rose-400/70 dark:bg-rose-500/70",
+    };
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={title}
+      aria-label={title}
+      className={classNames(
+        "inline-flex items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-0 transition",
+        toneClasses[variant],
+      )}
+    >
+      <span className="relative inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-300/70 bg-white/80 text-current shadow-sm transition dark:border-slate-700/70 dark:bg-slate-900/70">
+        <ExternalLinkIcon className="h-3.5 w-3.5" />
+        {variant !== "shared" ? (
+          <span
+            className={classNames(
+              "pointer-events-none absolute bottom-0.5 right-0.5 h-1.5 w-1.5 rounded-full",
+              accentDotClasses[variant],
+            )}
+          />
+        ) : null}
+      </span>
+    </a>
+  );
+}
+
+function ExternalLinkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={classNames("h-4 w-4", className)}
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M11 3h6v6" />
+      <path d="M9 11l8-8" />
+      <path d="M17 11v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
     </svg>
   );
 }
