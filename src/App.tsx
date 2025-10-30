@@ -32,6 +32,7 @@ import {
 import "./index.css";
 
 type SelectionOption = "left" | "right" | "custom" | "remove";
+type ThemePreference = "system" | "light" | "dark";
 
 interface SelectionState {
   option: SelectionOption;
@@ -51,6 +52,7 @@ interface LoadedConfig {
 
 const PRIMARY_STORAGE_KEY = "tomato-router:primary";
 const COMPARISON_STORAGE_KEY = "tomato-router:comparison";
+const THEME_PREFERENCE_STORAGE_KEY = "tomato-router:theme";
 
 function parseStoredConfig(raw: string): LoadedConfig | null {
   try {
@@ -106,15 +108,20 @@ interface FieldView {
 }
 
 const DIFF_BADGE_THEME: Record<DiffStatus, string> = {
-  same: "bg-slate-800/40 text-slate-200 border border-slate-700/60",
-  different: "bg-amber-500/15 text-amber-200 border border-amber-400/40",
-  added: "bg-emerald-500/15 text-emerald-200 border border-emerald-400/40",
-  removed: "bg-rose-500/15 text-rose-200 border border-rose-400/40",
+  same:
+    "bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800/40 dark:text-slate-200 dark:border-slate-700/60",
+  different:
+    "bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:border-amber-400/40",
+  added:
+    "bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-200 dark:border-emerald-400/40",
+  removed:
+    "bg-rose-100 text-rose-700 border border-rose-200 dark:bg-rose-500/15 dark:text-rose-200 dark:border-rose-400/40",
 };
 
 const PRIMARY_DIFF_BADGE_THEME: Record<DiffStatus, string> = {
   ...DIFF_BADGE_THEME,
-  different: "bg-indigo-500/20 text-indigo-200 border border-indigo-400/50",
+  different:
+    "bg-indigo-100 text-indigo-700 border border-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-200 dark:border-indigo-400/50",
 };
 
 const FINAL_STATUS_LABEL: Record<DiffStatus, string> = {
@@ -588,6 +595,15 @@ const UNCATALOGUED_VARIANT_BY_ID = new Map(
 );
 
 export function App() {
+  const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
+    if (typeof window === "undefined") return "system";
+    const stored = window.localStorage.getItem(THEME_PREFERENCE_STORAGE_KEY);
+    return stored === "light" || stored === "dark" ? stored : "system";
+  });
+  const [systemPrefersDark, setSystemPrefersDark] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
   const [leftConfig, setLeftConfig] = useState<LoadedConfig | null>(null);
   const [rightConfig, setRightConfig] = useState<LoadedConfig | null>(null);
   const [selections, setSelections] = useState<Record<string, SelectionState>>(
@@ -608,6 +624,56 @@ export function App() {
   const [activeAnchorKey, setActiveAnchorKey] = useState<string | null>(null);
   const manualHashNavigationRef = useRef<string | null>(null);
   const handledInitialHashRef = useRef(false);
+  const resolvedTheme = useMemo<"light" | "dark">(
+    () =>
+      themePreference === "system"
+        ? systemPrefersDark
+          ? "dark"
+          : "light"
+        : themePreference,
+    [systemPrefersDark, themePreference],
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (event: MediaQueryListEvent) => {
+      setSystemPrefersDark(event.matches);
+    };
+    setSystemPrefersDark(media.matches);
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", handleChange);
+      return () => {
+        media.removeEventListener("change", handleChange);
+      };
+    }
+    media.addListener(handleChange);
+    return () => {
+      media.removeListener(handleChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    const shouldUseDark =
+      themePreference === "dark" ||
+      (themePreference === "system" && systemPrefersDark);
+    root.classList.toggle("dark", shouldUseDark);
+    root.dataset.theme = themePreference;
+  }, [systemPrefersDark, themePreference]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (themePreference === "system") {
+      window.localStorage.removeItem(THEME_PREFERENCE_STORAGE_KEY);
+    } else {
+      window.localStorage.setItem(
+        THEME_PREFERENCE_STORAGE_KEY,
+        themePreference,
+      );
+    }
+  }, [themePreference]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -715,6 +781,14 @@ export function App() {
     setSelections({});
     setActivePageId(null);
   }, [leftConfig, rightConfig]);
+
+  const handleCycleThemePreference = useCallback(() => {
+    setThemePreference((current) => {
+      if (current === "system") return "light";
+      if (current === "light") return "dark";
+      return "system";
+    });
+  }, []);
 
   useEffect(() => {
     const leftEntries = leftConfig?.entries ?? null;
@@ -1465,48 +1539,55 @@ export function App() {
     {
       label: "Different",
       value: diffLeftRight.counts.different,
-      tone: "text-amber-300",
+      tone: "text-amber-600 dark:text-amber-300",
     },
     {
       label: "Added",
       value: diffLeftRight.counts.added,
-      tone: "text-emerald-300",
+      tone: "text-emerald-600 dark:text-emerald-300",
     },
     {
       label: "Removed",
       value: diffLeftRight.counts.removed,
-      tone: "text-rose-300",
+      tone: "text-rose-600 dark:text-rose-300",
     },
     {
       label: "Pending edits",
       value: totalPending,
-      tone: "text-sky-300",
+      tone: "text-sky-600 dark:text-sky-300",
     },
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100">
-      <header className="border-b border-slate-900 bg-slate-950/80 backdrop-blur">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-100">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:border-slate-900 dark:bg-slate-950/80 dark:supports-[backdrop-filter]:bg-slate-950/70">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-white">
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
                 FreshTomato Config Compare and Edit
               </h1>
-              <p className="mt-1 max-w-2xl text-sm text-slate-400">
+              <p className="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
                 Inspect, compare, and craft configuration backups visually.
                 Start by dropping a FreshTomato Router{" "}
-                <code className="rounded bg-slate-900 px-2 py-1">.cfg</code>{" "}
+                <code className="rounded bg-slate-200 px-2 py-1 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+                  .cfg
+                </code>{" "}
                 file.
               </p>
             </div>
             <div className="flex flex-col items-stretch gap-4 sm:items-end">
               <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
+                <ThemeToggle
+                  preference={themePreference}
+                  resolvedTheme={resolvedTheme}
+                  onCycle={handleCycleThemePreference}
+                />
                 <a
                   href="https://github.com/niieani/freshtomato-config-compare-and-edit"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-slate-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:border-slate-500 dark:hover:bg-slate-800 dark:hover:text-white"
                 >
                   <GitHubIcon className="h-4 w-4" />
                   View on GitHub
@@ -1524,14 +1605,14 @@ export function App() {
                 {summaryCards.map((card) => (
                   <div
                     key={card.label}
-                    className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-center"
+                    className="rounded-xl border border-slate-200 bg-white p-3 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900/60"
                   >
                     <div
                       className={classNames("text-lg font-semibold", card.tone)}
                     >
                       {card.value}
                     </div>
-                    <div className="text-[12px] uppercase tracking-wide text-slate-500">
+                    <div className="text-[12px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       {card.label}
                     </div>
                   </div>
@@ -1577,19 +1658,19 @@ export function App() {
       </header>
 
       <div className="flex flex-1">
-        <aside className="hidden w-60 shrink-0 border-r border-slate-900 bg-slate-950/60 backdrop-blur md:flex md:flex-col">
+        <aside className="hidden w-60 shrink-0 border-r border-slate-200 bg-slate-100/80 backdrop-blur supports-[backdrop-filter]:bg-slate-100/60 dark:border-slate-900 dark:bg-slate-950/60 dark:supports-[backdrop-filter]:bg-slate-950/50 md:flex md:flex-col">
           <div className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wide text-slate-500">
+              <span className="text-xs uppercase tracking-wide text-slate-600 dark:text-slate-400">
                 Pages
               </span>
               <button
                 type="button"
                 onClick={() => setShowEmptyPages((prev) => !prev)}
                 className={classNames(
-                  "inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-800 text-slate-500 transition hover:border-slate-700 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50",
+                  "inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-300 text-slate-500 transition hover:border-slate-400 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50 dark:border-slate-800 dark:text-slate-400 dark:hover:border-slate-700 dark:hover:text-slate-200",
                   showEmptyPages
-                    ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
+                    ? "border-sky-500/50 bg-sky-500/10 text-sky-700 dark:text-sky-300"
                     : "",
                 )}
                 aria-pressed={showEmptyPages}
@@ -1636,8 +1717,8 @@ export function App() {
                     className={classNames(
                       "flex w-full items-center justify-between px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wide transition",
                       activeInGroup
-                        ? "text-slate-200"
-                        : "text-slate-500 hover:text-slate-300",
+                        ? "text-slate-900 dark:text-slate-200"
+                        : "text-slate-600 hover:text-slate-800 dark:text-slate-500 dark:hover:text-slate-300",
                     )}
                   >
                     <span>{group.label}</span>
@@ -1670,10 +1751,10 @@ export function App() {
                           key={page.id}
                           onClick={() => setActivePageId(page.id)}
                           className={classNames(
-                            "flex w-full items-center justify-between py-2 pl-6 pr-4 text-left text-sm transition",
+                            "flex w-full items-center justify-between rounded-lg py-2 pl-6 pr-4 text-left text-sm transition",
                             isActive
-                              ? "bg-slate-900/80 text-white"
-                              : "text-slate-400 hover:bg-slate-900/40 hover:text-slate-200",
+                              ? "bg-slate-200 text-slate-900 dark:bg-slate-900/80 dark:text-white"
+                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/40 dark:hover:text-slate-200",
                           )}
                         >
                           <span className="flex-1 truncate">
@@ -1681,11 +1762,11 @@ export function App() {
                           </span>
                           <span className="ml-3 flex items-center gap-1">
                             {page.pendingCount > 0 ? (
-                              <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-amber-500/20 px-2 text-xs font-medium text-amber-200">
+                              <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-amber-100 px-2 text-xs font-medium text-amber-700 dark:bg-amber-500/20 dark:text-amber-200">
                                 {page.pendingCount}
                               </span>
                             ) : null}
-                            <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-sky-500/10 px-2 text-xs text-sky-300">
+                            <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-sky-100 px-2 text-xs text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
                               {page.totalCount}
                             </span>
                           </span>
@@ -1697,35 +1778,41 @@ export function App() {
               );
             })}
             {filteredPages.length === 0 ? (
-              <div className="px-4 py-8 text-sm text-slate-500">
+              <div className="px-4 py-8 text-sm text-slate-600 dark:text-slate-500">
                 No pages match the filters.
               </div>
             ) : null}
           </nav>
-          <div className="border-t border-slate-900 p-4 text-xs text-slate-500">
+          <div className="border-t border-slate-200 p-4 text-xs text-slate-600 dark:border-slate-900 dark:text-slate-500">
             {leftConfig ? (
               <div className="space-y-2">
                 <div>
-                  <div className="font-medium text-slate-300">Baseline</div>
+                  <div className="font-medium text-slate-800 dark:text-slate-300">
+                    Baseline
+                  </div>
                   <div className="truncate">{leftConfig.name}</div>
                   <div>{formatBytes(leftConfig.size)}</div>
                 </div>
                 {rightConfig ? (
                   <div>
-                    <div className="font-medium text-slate-300">Comparison</div>
+                    <div className="font-medium text-slate-800 dark:text-slate-300">
+                      Comparison
+                    </div>
                     <div className="truncate">{rightConfig.name}</div>
                     <div>{formatBytes(rightConfig.size)}</div>
                   </div>
                 ) : null}
               </div>
             ) : (
-              <div>Awaiting primary configuration…</div>
+              <div className="text-slate-500 dark:text-slate-400">
+                Awaiting primary configuration…
+              </div>
             )}
           </div>
         </aside>
 
-        <main className="flex-1">
-          <div className="sticky top-0 z-30 border-b border-slate-900/60 bg-slate-950/90 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-slate-950/70">
+      <main className="flex-1">
+          <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-slate-900/60 dark:bg-slate-950/90 dark:supports-[backdrop-filter]:bg-slate-950/70">
             <div className="mx-auto flex max-w-7xl flex-col gap-4">
               <div className="relative">
                 <input
@@ -1733,26 +1820,26 @@ export function App() {
                   placeholder="Search by key, label, or description…"
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
-                  className="w-full rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-2 text-sm text-slate-100 shadow-inner shadow-slate-950 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 shadow-inner shadow-slate-200 transition focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-100 dark:shadow-slate-950"
                 />
               </div>
               <div className="flex flex-wrap items-center gap-4">
                 <DiffFilterToggle value={diffFilter} onChange={setDiffFilter} />
-                <label className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-2 text-xs uppercase tracking-wide text-slate-400">
+                <label className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs uppercase tracking-wide text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
                   <input
                     type="checkbox"
                     checked={focusPending}
                     onChange={(event) => setFocusPending(event.target.checked)}
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-sky-500"
+                    className="h-4 w-4 rounded border-slate-300 bg-white text-sky-600 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-900 dark:text-sky-400"
                   />
                   Only edited
                 </label>
-                <label className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-2 text-xs uppercase tracking-wide text-slate-400">
+                <label className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs uppercase tracking-wide text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
                   <input
                     type="checkbox"
                     checked={showRawValues}
                     onChange={(event) => setShowRawValues(event.target.checked)}
-                    className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-sky-500"
+                    className="h-4 w-4 rounded border-slate-300 bg-white text-sky-600 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-900 dark:text-sky-400"
                   />
                   Raw
                 </label>
@@ -1765,17 +1852,17 @@ export function App() {
               <section>
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">
+                    <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
                       {selectedPage.title}
                     </h2>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
                       {selectedPage.entries.length} field
                       {selectedPage.entries.length === 1 ? "" : "s"} in view
                     </p>
                   </div>
                   <button
                     onClick={handleAddCustomKey}
-                    className="inline-flex items-center gap-2 rounded-lg border border-sky-500/60 bg-sky-500/10 px-3 py-2 text-sm font-medium text-sky-200 transition hover:border-sky-400 hover:bg-sky-500/20"
+                    className="inline-flex items-center gap-2 rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-2 text-sm font-medium text-sky-700 transition hover:border-sky-500 hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 dark:border-sky-500/60 dark:text-sky-200"
                   >
                     + Add custom key
                   </button>
@@ -1803,40 +1890,40 @@ export function App() {
                     })}
                   </div>
                 ) : (
-                  <div className="rounded-xl border border-slate-900 bg-slate-900/60 px-4 py-8 text-center text-sm text-slate-400">
+                  <div className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-600 dark:border-slate-900 dark:bg-slate-900/60 dark:text-slate-400">
                     No fields match the current filters on this page.
                   </div>
                 )}
               </section>
             ) : (
-              <div className="rounded-xl border border-slate-900 bg-slate-900/50 px-6 py-12 text-center text-slate-400">
+              <div className="rounded-xl border border-slate-200 bg-white px-6 py-12 text-center text-slate-600 dark:border-slate-900 dark:bg-slate-900/50 dark:text-slate-400">
                 No fields to display yet. Load a configuration to begin.
               </div>
             )}
           </div>
         </main>
 
-        <aside className="hidden w-[22rem] shrink-0 border-l border-slate-900 bg-slate-950/60 backdrop-blur lg:flex lg:flex-col">
+        <aside className="hidden w-[22rem] shrink-0 border-l border-slate-200 bg-slate-100/80 backdrop-blur supports-[backdrop-filter]:bg-slate-100/60 dark:border-slate-900 dark:bg-slate-950/60 dark:supports-[backdrop-filter]:bg-slate-950/50 lg:flex lg:flex-col">
           <div className="p-6">
-            <h3 className="text-lg font-semibold text-white">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
               Preview & export
             </h3>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               Generate a curated backup or script reflecting the selections you
               have applied.
             </p>
           </div>
           <div className="flex-1 overflow-y-auto px-6 pb-6">
             <div className="space-y-4">
-              <div className="rounded-xl border border-slate-900 bg-slate-900/60 p-4">
-                <h4 className="text-sm font-semibold text-slate-200">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-900 dark:bg-slate-900/60">
+                <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-200">
                   Pending edits
                 </h4>
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                   {totalPending} change
                   {totalPending === 1 ? "" : "s"} relative to the baseline file.
                 </p>
-                <ul className="mt-2 space-y-1 text-xs text-slate-300">
+                <ul className="mt-2 space-y-1 text-xs text-slate-600 dark:text-slate-300">
                   {diffLeftFinal.entries
                     .filter((entry) => entry.status !== "same")
                     .slice(0, 12)
@@ -1860,7 +1947,7 @@ export function App() {
                             <a
                               href={`#${anchorId}`}
                               onClick={handleClick}
-                              className="truncate text-sky-300 transition hover:text-sky-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+                              className="truncate text-sky-600 transition hover:text-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 dark:text-sky-300 dark:hover:text-sky-200"
                             >
                               {entry.key}
                             </a>
@@ -1879,7 +1966,7 @@ export function App() {
                             <button
                               type="button"
                               onClick={handleUndoClick}
-                              className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-800 text-[11px] font-semibold text-slate-400 transition hover:border-slate-600 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500/50"
+                              className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-[11px] font-semibold text-slate-500 transition hover:border-slate-400 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60 dark:border-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-slate-200"
                               aria-label="Undo change"
                               title="Undo change"
                             >
@@ -1891,15 +1978,15 @@ export function App() {
                     })}
                   {totalPending === 0 ? <li>No changes yet.</li> : null}
                   {totalPending > 12 ? (
-                    <li className="text-slate-500">
+                    <li className="text-slate-500 dark:text-slate-400">
                       …and {totalPending - 12} more.
                     </li>
                   ) : null}
                 </ul>
               </div>
 
-              <div className="rounded-xl border border-slate-900 bg-slate-900/60 p-4">
-                <h4 className="text-sm font-semibold text-slate-200">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-900 dark:bg-slate-900/60">
+                <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-200">
                   Download backup
                 </h4>
                 <div className="mt-3 grid gap-2">
@@ -1907,7 +1994,7 @@ export function App() {
                     onClick={() =>
                       handleDownloadCfg(leftConfig?.header ?? "HDR2")
                     }
-                    className="rounded-lg border border-sky-500/60 bg-sky-500/15 px-3 py-2 text-sm font-medium text-sky-200 transition hover:border-sky-400 hover:bg-sky-500/25"
+                    className="rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-2 text-sm font-medium text-sky-700 transition hover:border-sky-500 hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 dark:border-sky-500/60 dark:text-sky-200"
                   >
                     Export as .cfg ({leftConfig?.header ?? "HDR2"})
                   </button>
@@ -1917,40 +2004,40 @@ export function App() {
                         leftConfig?.header === "HDR1" ? "HDR2" : "HDR1",
                       )
                     }
-                    className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-300 transition hover:border-slate-600 hover:bg-slate-800"
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800"
                   >
                     Export as .cfg (
                     {leftConfig?.header === "HDR1" ? "HDR2" : "HDR1"})
                   </button>
                   <button
                     onClick={handleExportJson}
-                    className="rounded-lg border border-rose-500/60 bg-rose-500/15 px-3 py-2 text-sm font-medium text-rose-200 transition hover:border-rose-400 hover:bg-rose-500/25"
+                    className="rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm font-medium text-rose-700 transition hover:border-rose-500 hover:bg-rose-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/60 dark:border-rose-500/60 dark:text-rose-200"
                   >
                     Export as JSON
                   </button>
                 </div>
               </div>
 
-              <div className="rounded-xl border border-slate-900 bg-slate-900/60 p-4">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-900 dark:bg-slate-900/60">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-200">
+                  <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-200">
                     NVRAM CLI Script
                   </h4>
                   <button
                     onClick={() => setShowScript((prev) => !prev)}
-                    className="text-xs text-sky-300 underline-offset-4 hover:underline"
+                    className="text-xs text-sky-600 underline-offset-4 transition hover:text-sky-700 hover:underline dark:text-sky-300 dark:hover:text-sky-200"
                   >
                     {showScript ? "Hide" : "Show"}
                   </button>
                 </div>
                 {showScript ? (
                   <div className="mt-3 space-y-2">
-                    <pre className="max-h-64 overflow-y-auto rounded-lg border border-slate-800 bg-slate-950/80 p-3 text-xs text-slate-200">
+                    <pre className="max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-slate-100 p-3 text-xs text-slate-800 dark:border-slate-800 dark:bg-slate-950/80 dark:text-slate-200">
                       {scriptText || "# No changes to apply"}
                     </pre>
                     <button
                       onClick={handleCopyScript}
-                      className="w-full rounded-lg border border-emerald-500/60 bg-emerald-500/15 px-3 py-2 text-sm font-medium text-emerald-200 transition hover:border-emerald-400 hover:bg-emerald-500/25"
+                      className="w-full rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:border-emerald-500 hover:bg-emerald-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 dark:border-emerald-500/60 dark:text-emerald-200"
                     >
                       Copy script
                     </button>
@@ -1958,21 +2045,23 @@ export function App() {
                 ) : null}
               </div>
 
-              <div className="rounded-xl border border-slate-900 bg-slate-900/60 p-4">
-                <h4 className="text-sm font-semibold text-slate-200">Tools</h4>
-                <p className="mt-1 text-xs text-slate-400">
+              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-900 dark:bg-slate-900/60">
+                <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-200">
+                  Tools
+                </h4>
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                   Operates on the currently visible fields in the workspace.
                 </p>
                 <div className="mt-3 grid gap-2">
                   <button
                     onClick={handleCopyVisibleKeys}
-                    className="w-full rounded-lg border border-sky-500/60 bg-sky-500/15 px-3 py-2 text-sm font-medium text-sky-200 transition hover:border-sky-400 hover:bg-sky-500/25"
+                    className="w-full rounded-lg border border-sky-500/40 bg-sky-500/10 px-3 py-2 text-sm font-medium text-sky-700 transition hover:border-sky-500 hover:bg-sky-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 dark:border-sky-500/60 dark:text-sky-200"
                   >
                     Copy visible keys
                   </button>
                   <button
                     onClick={handleCopyVisiblePairs}
-                    className="w-full rounded-lg border border-indigo-500/60 bg-indigo-500/15 px-3 py-2 text-sm font-medium text-indigo-200 transition hover:border-indigo-400 hover:bg-indigo-500/25"
+                    className="w-full rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-3 py-2 text-sm font-medium text-indigo-700 transition hover:border-indigo-500 hover:bg-indigo-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 dark:border-indigo-500/60 dark:text-indigo-200"
                   >
                     Copy visible key value pairs
                   </button>
@@ -1982,15 +2071,15 @@ export function App() {
           </div>
         </aside>
       </div>
-      <footer className="border-t border-slate-900 bg-slate-950/80 px-6 py-4">
-        <div className="mx-auto flex max-w-7xl justify-center text-xs text-slate-500">
+      <footer className="border-t border-slate-200 bg-white/80 px-6 py-4 dark:border-slate-900 dark:bg-slate-950/80">
+        <div className="mx-auto flex max-w-7xl justify-center text-xs text-slate-500 dark:text-slate-400">
           <span>
             made by{" "}
             <a
               href="https://github.com/niieani"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sky-300 hover:text-sky-200"
+              className="text-sky-600 transition hover:text-sky-700 dark:text-sky-300 dark:hover:text-sky-200"
             >
               @niieani
             </a>{" "}
@@ -2028,8 +2117,8 @@ function SwapButton({ disabled, onSwap }: SwapButtonProps) {
         className={classNames(
           "flex h-12 w-12 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60",
           disabled
-            ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-600"
-            : "border-slate-700 bg-slate-900/70 text-slate-200 hover:border-sky-500/60 hover:text-sky-200",
+            ? "cursor-not-allowed border-slate-300 bg-slate-100 text-slate-400 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-600"
+            : "border-slate-300 bg-white text-slate-700 hover:border-sky-500/60 hover:bg-slate-50 hover:text-sky-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:hover:text-sky-200",
         )}
       >
         <SwapIcon className="h-5 w-5" />
@@ -2056,6 +2145,75 @@ function SwapIcon({ className }: { className?: string }) {
       <path d="M17 17H6" />
       <path d="M6 17l3 3" />
       <path d="M6 17l3-3" />
+    </svg>
+  );
+}
+
+interface ThemeToggleProps {
+  preference: ThemePreference;
+  resolvedTheme: "light" | "dark";
+  onCycle: () => void;
+}
+
+function ThemeToggle({ preference, resolvedTheme, onCycle }: ThemeToggleProps) {
+  const labels: Record<ThemePreference, string> = {
+    system: "Auto",
+    light: "Light",
+    dark: "Dark",
+  };
+  const IconComponent = resolvedTheme === "dark" ? MoonIcon : SunIcon;
+  return (
+    <button
+      type="button"
+      onClick={onCycle}
+      className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:border-slate-500 dark:hover:bg-slate-800"
+      aria-label={`Switch theme (current: ${labels[preference]})`}
+      title={`Switch theme (current: ${labels[preference]})`}
+    >
+      <IconComponent className="h-5 w-5" />
+      <span>{labels[preference]}</span>
+    </button>
+  );
+}
+
+function SunIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={classNames("h-5 w-5", className)}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 3v2" />
+      <path d="M12 19v2" />
+      <path d="M5.64 5.64l1.42 1.42" />
+      <path d="M16.94 16.94l1.42 1.42" />
+      <path d="M3 12h2" />
+      <path d="M19 12h2" />
+      <path d="M5.64 18.36l1.42-1.42" />
+      <path d="M16.94 7.06l1.42-1.42" />
+    </svg>
+  );
+}
+
+function MoonIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={classNames("h-5 w-5", className)}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        d="M17.293 13.293A8 8 0 017.707 3.707 8.001 8.001 0 1017.293 13.293z"
+        clipRule="evenodd"
+      />
     </svg>
   );
 }
@@ -2121,11 +2279,11 @@ function DropZoneCard({
       }}
       onDrop={handleDrop}
       className={classNames(
-        "group relative flex cursor-pointer flex-col gap-3 rounded-2xl border border-dashed border-slate-800 bg-slate-950/70 px-6 py-6 transition",
+        "group relative flex min-w-0 cursor-pointer flex-col gap-3 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-6 shadow-sm transition dark:border-slate-800 dark:bg-slate-950/70",
         disabled
           ? "cursor-not-allowed opacity-40"
-          : "hover:border-sky-500/50 hover:bg-slate-900/80",
-        isDragging && !disabled ? "border-sky-400/70 bg-sky-500/5" : "",
+          : "hover:border-sky-500/60 hover:bg-sky-50 dark:hover:bg-slate-900/80",
+        isDragging && !disabled ? "border-sky-400/70 bg-sky-500/10 dark:bg-sky-500/10" : "",
       )}
     >
       <input
@@ -2146,7 +2304,7 @@ function DropZoneCard({
           aria-label={`Remove ${
             side === "left" ? "primary" : "comparison"
           } configuration`}
-          className="absolute right-3 top-3 rounded-full border border-transparent bg-slate-900/80 p-1.5 text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+          className="absolute right-3 top-3 rounded-full border border-transparent bg-slate-200/90 p-1.5 text-slate-500 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-100"
         >
           <svg
             className="h-4 w-4"
@@ -2166,23 +2324,27 @@ function DropZoneCard({
       <div className="flex items-center gap-3">
         <div
           className={classNames(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-sm font-semibold uppercase tracking-wide text-slate-400",
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-sm font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400",
             side === "left"
-              ? "border-sky-500/50 text-sky-300"
-              : "border-emerald-500/50 text-emerald-300",
+              ? "border-sky-500/50 text-sky-600 dark:text-sky-300"
+              : "border-emerald-500/50 text-emerald-600 dark:text-emerald-300",
           )}
         >
           {side === "left" ? "L" : "R"}
         </div>
         <div>
-          <div className="text-sm font-semibold text-white">{title}</div>
-          <div className="text-xs text-slate-400">{subtitle}</div>
+          <div className="text-sm font-semibold text-slate-900 dark:text-white">
+            {title}
+          </div>
+          <div className="text-xs text-slate-600 dark:text-slate-400">
+            {subtitle}
+          </div>
         </div>
       </div>
 
       {config ? (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3 text-xs text-slate-300">
-          <div className="truncate font-medium text-slate-200">
+        <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+          <div className="w-full truncate font-medium text-slate-900 dark:text-slate-200">
             {config.name}
           </div>
           <div className="mt-2 grid grid-cols-4 gap-2 leading-relaxed">
@@ -2201,12 +2363,12 @@ function DropZoneCard({
               <InfoItem label="Length" value={`${config.fileLength} B`} />
             )}
           </div>
-          <div className="mt-2 text-[11px] text-slate-500">
+          <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
             Loaded {formatTimestamp(config.loadedAt)}
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-5 text-center text-sm text-slate-500">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-5 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
           Drop file here or click to browse
         </div>
       )}
@@ -2217,10 +2379,10 @@ function DropZoneCard({
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wide text-slate-500">
+      <div className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
         {label}
       </div>
-      <div className="text-xs text-slate-300">{value}</div>
+      <div className="text-xs text-slate-700 dark:text-slate-200">{value}</div>
     </div>
   );
 }
@@ -2238,7 +2400,7 @@ function DiffFilterToggle({ value, onChange }: DiffFilterToggleProps) {
     { value: "removed", label: "Removed" },
   ];
   return (
-    <div className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-slate-800 bg-slate-900/70 p-1 text-xs text-slate-300">
+    <div className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-slate-300 bg-white p-1 text-xs text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
       {options.map((option) => {
         const active = option.value === value;
         return (
@@ -2248,8 +2410,8 @@ function DiffFilterToggle({ value, onChange }: DiffFilterToggleProps) {
             className={classNames(
               "rounded-lg px-3 py-1.5 transition",
               active
-                ? "bg-slate-800 text-white shadow-[0_0_0_1px_rgba(148,163,184,0.35)]"
-                : "text-slate-400 hover:text-slate-200",
+                ? "bg-slate-200 text-slate-900 shadow-[0_0_0_1px_rgba(148,163,184,0.25)] dark:bg-slate-800 dark:text-white dark:shadow-[0_0_0_1px_rgba(148,163,184,0.35)]"
+                : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200",
             )}
           >
             {option.label}
@@ -2426,13 +2588,13 @@ function FieldCard({
     <article
       id={anchorId}
       className={classNames(
-        "rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-sm shadow-slate-950/30 scroll-mt-28 transition-shadow",
+        "rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/60 p-4 shadow-sm shadow-slate-200 dark:shadow-slate-950/30 scroll-mt-28 transition-shadow",
         isAnchorTarget ? "ring-2 ring-sky-500/60 shadow-sky-500/20" : null,
       )}
     >
       <header className="flex flex-col gap-3 min-[460px]:flex-row min-[460px]:items-center min-[460px]:justify-between min-[460px]:gap-4 md:gap-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-semibold text-white">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
             <a
               href={`#${anchorId}`}
               title={field.label}
@@ -2440,7 +2602,7 @@ function FieldCard({
                 event.preventDefault();
                 onNavigate(key, { preserveFilters: true });
               }}
-              className="-mx-1 rounded px-1 transition hover:text-sky-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+              className="-mx-1 rounded px-1 transition hover:text-sky-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 dark:hover:text-sky-300"
             >
               {key}
             </a>
@@ -2471,7 +2633,7 @@ function FieldCard({
         </div>
       </header>
       {field.description ? (
-        <p className="mt-1 text-xs leading-relaxed text-slate-400">
+        <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
           {field.description}
         </p>
       ) : null}
@@ -2655,7 +2817,7 @@ function ValueColumn({
     if (rawMode) {
       if (hint) {
         return (
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-xs text-slate-500">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-xs text-slate-600 dark:text-slate-500">
             {hint}
           </div>
         );
@@ -2669,9 +2831,9 @@ function ValueColumn({
             ? rawValue
             : String(rawValue);
         return (
-          <pre className="max-h-40 overflow-auto rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-200 whitespace-pre">
+          <pre className="max-h-40 overflow-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-700 dark:text-slate-200 whitespace-pre">
             {display === null ? (
-              <span className="text-slate-500">&lt;EMPTY&gt;</span>
+              <span className="text-slate-600 dark:text-slate-500">&lt;EMPTY&gt;</span>
             ) : (
               display
             )}
@@ -2689,7 +2851,7 @@ function ValueColumn({
           value={editableRaw}
           onChange={(event) => onRawChange?.(event.target.value)}
           wrap="off"
-          className="h-32 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className="h-32 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
           spellCheck={false}
         />
       );
@@ -2698,14 +2860,14 @@ function ValueColumn({
     if (readOnly) {
       if (hint) {
         return (
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-xs text-slate-500">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-xs text-slate-600 dark:text-slate-500">
             {hint}
           </div>
         );
       }
       if (controlType === "boolean") {
         return (
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2">
             {renderBooleanVisual(Boolean(value))}
           </div>
         );
@@ -2762,8 +2924,8 @@ function ValueColumn({
       ) {
         const display = value == null || value === "" ? "—" : String(value);
         return (
-          <div className="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-200">
-            <code className="font-mono text-slate-100">{display}</code>
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-sm text-slate-700 dark:text-slate-200">
+            <code className="font-mono text-slate-800 dark:text-slate-100">{display}</code>
           </div>
         );
       }
@@ -2778,10 +2940,10 @@ function ValueColumn({
         );
       }
       return (
-        <pre className="max-h-40 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-200">
+        <pre className="max-h-40 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-700 dark:text-slate-200">
           {(() => {
             if (value === null || value === undefined || value === "") {
-              return <span className="text-slate-500">&lt;EMPTY&gt;</span>;
+              return <span className="text-slate-600 dark:text-slate-500">&lt;EMPTY&gt;</span>;
             }
             if (controlType === "select" && options && options.length > 0) {
               const match = options.find(
@@ -2805,7 +2967,7 @@ function ValueColumn({
         value === "true" ||
         (typeof value === "string" && value.toLowerCase?.() === "on");
       return (
-        <label className="inline-flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2">
+        <label className="inline-flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2">
           <input
             type="checkbox"
             checked={checked}
@@ -2881,7 +3043,7 @@ function ValueColumn({
               onCustomChange?.(event.target.value.toUpperCase())
             }
             placeholder={placeholder}
-            className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
             autoCapitalize="characters"
             spellCheck={false}
           />
@@ -2897,7 +3059,7 @@ function ValueColumn({
               onCustomChange?.(event.target.value.toUpperCase())
             }
             placeholder={placeholder}
-            className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
             spellCheck={false}
           />
         );
@@ -2913,7 +3075,7 @@ function ValueColumn({
           value={stringValue}
           onChange={(event) => onCustomChange?.(event.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
           inputMode={inputMode}
           spellCheck={false}
         />
@@ -2993,7 +3155,7 @@ function ValueColumn({
         <select
           value={value ?? ""}
           onChange={(event) => onCustomChange?.(event.target.value)}
-          className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
         >
           {options.map((option) => (
             <option key={String(option.value)} value={String(option.value)}>
@@ -3010,7 +3172,7 @@ function ValueColumn({
           value={value ?? ""}
           onChange={(event) => onCustomChange?.(event.target.value)}
           wrap="off"
-          className="h-32 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className="h-32 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
           spellCheck={false}
         />
       );
@@ -3066,7 +3228,7 @@ function ValueColumn({
           autoComplete="off"
           spellCheck={false}
           pattern={isIntegerField ? "^-?[0-9]*$" : undefined}
-          className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
         />
       );
     }
@@ -3076,7 +3238,7 @@ function ValueColumn({
         type="text"
         value={value ?? ""}
         onChange={(event) => onCustomChange?.(event.target.value)}
-        className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+        className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
         spellCheck={false}
       />
     );
@@ -3084,7 +3246,7 @@ function ValueColumn({
 
   return (
     <div className={classNames("space-y-2", className)}>
-      <div className="text-xs uppercase tracking-wide text-slate-500">
+      <div className="text-xs uppercase tracking-wide text-slate-600 dark:text-slate-500">
         {title}
       </div>
 
@@ -3093,7 +3255,7 @@ function ValueColumn({
       {!readOnly && isRemovable && onRemoveCustom && fieldKey ? (
         <button
           onClick={() => onRemoveCustom(fieldKey)}
-          className="text-xs text-rose-300 underline-offset-4 hover:underline"
+          className="text-xs text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
         >
           Remove field
         </button>
@@ -3147,8 +3309,8 @@ function ListInput({ value, onChange, readOnly }: ListInputProps) {
     <div className="flex w-full flex-col gap-2">
       <div
         className={classNames(
-          "flex w-full min-h-[42px] flex-wrap items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2",
-          items.length === 0 ? "text-xs text-slate-500" : undefined,
+          "flex w-full min-h-[42px] flex-wrap items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2",
+          items.length === 0 ? "text-xs text-slate-600 dark:text-slate-500" : undefined,
         )}
       >
         {items.length === 0 ? (
@@ -3157,14 +3319,14 @@ function ListInput({ value, onChange, readOnly }: ListInputProps) {
           items.map((item, index) => (
             <span
               key={`${item}-${index}`}
-              className="inline-flex items-center gap-2 rounded-full bg-slate-800/60 px-3 py-1 text-xs text-slate-100"
+              className="inline-flex items-center gap-2 rounded-full bg-slate-200 dark:bg-slate-800/60 px-3 py-1 text-xs text-slate-800 dark:text-slate-100"
             >
               {item}
               {canEdit ? (
                 <button
                   type="button"
                   onClick={() => handleRemove(index)}
-                  className="text-slate-400 transition hover:text-rose-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/60"
+                  className="text-slate-600 dark:text-slate-400 transition hover:text-rose-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/60"
                   aria-label={`Remove ${item}`}
                 >
                   ×
@@ -3182,7 +3344,7 @@ function ListInput({ value, onChange, readOnly }: ListInputProps) {
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Add value"
-            className="min-w-0 flex-1 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="min-w-0 flex-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
           />
           <button
             type="button"
@@ -3311,7 +3473,7 @@ function StructuredStringEditor({ value, onChange, readOnly, mode = "array", sch
   if (!records.length) {
     return (
       <div className="space-y-3">
-        <div className="rounded-xl border border-dashed border-slate-800 bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-400">
+        <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-600 dark:text-slate-400">
           {canEdit
             ? "No entries available. Add one to define structured data."
             : "No entries available."}
@@ -3339,18 +3501,20 @@ function StructuredStringEditor({ value, onChange, readOnly, mode = "array", sch
         {records.map((record, index) => (
           <div
             key={`structured-ro-${index}`}
-            className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-200"
+            className="space-y-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 p-3 text-sm text-slate-700 dark:text-slate-200"
           >
-            <div className="flex items-center justify-between text-xs uppercase tracking-wide text-slate-400">
-              <span>Entry {index + 1}</span>
-            </div>
+            {mode === "array" ? (
+              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                <span>Entry {index + 1}</span>
+              </div>
+            ) : null}
             <dl className="grid gap-2 sm:grid-cols-2">
               {Object.entries(record).map(([key, raw]) => {
                 const display = raw === undefined || raw === null || raw === "" ? "—" : String(raw);
                 const label = fieldLabels?.get(key) ?? key;
                 return (
                   <div key={key}>
-                    <dt className="text-[10px] uppercase tracking-wide text-slate-500">{label}</dt>
+                    <dt className="text-[10px] uppercase tracking-wide text-slate-600 dark:text-slate-500">{label}</dt>
                     <dd>{display}</dd>
                   </div>
                 );
@@ -3375,6 +3539,1344 @@ function StructuredStringEditor({ value, onChange, readOnly, mode = "array", sch
           allowCustomFields={!objectSchema}
           onChange={(nextRecord) => handleRecordChange(index, nextRecord)}
           onRemove={mode === "array" ? () => handleRecordRemove(index) : undefined}
+          showHeader={mode === "array"}
+        />
+      ))}
+      {canAddMoreRecords ? (
+        <button
+          type="button"
+          onClick={handleAddRecord}
+          className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+        >
+          Add entry
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+function GitHubIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className ?? "h-5 w-5"}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.38 7.85 10.9.58.1.79-.24.79-.55 0-.27-.01-1.16-.02-2.1-3.19.69-3.87-1.37-3.87-1.37-.53-1.35-1.29-1.71-1.29-1.71-1.06-.72.08-.7.08-.7 1.18.08 1.8 1.21 1.8 1.21 1.04 1.78 2.74 1.27 3.41.97.1-.76.41-1.27.75-1.56-2.55-.29-5.23-1.27-5.23-5.66 0-1.25.45-2.27 1.19-3.07-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.18 1.18.92-.26 1.9-.39 2.88-.4.98 0 1.96.14 2.88.4 2.21-1.49 3.18-1.18 3.18-1.18.63 1.58.23 2.75.11 3.04.74.8 1.19 1.82 1.19 3.07 0 4.41-2.68 5.37-5.24 5.65.42.36.8 1.07.8 2.16 0 1.56-.01 2.82-.01 3.21 0 .31.21.66.8.55A10.52 10.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
+    </svg>
+  );
+}
+
+function DropZoneCard({
+  side,
+  title,
+  subtitle,
+  disabled,
+  config,
+  onFile,
+  onClear,
+}: DropZoneCardProps) {
+  const [isDragging, setDragging] = useState(false);
+
+  const handleDrop = useCallback(
+    (event: DragEvent<HTMLLabelElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setDragging(false);
+      if (disabled) return;
+      const file = event.dataTransfer.files?.[0];
+      if (file) {
+        onFile(file);
+      }
+    },
+    [disabled, onFile],
+  );
+
+  const handleChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (file) {
+        onFile(file);
+      }
+      event.target.value = "";
+    },
+    [onFile],
+  );
+
+  return (
+    <label
+      onDragOver={(event) => {
+        event.preventDefault();
+        if (!disabled) setDragging(true);
+      }}
+      onDragLeave={(event) => {
+        event.preventDefault();
+        setDragging(false);
+      }}
+      onDrop={handleDrop}
+      className={classNames(
+        "group relative flex min-w-0 cursor-pointer flex-col gap-3 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-6 shadow-sm transition dark:border-slate-800 dark:bg-slate-950/70",
+        disabled
+          ? "cursor-not-allowed opacity-40"
+          : "hover:border-sky-500/60 hover:bg-sky-50 dark:hover:bg-slate-900/80",
+        isDragging && !disabled ? "border-sky-400/70 bg-sky-500/10 dark:bg-sky-500/10" : "",
+      )}
+    >
+      <input
+        type="file"
+        accept=".cfg,application/octet-stream"
+        className="hidden"
+        onChange={handleChange}
+        disabled={disabled}
+      />
+      {config ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onClear();
+          }}
+          aria-label={`Remove ${
+            side === "left" ? "primary" : "comparison"
+          } configuration`}
+          className="absolute right-3 top-3 rounded-full border border-transparent bg-slate-200/90 p-1.5 text-slate-500 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:border-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+        >
+          <svg
+            className="h-4 w-4"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4 4l8 8" />
+            <path d="M12 4l-8 8" />
+          </svg>
+        </button>
+      ) : null}
+      <div className="flex items-center gap-3">
+        <div
+          className={classNames(
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-sm font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400",
+            side === "left"
+              ? "border-sky-500/50 text-sky-600 dark:text-sky-300"
+              : "border-emerald-500/50 text-emerald-600 dark:text-emerald-300",
+          )}
+        >
+          {side === "left" ? "L" : "R"}
+        </div>
+        <div>
+          <div className="text-sm font-semibold text-slate-900 dark:text-white">
+            {title}
+          </div>
+          <div className="text-xs text-slate-600 dark:text-slate-400">
+            {subtitle}
+          </div>
+        </div>
+      </div>
+
+      {config ? (
+        <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+          <div className="w-full truncate font-medium text-slate-900 dark:text-slate-200">
+            {config.name}
+          </div>
+          <div className="mt-2 grid grid-cols-4 gap-2 leading-relaxed">
+            <InfoItem
+              label="Entries"
+              value={Object.keys(config.entries).length.toString()}
+            />
+            <InfoItem label="Size" value={formatBytes(config.size)} />
+            <InfoItem label="Header" value={config.header} />
+            {config.salt !== undefined ? (
+              <InfoItem
+                label="Salt"
+                value={`0x${config.salt.toString(16).padStart(2, "0")}`}
+              />
+            ) : (
+              <InfoItem label="Length" value={`${config.fileLength} B`} />
+            )}
+          </div>
+          <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+            Loaded {formatTimestamp(config.loadedAt)}
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-5 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
+          Drop file here or click to browse
+        </div>
+      )}
+    </label>
+  );
+}
+
+function InfoItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        {label}
+      </div>
+      <div className="text-xs text-slate-700 dark:text-slate-200">{value}</div>
+    </div>
+  );
+}
+
+interface DiffFilterToggleProps {
+  value: DiffFilter;
+  onChange: (value: DiffFilter) => void;
+}
+
+function DiffFilterToggle({ value, onChange }: DiffFilterToggleProps) {
+  const options: Array<{ value: DiffFilter; label: string }> = [
+    { value: "all", label: "All fields" },
+    { value: "different", label: "Different" },
+    { value: "added", label: "Added" },
+    { value: "removed", label: "Removed" },
+  ];
+  return (
+    <div className="inline-flex shrink-0 items-center gap-1 rounded-xl border border-slate-300 bg-white p-1 text-xs text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+      {options.map((option) => {
+        const active = option.value === value;
+        return (
+          <button
+            key={option.value}
+            onClick={() => onChange(option.value)}
+            className={classNames(
+              "rounded-lg px-3 py-1.5 transition",
+              active
+                ? "bg-slate-200 text-slate-900 shadow-[0_0_0_1px_rgba(148,163,184,0.25)] dark:bg-slate-800 dark:text-white dark:shadow-[0_0_0_1px_rgba(148,163,184,0.35)]"
+                : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200",
+            )}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+interface FieldCardProps {
+  entry: FieldView;
+  onSelectionChange: (key: string, state: SelectionState) => void;
+  onRemoveCustom: (key: string) => void;
+  hasRight: boolean;
+  rawMode: boolean;
+  anchorId: string;
+  onNavigate: (key: string, options?: NavigateToFieldOptions) => void;
+  isAnchorTarget: boolean;
+}
+
+function FieldCard({
+  entry,
+  onSelectionChange,
+  onRemoveCustom,
+  hasRight,
+  rawMode,
+  anchorId,
+  onNavigate,
+  isAnchorTarget,
+}: FieldCardProps) {
+  const { key, field, diff, finalDiff, selection } = entry;
+  const isFallback = field.raw === null;
+  const controlType = resolveControlType(field);
+  const rawModeActive = rawMode && controlType !== "text";
+  const structuredMode =
+    !rawModeActive && controlType === "structured"
+      ? detectStructuredMode(field, entry)
+      : undefined;
+  const leftValue = rawModeActive
+    ? entry.leftRaw ?? ""
+    : coerceDisplayValue(field, entry.leftRaw, controlType);
+  const rightValue = rawModeActive
+    ? entry.rightRaw ?? ""
+    : coerceDisplayValue(field, entry.rightRaw, controlType);
+  const workingValue = rawModeActive
+    ? entry.workingRaw ?? ""
+    : coerceDisplayValue(field, entry.workingRaw, controlType);
+  const sidesIdentical =
+    hasRight &&
+    entry.leftRaw !== undefined &&
+    entry.rightRaw !== undefined &&
+    entry.leftRaw === entry.rightRaw;
+
+  const selectionValue =
+    selection?.option ?? (entry.leftRaw !== undefined ? "left" : "remove");
+  const disabledOptions = {
+    left: entry.leftRaw === undefined,
+    right: !hasRight || entry.rightRaw === undefined,
+  } as const;
+
+  const handleCustomChange = (value: unknown) => {
+    onSelectionChange(key, {
+      option: "custom",
+      customRaw: field.fromUi(value),
+    });
+  };
+
+  const handleBooleanChange = (value: boolean) => {
+    onSelectionChange(key, {
+      option: "custom",
+      customRaw: field.fromUi(value),
+    });
+  };
+
+  const handleNumberChange = (value: string, kind: "integer" | "number") => {
+    const rawInput = value.trim();
+
+    if (rawInput === "") {
+      onSelectionChange(key, { option: "custom", customRaw: field.fromUi("") });
+      return;
+    }
+
+    if (kind === "integer") {
+      if (rawInput === "-") {
+        onSelectionChange(key, { option: "custom", customRaw: "-" });
+        return;
+      }
+      const digitsOnly = rawInput.replace(/[^0-9-]/g, "");
+      const normalized = digitsOnly.startsWith("-")
+        ? `-${digitsOnly.slice(1).replace(/-/g, "")}`
+        : digitsOnly.replace(/-/g, "");
+      if (normalized === "" || normalized === "-") {
+        onSelectionChange(key, { option: "custom", customRaw: normalized });
+        return;
+      }
+      if (!/^-?\d+$/.test(normalized)) {
+        return;
+      }
+      const parsed = Number.parseInt(normalized, 10);
+      if (Number.isNaN(parsed)) {
+        return;
+      }
+      onSelectionChange(key, {
+        option: "custom",
+        customRaw: field.fromUi(parsed),
+      });
+      return;
+    }
+
+    if (rawInput === "-" || rawInput === "." || rawInput === "-.") {
+      onSelectionChange(key, { option: "custom", customRaw: rawInput });
+      return;
+    }
+
+    if (!/^-?\d*(?:\.\d+)?$/.test(rawInput)) {
+      return;
+    }
+
+    const parsed = Number(rawInput);
+    if (Number.isNaN(parsed)) {
+      return;
+    }
+    onSelectionChange(key, {
+      option: "custom",
+      customRaw: field.fromUi(parsed),
+    });
+  };
+
+  const handleListChange = (value: string[]) => {
+    onSelectionChange(key, {
+      option: "custom",
+      customRaw: field.fromUi(value),
+    });
+  };
+
+  const handleSelectOption = (option: Exclude<SelectionOption, "custom">) => {
+    if (option === "left" && entry.leftRaw === undefined) return;
+    if (option === "right" && (entry.rightRaw === undefined || !hasRight))
+      return;
+    onSelectionChange(key, { option });
+  };
+
+  const handleSelectEdited = () => {
+    if (rawModeActive) {
+      onSelectionChange(key, {
+        option: "custom",
+        customRaw: entry.workingRaw ?? "",
+      });
+      return;
+    }
+    onSelectionChange(key, {
+      option: "custom",
+      customRaw: field.fromUi(workingValue),
+    });
+  };
+
+  const handleRawChange = (value: string) => {
+    onSelectionChange(key, { option: "custom", customRaw: value });
+  };
+
+  const finalBadge = finalDiff.status !== "same" && (
+    <span
+      className={classNames(
+        "inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium",
+        DIFF_BADGE_THEME[finalDiff.status],
+      )}
+    >
+      {FINAL_STATUS_LABEL[finalDiff.status]}
+    </span>
+  );
+
+  return (
+    <article
+      id={anchorId}
+      className={classNames(
+        "rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/60 p-4 shadow-sm shadow-slate-200 dark:shadow-slate-950/30 scroll-mt-28 transition-shadow",
+        isAnchorTarget ? "ring-2 ring-sky-500/60 shadow-sky-500/20" : null,
+      )}
+    >
+      <header className="flex flex-col gap-3 min-[460px]:flex-row min-[460px]:items-center min-[460px]:justify-between min-[460px]:gap-4 md:gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+            <a
+              href={`#${anchorId}`}
+              title={field.label}
+              onClick={(event) => {
+                event.preventDefault();
+                onNavigate(key, { preserveFilters: true });
+              }}
+              className="-mx-1 rounded px-1 transition hover:text-sky-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 dark:hover:text-sky-300"
+            >
+              {key}
+            </a>
+          </h3>
+          <span
+            className={classNames(
+              "inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium",
+              PRIMARY_DIFF_BADGE_THEME[diff.status],
+            )}
+          >
+            {diff.status === "different"
+              ? "DIFFERENT"
+              : diff.status.toUpperCase()}
+          </span>
+        </div>
+        <div className="flex flex-col items-start gap-2 min-[460px]:items-end md:gap-2 md:min-w-[320px]">
+          <div className="flex flex-wrap items-center gap-2 md:flex-nowrap md:justify-end">
+            {finalBadge}
+            <SelectionChips
+              current={selectionValue}
+              onSelect={handleSelectOption}
+              onSelectCustom={handleSelectEdited}
+              disabledOptions={disabledOptions}
+              showEdited={selectionValue === "custom"}
+              sidesIdentical={sidesIdentical}
+            />
+          </div>
+        </div>
+      </header>
+      {field.description ? (
+        <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+          {field.description}
+        </p>
+      ) : null}
+
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <ValueColumn
+          title={sidesIdentical ? "Left and Right" : "Left"}
+          controlType={controlType}
+          hint={entry.leftRaw === undefined ? "Not present" : undefined}
+          value={leftValue}
+          field={field}
+          readOnly
+          options={field.options}
+          className={sidesIdentical ? "md:col-span-2" : undefined}
+          structuredMode={structuredMode}
+          structuredSchema={field.structuredSchema}
+          rawMode={rawModeActive}
+        />
+        {!sidesIdentical ? (
+          <ValueColumn
+            title="Right"
+            controlType={controlType}
+            hint={
+              hasRight
+                ? entry.rightRaw === undefined
+                  ? "Not present"
+                  : undefined
+                : "No file loaded"
+            }
+            value={rightValue}
+            field={field}
+            readOnly
+            options={field.options}
+            structuredMode={structuredMode}
+            structuredSchema={field.structuredSchema}
+            rawMode={rawModeActive}
+          />
+        ) : null}
+        <ValueColumn
+          title="Working"
+          controlType={controlType}
+          value={workingValue}
+          field={field}
+          isRemovable={
+            isFallback &&
+            entry.leftRaw === undefined &&
+            entry.rightRaw === undefined
+          }
+          onRemoveCustom={onRemoveCustom}
+          fieldKey={key}
+          options={field.options}
+          className={sidesIdentical ? "md:col-span-1" : undefined}
+          structuredMode={structuredMode}
+          structuredSchema={field.structuredSchema}
+          rawMode={rawModeActive}
+          onRawChange={rawModeActive ? handleRawChange : undefined}
+          onCustomChange={rawModeActive ? undefined : handleCustomChange}
+          onBooleanChange={rawModeActive ? undefined : handleBooleanChange}
+          onNumberChange={rawModeActive ? undefined : handleNumberChange}
+          onListChange={rawModeActive ? undefined : handleListChange}
+        />
+      </div>
+    </article>
+  );
+}
+
+interface ValueColumnProps {
+  title: string;
+  value: any;
+  field: ResolvedField;
+  controlType: ControlType;
+  readOnly?: boolean;
+  hint?: string;
+  onCustomChange?: (value: unknown) => void;
+  onBooleanChange?: (value: boolean) => void;
+  onNumberChange?: (value: string, kind: "integer" | "number") => void;
+  onListChange?: (value: string[]) => void;
+  isRemovable?: boolean;
+  onRemoveCustom?: (key: string) => void;
+  fieldKey?: string;
+  options?: ResolvedField["options"];
+  className?: string;
+  structuredMode?: StructuredEditorMode;
+  structuredSchema?: StructuredSchema;
+  rawMode?: boolean;
+  onRawChange?: (value: string) => void;
+}
+
+function ValueColumn({
+  title,
+  value,
+  field,
+  controlType,
+  readOnly,
+  hint,
+  onCustomChange,
+  onBooleanChange,
+  onNumberChange,
+  onListChange,
+  isRemovable,
+  onRemoveCustom,
+  fieldKey,
+  options,
+  className,
+  structuredMode,
+  structuredSchema,
+  rawMode = false,
+  onRawChange,
+}: ValueColumnProps) {
+  const portForwardVariant: PortForwardVariant =
+    field.key === "ipv6_portforward" ? "ipv6" : "ipv4";
+  const schema = structuredSchema;
+  const resolvedStructuredMode: StructuredEditorMode =
+    structuredMode ??
+    (schema
+      ? schema.kind === "object"
+        ? "object"
+        : schema.kind === "array" && isStructuredPrimitiveField(schema.items)
+        ? "primitive-array"
+        : "array"
+      : "array");
+  const primitiveArraySchema =
+    schema &&
+    schema.kind === "array" &&
+    isStructuredPrimitiveField(schema.items)
+      ? schema.items
+      : undefined;
+  const objectSchema =
+    schema && schema.kind === "object"
+      ? schema
+      : schema &&
+        schema.kind === "array" &&
+        isStructuredObjectSchemaDefinition(schema.items)
+      ? schema.items
+      : undefined;
+  const editorModeForRecords: "array" | "object" =
+    resolvedStructuredMode === "primitive-array"
+      ? "array"
+      : resolvedStructuredMode;
+  const toStructuredRecords = (
+    input: unknown,
+  ): Array<Record<string, unknown>> => {
+    if (Array.isArray(input)) {
+      return input.filter(isPlainObject) as Array<Record<string, unknown>>;
+    }
+    if (isPlainObject(input)) {
+      return [input as Record<string, unknown>];
+    }
+    return [];
+  };
+
+  const renderBooleanVisual = (checked: boolean) => (
+    <div className="flex items-center gap-2">
+      <span
+        className={classNames(
+          "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border transition-colors duration-200",
+          checked
+            ? "border-sky-500 bg-sky-500/80"
+            : "border-rose-500 bg-rose-500/30",
+        )}
+      >
+        <span
+          className={classNames(
+            "absolute left-[2px] h-4 w-4 translate-x-0 rounded-full bg-white transition-transform duration-200",
+            checked ? "translate-x-4" : "",
+          )}
+        />
+      </span>
+      <span
+        className={classNames(
+          "text-xs font-semibold tracking-wide",
+          checked ? "text-sky-300" : "text-rose-300",
+        )}
+      >
+        {checked ? "ENABLED" : "DISABLED"}
+      </span>
+    </div>
+  );
+
+  const renderControl = () => {
+    if (rawMode) {
+      if (hint) {
+        return (
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-xs text-slate-600 dark:text-slate-500">
+            {hint}
+          </div>
+        );
+      }
+      if (readOnly) {
+        const rawValue = value ?? "";
+        const display =
+          rawValue === null || rawValue === undefined || rawValue === ""
+            ? null
+            : typeof rawValue === "string"
+            ? rawValue
+            : String(rawValue);
+        return (
+          <pre className="max-h-40 overflow-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-700 dark:text-slate-200 whitespace-pre">
+            {display === null ? (
+              <span className="text-slate-600 dark:text-slate-500">&lt;EMPTY&gt;</span>
+            ) : (
+              display
+            )}
+          </pre>
+        );
+      }
+      const editableRaw =
+        typeof value === "string"
+          ? value
+          : value === null || value === undefined
+          ? ""
+          : String(value);
+      return (
+        <textarea
+          value={editableRaw}
+          onChange={(event) => onRawChange?.(event.target.value)}
+          wrap="off"
+          className="h-32 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          spellCheck={false}
+        />
+      );
+    }
+
+    if (readOnly) {
+      if (hint) {
+        return (
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-xs text-slate-600 dark:text-slate-500">
+            {hint}
+          </div>
+        );
+      }
+      if (controlType === "boolean") {
+        return (
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2">
+            {renderBooleanVisual(Boolean(value))}
+          </div>
+        );
+      }
+      if (controlType === "list") {
+        const items = Array.isArray(value)
+          ? (value as string[])
+          : typeof value === "string"
+          ? value
+              .split(",")
+              .map((part) => part.trim())
+              .filter((part) => part.length > 0)
+          : [];
+        return <ListInput value={items} readOnly />;
+      }
+      if (controlType === "structured") {
+        if (primitiveArraySchema) {
+          const items = Array.isArray(value)
+            ? (value as Array<string | number | boolean>)
+            : value == null
+            ? []
+            : [value].filter(
+                (item): item is string | number | boolean =>
+                  typeof item !== "object",
+              );
+          return (
+            <StructuredPrimitiveArrayEditor
+              schema={primitiveArraySchema}
+              values={items}
+              readOnly
+            />
+          );
+        }
+        const records = toStructuredRecords(value);
+        const normalisedRecords = objectSchema
+          ? records.map((record) =>
+              normaliseRecordWithSchema(record, objectSchema),
+            )
+          : records;
+        return (
+          <StructuredStringEditor
+            value={normalisedRecords}
+            readOnly
+            mode={editorModeForRecords}
+            schema={schema}
+          />
+        );
+      }
+      if (
+        controlType === "ip" ||
+        controlType === "mac" ||
+        controlType === "netmask" ||
+        controlType === "hex"
+      ) {
+        const display = value == null || value === "" ? "—" : String(value);
+        return (
+          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-sm text-slate-700 dark:text-slate-200">
+            <code className="font-mono text-slate-800 dark:text-slate-100">{display}</code>
+          </div>
+        );
+      }
+      if (controlType === "portforward") {
+        const rules = Array.isArray(value) ? (value as PortForwardRule[]) : [];
+        return (
+          <PortForwardEditor
+            value={rules}
+            variant={portForwardVariant}
+            readOnly
+          />
+        );
+      }
+      return (
+        <pre className="max-h-40 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-700 dark:text-slate-200">
+          {(() => {
+            if (value === null || value === undefined || value === "") {
+              return <span className="text-slate-600 dark:text-slate-500">&lt;EMPTY&gt;</span>;
+            }
+            if (controlType === "select" && options && options.length > 0) {
+              const match = options.find(
+                (option) => String(option.value) === String(value),
+              );
+              return match
+                ? `${match.label} (${value})`
+                : formatDisplay(value, controlType);
+            }
+            return formatDisplay(value, controlType);
+          })()}
+        </pre>
+      );
+    }
+
+    if (controlType === "boolean") {
+      const checked =
+        value === true ||
+        value === 1 ||
+        value === "1" ||
+        value === "true" ||
+        (typeof value === "string" && value.toLowerCase?.() === "on");
+      return (
+        <label className="inline-flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={(event) => onBooleanChange?.(event.target.checked)}
+            className="peer sr-only"
+            aria-label={field.label || field.key || title}
+          />
+          <span
+            className={classNames(
+              "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border transition-colors duration-200 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-500",
+              checked
+                ? "border-sky-500 bg-sky-500/80"
+                : "border-rose-500/60 bg-rose-500/30",
+            )}
+          >
+            <span
+              className={classNames(
+                "absolute left-[2px] h-4 w-4 rounded-full bg-white transition-transform duration-200",
+                checked ? "translate-x-4" : "translate-x-0",
+              )}
+            />
+          </span>
+          <span
+            className={classNames(
+              "text-xs font-semibold tracking-wide transition-colors duration-200",
+              checked ? "text-sky-300" : "text-rose-300",
+            )}
+          >
+            {checked ? "ENABLED" : "DISABLED"}
+          </span>
+        </label>
+      );
+    }
+
+    if (controlType === "portforward") {
+      const rules = Array.isArray(value) ? (value as PortForwardRule[]) : [];
+      const handleChange = (next: PortForwardRule[]) => {
+        if (onCustomChange) {
+          onCustomChange(next);
+        }
+      };
+      return (
+        <PortForwardEditor
+          value={rules}
+          onChange={handleChange}
+          variant={portForwardVariant}
+        />
+      );
+    }
+
+    if (
+      controlType === "ip" ||
+      controlType === "mac" ||
+      controlType === "netmask" ||
+      controlType === "hex"
+    ) {
+      const stringValue =
+        typeof value === "string" ? value : value == null ? "" : String(value);
+      const placeholderMap = {
+        ip: "e.g. 192.168.1.1",
+        mac: "e.g. AA:BB:CC:DD:EE:FF",
+        netmask: "e.g. 255.255.255.0",
+        hex: "e.g. 0A1B2C",
+      } as const;
+      const placeholder = placeholderMap[controlType];
+
+      if (controlType === "mac") {
+        return (
+          <input
+            type="text"
+            value={stringValue}
+            onChange={(event) =>
+              onCustomChange?.(event.target.value.toUpperCase())
+            }
+            placeholder={placeholder}
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            autoCapitalize="characters"
+            spellCheck={false}
+          />
+        );
+      }
+
+      if (controlType === "hex") {
+        return (
+          <input
+            type="text"
+            value={stringValue}
+            onChange={(event) =>
+              onCustomChange?.(event.target.value.toUpperCase())
+            }
+            placeholder={placeholder}
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            spellCheck={false}
+          />
+        );
+      }
+
+      const inputMode =
+        controlType === "ip" || controlType === "netmask"
+          ? "decimal"
+          : undefined;
+      return (
+        <input
+          type="text"
+          value={stringValue}
+          onChange={(event) => onCustomChange?.(event.target.value)}
+          placeholder={placeholder}
+          className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          inputMode={inputMode}
+          spellCheck={false}
+        />
+      );
+    }
+
+    if (controlType === "list") {
+      const items = Array.isArray(value)
+        ? (value as string[])
+        : typeof value === "string"
+        ? value
+            .split(",")
+            .map((part) => part.trim())
+            .filter((part) => part.length > 0)
+        : [];
+      const handleChange = (next: string[]) => {
+        if (onListChange) {
+          onListChange(next);
+        } else if (onCustomChange) {
+          onCustomChange(next);
+        }
+      };
+
+      return <ListInput value={items} onChange={handleChange} />;
+    }
+
+    if (controlType === "structured") {
+      if (primitiveArraySchema) {
+        const items = Array.isArray(value)
+          ? (value as Array<string | number | boolean>)
+          : value == null
+          ? []
+          : [value].filter(
+              (item): item is string | number | boolean =>
+                typeof item !== "object",
+            );
+        const handlePrimitiveChange = (
+          next: Array<string | number | boolean>,
+        ) => {
+          onCustomChange?.(next);
+        };
+        return (
+          <StructuredPrimitiveArrayEditor
+            schema={primitiveArraySchema}
+            values={items}
+            onChange={handlePrimitiveChange}
+          />
+        );
+      }
+      const records = toStructuredRecords(value);
+      const normalisedRecords = objectSchema
+        ? records.map((record) =>
+            normaliseRecordWithSchema(record, objectSchema),
+          )
+        : records;
+      const handleChange = (next: Array<Record<string, unknown>>) => {
+        if (!onCustomChange) return;
+        if (editorModeForRecords === "object") {
+          const nextRecord = next.find(isPlainObject) ?? {};
+          onCustomChange(nextRecord);
+        } else {
+          onCustomChange(next);
+        }
+      };
+      return (
+        <StructuredStringEditor
+          value={normalisedRecords}
+          onChange={handleChange}
+          mode={editorModeForRecords}
+          schema={schema}
+        />
+      );
+    }
+
+    if (controlType === "select" && options && options.length > 0) {
+      return (
+        <select
+          value={value ?? ""}
+          onChange={(event) => onCustomChange?.(event.target.value)}
+          className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+        >
+          {options.map((option) => (
+            <option key={String(option.value)} value={String(option.value)}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    if (controlType === "textarea") {
+      return (
+        <textarea
+          value={value ?? ""}
+          onChange={(event) => onCustomChange?.(event.target.value)}
+          wrap="off"
+          className="h-32 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          spellCheck={false}
+        />
+      );
+    }
+
+    if (controlType === "integer" || controlType === "number") {
+      const isIntegerField = controlType === "integer";
+      const stringValue =
+        value === null || value === undefined
+          ? ""
+          : typeof value === "number"
+          ? isIntegerField
+            ? String(Math.trunc(value))
+            : String(value)
+          : String(value);
+      const allowedKeys = new Set([
+        "Backspace",
+        "Delete",
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End",
+        "Tab",
+        "Enter",
+      ]);
+      return (
+        <input
+          type="text"
+          value={stringValue}
+          onChange={(event) =>
+            onNumberChange?.(event.target.value, controlType)
+          }
+          onKeyDown={(event) => {
+            if (!isIntegerField) return;
+            if (allowedKeys.has(event.key)) return;
+            if (
+              event.key === "-" &&
+              event.currentTarget.selectionStart === 0 &&
+              !event.currentTarget.value.includes("-")
+            ) {
+              return;
+            }
+            if (/^\d$/.test(event.key)) return;
+            event.preventDefault();
+          }}
+          onPaste={(event) => {
+            if (!isIntegerField) return;
+            const text = event.clipboardData.getData("text/plain");
+            if (/^-?\d*$/.test(text)) return;
+            event.preventDefault();
+          }}
+          inputMode={isIntegerField ? "numeric" : "decimal"}
+          autoComplete="off"
+          spellCheck={false}
+          pattern={isIntegerField ? "^-?[0-9]*$" : undefined}
+          className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+        />
+      );
+    }
+
+    return (
+      <input
+        type="text"
+        value={value ?? ""}
+        onChange={(event) => onCustomChange?.(event.target.value)}
+        className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+        spellCheck={false}
+      />
+    );
+  };
+
+  return (
+    <div className={classNames("space-y-2", className)}>
+      <div className="text-xs uppercase tracking-wide text-slate-600 dark:text-slate-500">
+        {title}
+      </div>
+
+      {renderControl()}
+
+      {!readOnly && isRemovable && onRemoveCustom && fieldKey ? (
+        <button
+          onClick={() => onRemoveCustom(fieldKey)}
+          className="text-xs text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
+        >
+          Remove field
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+interface ListInputProps {
+  value: ReadonlyArray<string>;
+  onChange?: (next: string[]) => void;
+  readOnly?: boolean;
+}
+
+function ListInput({ value, onChange, readOnly }: ListInputProps) {
+  const [draft, setDraft] = useState("");
+  const items = useMemo(
+    () =>
+      (Array.isArray(value) ? value : [])
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0),
+    [value],
+  );
+  const canEdit = Boolean(onChange) && !readOnly;
+
+  const commitDraft = () => {
+    if (!canEdit) return;
+    const trimmed = draft.trim();
+    if (!trimmed) return;
+    onChange?.([...items, trimmed]);
+    setDraft("");
+  };
+
+  const handleRemove = (index: number) => {
+    if (!canEdit) return;
+    onChange?.(items.filter((_, idx) => idx !== index));
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!canEdit) return;
+    if (event.key === "Enter") {
+      event.preventDefault();
+      commitDraft();
+    } else if (event.key === ",") {
+      event.preventDefault();
+      commitDraft();
+    }
+  };
+
+  return (
+    <div className="flex w-full flex-col gap-2">
+      <div
+        className={classNames(
+          "flex w-full min-h-[42px] flex-wrap items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2",
+          items.length === 0 ? "text-xs text-slate-600 dark:text-slate-500" : undefined,
+        )}
+      >
+        {items.length === 0 ? (
+          <span>No entries</span>
+        ) : (
+          items.map((item, index) => (
+            <span
+              key={`${item}-${index}`}
+              className="inline-flex items-center gap-2 rounded-full bg-slate-200 dark:bg-slate-800/60 px-3 py-1 text-xs text-slate-800 dark:text-slate-100"
+            >
+              {item}
+              {canEdit ? (
+                <button
+                  type="button"
+                  onClick={() => handleRemove(index)}
+                  className="text-slate-600 dark:text-slate-400 transition hover:text-rose-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/60"
+                  aria-label={`Remove ${item}`}
+                >
+                  ×
+                </button>
+              ) : null}
+            </span>
+          ))
+        )}
+      </div>
+      {canEdit ? (
+        <div className="flex w-full items-center gap-2">
+          <input
+            type="text"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Add value"
+            className="min-w-0 flex-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+          <button
+            type="button"
+            onClick={commitDraft}
+            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-sky-600 text-base font-semibold text-white shadow-sm transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+            aria-label="Add value"
+          >
+            +
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+interface StructuredStringEditorProps {
+  value: ReadonlyArray<Record<string, unknown>>;
+  mode?: StructuredEditorMode;
+  schema?: StructuredSchema;
+  onChange?: (next: Array<Record<string, unknown>>) => void;
+  readOnly?: boolean;
+}
+
+function StructuredStringEditor({ value, onChange, readOnly, mode = "array", schema }: StructuredStringEditorProps) {
+  const objectSchema =
+    schema && schema.kind === "object"
+      ? schema
+      : schema && schema.kind === "array" && isStructuredObjectSchemaDefinition(schema.items)
+        ? schema.items
+        : undefined;
+  const records = useMemo(() => {
+    if (mode === "object") {
+      const first = value[0];
+      const baseRecord = isPlainObject(first) ? (first as Record<string, unknown>) : {};
+      return objectSchema ? [normaliseRecordWithSchema(baseRecord, objectSchema)] : [baseRecord];
+    }
+    const list = Array.isArray(value)
+      ? value.map((entry) => (isPlainObject(entry) ? (entry as Record<string, unknown>) : {}))
+      : [];
+    return objectSchema ? list.map((entry) => normaliseRecordWithSchema(entry, objectSchema)) : list;
+  }, [mode, objectSchema, value]);
+  const canEdit = Boolean(onChange) && !readOnly;
+
+  const fieldTypes = useMemo(() => {
+    const map = new Map<string, StructuredFieldType>();
+    if (objectSchema) {
+      for (const [key, definition] of Object.entries(objectSchema.fields)) {
+        map.set(key, primitiveToStructuredFieldType(definition.type));
+      }
+    }
+    for (const record of records) {
+      if (!isPlainObject(record)) continue;
+      for (const [key, raw] of Object.entries(record)) {
+        const inferred = inferStructuredFieldType(raw);
+        if (!map.has(key)) {
+          map.set(key, inferred);
+          continue;
+        }
+        const existing = map.get(key)!;
+        if (existing === "string") continue;
+        if (existing === "number" && inferred === "string") {
+          map.set(key, "string");
+        } else if (existing === "boolean" && inferred !== "boolean") {
+          map.set(key, "string");
+        }
+      }
+    }
+    return map;
+  }, [records]);
+
+  const fieldLabels = useMemo(() => {
+    if (!objectSchema) return undefined;
+    const labelMap = new Map<string, string>();
+    for (const [key, definition] of Object.entries(objectSchema.fields)) {
+      labelMap.set(key, definition.label ?? key);
+    }
+    return labelMap;
+  }, [objectSchema]);
+
+  const handleRecordChange = useCallback(
+    (index: number, nextRecord: Record<string, unknown>) => {
+      if (!canEdit || !onChange) return;
+      const baseRecord = objectSchema ? normaliseRecordWithSchema(nextRecord, objectSchema) : nextRecord;
+      const next = records.map((record, idx) => (idx === index ? baseRecord : record));
+      onChange(mode === "object" ? next.slice(0, 1) : next);
+    },
+    [canEdit, mode, objectSchema, onChange, records],
+  );
+
+  const handleRecordRemove = useCallback(
+    (index: number) => {
+      if (!canEdit || !onChange) return;
+      const next = records.filter((_, idx) => idx !== index);
+      onChange(mode === "object" ? next.slice(0, 1) : next);
+    },
+    [canEdit, mode, onChange, records],
+  );
+
+  const canAddMoreRecords = mode === "array" || records.length === 0;
+
+  const handleAddRecord = () => {
+    if (!canEdit || !onChange || !canAddMoreRecords) return;
+    const template: Record<string, unknown> = objectSchema
+      ? normaliseRecordWithSchema({}, objectSchema)
+      : (() => {
+          if (fieldTypes.size === 0) return {};
+          const draft: Record<string, unknown> = {};
+          for (const [key, type] of fieldTypes.entries()) {
+            if (type === "boolean") {
+              draft[key] = false;
+            } else if (type === "number") {
+              draft[key] = undefined;
+            } else {
+              draft[key] = "";
+            }
+          }
+          return draft;
+        })();
+    if (mode === "array") {
+      onChange([...records, template]);
+    } else {
+      onChange([template]);
+    }
+  };
+
+  if (!records.length) {
+    return (
+      <div className="space-y-3">
+        <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-600 dark:text-slate-400">
+          {canEdit
+            ? "No entries available. Add one to define structured data."
+            : "No entries available."}
+        </div>
+        {canEdit ? (
+          <button
+            type="button"
+            onClick={handleAddRecord}
+            disabled={!canAddMoreRecords}
+            className={classNames(
+              "inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60",
+              !canAddMoreRecords ? "cursor-not-allowed opacity-40 hover:bg-sky-600" : "hover:bg-sky-500",
+            )}
+          >
+            Add entry
+          </button>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (!canEdit) {
+    return (
+      <div className="space-y-3">
+        {records.map((record, index) => (
+          <div
+            key={`structured-ro-${index}`}
+            className="space-y-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 p-3 text-sm text-slate-700 dark:text-slate-200"
+          >
+            {mode === "array" ? (
+              <div className="flex items-center justify-between text-xs uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                <span>Entry {index + 1}</span>
+              </div>
+            ) : null}
+            <dl className="grid gap-2 sm:grid-cols-2">
+              {Object.entries(record).map(([key, raw]) => {
+                const display = raw === undefined || raw === null || raw === "" ? "—" : String(raw);
+                const label = fieldLabels?.get(key) ?? key;
+                return (
+                  <div key={key}>
+                    <dt className="text-[10px] uppercase tracking-wide text-slate-600 dark:text-slate-500">{label}</dt>
+                    <dd>{display}</dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {records.map((record, index) => (
+        <StructuredRecordEditor
+          key={`structured-edit-${index}`}
+          index={index}
+          record={isPlainObject(record) ? record : {}}
+          fieldTypes={fieldTypes}
+          fieldLabels={fieldLabels}
+          schema={objectSchema}
+          allowCustomFields={!objectSchema}
+          onChange={(nextRecord) => handleRecordChange(index, nextRecord)}
+          onRemove={mode === "array" ? () => handleRecordRemove(index) : undefined}
+          showHeader={mode === "array"}
         />
       ))}
       {canAddMoreRecords ? (
@@ -3399,6 +4901,7 @@ interface StructuredRecordEditorProps {
   allowCustomFields: boolean;
   onChange: (next: Record<string, unknown>) => void;
   onRemove?: () => void;
+  showHeader?: boolean;
 }
 
 function StructuredRecordEditor({
@@ -3410,6 +4913,7 @@ function StructuredRecordEditor({
   allowCustomFields,
   onChange,
   onRemove,
+  showHeader = true,
 }: StructuredRecordEditorProps) {
   const [newFieldKey, setNewFieldKey] = useState("");
   const [newFieldType, setNewFieldType] = useState<StructuredFieldType>("string");
@@ -3488,21 +4992,27 @@ function StructuredRecordEditor({
   };
 
   return (
-    <div className="space-y-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3 shadow-sm shadow-slate-950/30">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Entry {index + 1}
-        </span>
-        {onRemove ? (
-          <button
-            type="button"
-            onClick={onRemove}
-            className="text-xs text-rose-300 underline-offset-4 hover:underline"
-          >
-            Remove
-          </button>
-        ) : null}
-      </header>
+    <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-slate-950/30">
+      {(showHeader || onRemove) && (
+        <header className="flex flex-wrap items-center justify-between gap-3">
+          {showHeader ? (
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
+              Entry {index + 1}
+            </span>
+          ) : (
+            <span className="sr-only">Entry {index + 1}</span>
+          )}
+          {onRemove ? (
+            <button
+              type="button"
+              onClick={onRemove}
+              className="text-xs text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
+            >
+              Remove
+            </button>
+          ) : null}
+        </header>
+      )}
       <div className="grid gap-3 sm:grid-cols-2">
         {keys.map((key) => {
           const type = fieldTypes.get(key) ?? inferStructuredFieldType(record[key]);
@@ -3511,22 +5021,24 @@ function StructuredRecordEditor({
           const canRemoveField = allowCustomFields || !(schema && key in schema.fields);
           if (type === "boolean") {
             return (
-              <div key={key} className="flex flex-col gap-1 text-xs text-slate-300">
-                <span className="text-[10px] uppercase tracking-wide text-slate-500">{label}</span>
-                <label className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
+              <div key={key} className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+                <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
+                <label className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 transition-colors dark:border-slate-800 dark:bg-slate-950/70">
                   <input
                     type="checkbox"
                     checked={Boolean(rawValue)}
                     onChange={(event) => handleBooleanChange(key, event.target.checked)}
                     aria-label={label}
                   />
-                  <span className="text-sm text-slate-200">{Boolean(rawValue) ? "True" : "False"}</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-200">
+                    {Boolean(rawValue) ? "True" : "False"}
+                  </span>
                 </label>
                 {canRemoveField ? (
                   <button
                     type="button"
                     onClick={() => handleRemoveField(key)}
-                    className="self-start text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                    className="self-start text-[10px] text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
                   >
                     Remove field
                   </button>
@@ -3537,20 +5049,20 @@ function StructuredRecordEditor({
 
           if (type === "number") {
             return (
-              <div key={key} className="flex flex-col gap-1 text-xs text-slate-300">
-                <span className="text-[10px] uppercase tracking-wide text-slate-500">{label}</span>
+              <div key={key} className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+                <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
                 <input
                   type="number"
                   value={typeof rawValue === "number" && Number.isFinite(rawValue) ? rawValue : ""}
                   onChange={(event) => handleFieldChange(key, "number", event.target.value)}
-                  className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
                   aria-label={label}
                 />
                 {canRemoveField ? (
                   <button
                     type="button"
                     onClick={() => handleRemoveField(key)}
-                    className="self-start text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                    className="self-start text-[10px] text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
                   >
                     Remove field
                   </button>
@@ -3560,20 +5072,20 @@ function StructuredRecordEditor({
           }
 
           return (
-            <div key={key} className="flex flex-col gap-1 text-xs text-slate-300">
-              <span className="text-[10px] uppercase tracking-wide text-slate-500">{label}</span>
+            <div key={key} className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+              <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
               <input
                 type="text"
                 value={rawValue == null ? "" : String(rawValue)}
                 onChange={(event) => handleFieldChange(key, "string", event.target.value)}
-                className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
                 aria-label={label}
               />
               {canRemoveField ? (
                 <button
                   type="button"
                   onClick={() => handleRemoveField(key)}
-                  className="self-start text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                  className="self-start text-[10px] text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
                 >
                   Remove field
                 </button>
@@ -3583,33 +5095,33 @@ function StructuredRecordEditor({
         })}
       </div>
       {allowCustomFields ? (
-        <div className="flex flex-col gap-2 rounded-lg border border-dashed border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Add field</span>
+        <div className="flex flex-col gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Add field</span>
           <div className="flex flex-wrap gap-2">
             <input
               type="text"
               value={newFieldKey}
               onChange={(event) => setNewFieldKey(event.target.value)}
               placeholder="Field name"
-              className="flex-1 min-w-[140px] rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              className="flex-1 min-w-[140px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
             />
             <select
               value={newFieldType}
               onChange={(event) => setNewFieldType(event.target.value as StructuredFieldType)}
-              className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
             >
               <option value="string">String</option>
               <option value="number">Number</option>
               <option value="boolean">Boolean</option>
             </select>
             {newFieldType === "boolean" ? (
-              <label className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
+              <label className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 transition-colors dark:border-slate-800 dark:bg-slate-950/70">
                 <input
                   type="checkbox"
                   checked={newFieldBoolean}
                   onChange={(event) => setNewFieldBoolean(event.target.checked)}
                 />
-                <span className="text-sm text-slate-200">{newFieldBoolean ? "True" : "False"}</span>
+                <span className="text-sm text-slate-700 dark:text-slate-200">{newFieldBoolean ? "True" : "False"}</span>
               </label>
             ) : (
               <input
@@ -3617,7 +5129,7 @@ function StructuredRecordEditor({
                 value={newFieldValue}
                 onChange={(event) => setNewFieldValue(event.target.value)}
                 placeholder="Value"
-                className="flex-1 min-w-[120px] rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                className="flex-1 min-w-[120px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
               />
             )}
             <button
@@ -3692,7 +5204,7 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
   if (!canEdit) {
     if (items.length === 0) {
       return (
-        <div className="rounded-xl border border-dashed border-slate-800 bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-400">
+        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400">
           No entries available.
         </div>
       );
@@ -3702,9 +5214,9 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
         {items.map((value, index) => (
           <div
             key={`primitive-ro-${index}`}
-            className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-200"
+            className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-200"
           >
-            <span className="text-[10px] uppercase tracking-wide text-slate-500">
+            <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
               {label} {index + 1}
             </span>
             <span>{value === "" ? "—" : String(value)}</span>
@@ -3718,7 +5230,7 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
     <div className="space-y-3">
       <div className="space-y-2">
         {items.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-800 bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-400">
+          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400">
             No entries available. Add one to get started.
           </div>
         ) : (
@@ -3727,10 +5239,10 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
               return (
                 <div
                   key={`primitive-${index}`}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-950/70"
                 >
-                  <label className="flex flex-1 items-center justify-between gap-2 text-xs text-slate-300">
-                    <span className="text-[10px] uppercase tracking-wide text-slate-500">
+                  <label className="flex flex-1 items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
+                    <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       {label} {index + 1}
                     </span>
                     <input
@@ -3742,7 +5254,7 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
                   <button
                     type="button"
                     onClick={() => handleRemove(index)}
-                    className="text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                    className="text-[10px] text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
                   >
                     Remove
                   </button>
@@ -3754,23 +5266,23 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
               return (
                 <div
                   key={`primitive-${index}`}
-                  className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2"
+                  className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-950/70"
                 >
-                  <div className="flex flex-1 flex-col gap-1 text-xs text-slate-300">
-                    <span className="text-[10px] uppercase tracking-wide text-slate-500">
+                  <div className="flex flex-1 flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+                    <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
                       {label} {index + 1}
                     </span>
                     <input
                       type="number"
                       value={typeof value === "number" && Number.isFinite(value) ? value : ""}
                       onChange={(event) => handleNumberChange(index, event.target.value)}
-                      className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => handleRemove(index)}
-                    className="text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                    className="text-[10px] text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
                   >
                     Remove
                   </button>
@@ -3781,23 +5293,23 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
             return (
               <div
                 key={`primitive-${index}`}
-                className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2"
+                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-950/70"
               >
-                <div className="flex flex-1 flex-col gap-1 text-xs text-slate-300">
-                  <span className="text-[10px] uppercase tracking-wide text-slate-500">
+                <div className="flex flex-1 flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+                  <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
                     {label} {index + 1}
                   </span>
                   <input
                     type="text"
                     value={typeof value === "string" ? value : ""}
                     onChange={(event) => handleStringChange(index, event.target.value)}
-                    className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => handleRemove(index)}
-                  className="text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                  className="text-[10px] text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
                 >
                   Remove
                 </button>
@@ -3889,35 +5401,35 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
   const renderIpv4ReadOnly = (rule: PortForwardIpv4Rule, index: number) => (
     <div
       key={`pfipv4-ro-${index}`}
-      className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-200"
+      className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-200"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-400">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-600 dark:text-slate-400">
         <span>Rule {index + 1}</span>
         <span>{rule.enabled ? "Enabled" : "Disabled"}</span>
       </div>
       <dl className="grid gap-2 sm:grid-cols-2">
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Protocol</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Protocol</dt>
           <dd>{protocolLabel(rule.protocol)}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Source Address</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Source Address</dt>
           <dd>{rule.srcAddr || "Any"}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">External Ports</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">External Ports</dt>
           <dd>{rule.extPorts || "—"}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Internal Port</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Internal Port</dt>
           <dd>{rule.intPort != null ? String(rule.intPort) : "Auto"}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Internal Address</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Internal Address</dt>
           <dd>{rule.intAddr || "—"}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Description</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Description</dt>
           <dd>{rule.description || "—"}</dd>
         </div>
       </dl>
@@ -3927,33 +5439,35 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
   const renderIpv4Editable = (rule: PortForwardIpv4Rule, index: number) => (
     <div
       key={`pfipv4-edit-${index}`}
-      className="space-y-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3 shadow-sm shadow-slate-950/30"
+      className="space-y-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-slate-950/30"
     >
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
             Rule {index + 1}
           </span>
-          <label className="inline-flex items-center gap-2 text-xs text-slate-300">
+          <label className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
             <input
               type="checkbox"
               checked={Boolean(rule.enabled)}
               onChange={(event) => updateRule(index, { enabled: event.target.checked })}
             />
-            <span>{rule.enabled ? "Enabled" : "Disabled"}</span>
+            <span className="text-sm text-slate-700 dark:text-slate-200">
+              {rule.enabled ? "Enabled" : "Disabled"}
+            </span>
           </label>
         </div>
         <button
           type="button"
           onClick={() => removeRule(index)}
-          className="text-xs text-rose-300 underline-offset-4 hover:underline"
+          className="text-xs text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
         >
           Remove
         </button>
       </header>
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-xs text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Protocol</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Protocol</span>
           <select
             value={String(rule.protocol)}
             onChange={(event) => {
@@ -3962,7 +5476,7 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
               const valid = [1, 2, 3].includes(parsed) ? parsed : 1;
               updateRule(index, { protocol: valid });
             }}
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           >
             {protocolOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -3971,28 +5485,28 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Source Address</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Source Address</span>
           <input
             type="text"
             value={rule.srcAddr}
             onChange={(event) => updateRule(index, { srcAddr: event.target.value })}
             placeholder="0.0.0.0/0"
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">External Ports</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">External Ports</span>
           <input
             type="text"
             value={rule.extPorts}
             onChange={(event) => updateRule(index, { extPorts: event.target.value })}
             placeholder="80-80"
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Internal Port</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Internal Port</span>
           <input
             type="number"
             value={rule.intPort ?? ""}
@@ -4008,27 +5522,27 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
               });
             }}
             placeholder="auto"
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Internal Address</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Internal Address</span>
           <input
             type="text"
             value={rule.intAddr}
             onChange={(event) => updateRule(index, { intAddr: event.target.value })}
             placeholder="192.168.1.2"
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-300 sm:col-span-2">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Description</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300 sm:col-span-2">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Description</span>
           <input
             type="text"
             value={rule.description}
             onChange={(event) => updateRule(index, { description: event.target.value })}
             placeholder="Web Server"
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           />
         </label>
       </div>
@@ -4038,31 +5552,31 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
   const renderIpv6ReadOnly = (rule: PortForwardIpv6Rule, index: number) => (
     <div
       key={`pfipv6-ro-${index}`}
-      className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-200"
+      className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-200"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-400">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-600 dark:text-slate-400">
         <span>Rule {index + 1}</span>
         <span>{rule.enabled ? "Enabled" : "Disabled"}</span>
       </div>
       <dl className="grid gap-2 sm:grid-cols-2">
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Protocol</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Protocol</dt>
           <dd>{protocolLabel(rule.protocol)}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Source Address</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Source Address</dt>
           <dd>{rule.srcAddress || "Any"}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Destination Address</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Destination Address</dt>
           <dd>{rule.destAddress || "—"}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Destination Ports</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Destination Ports</dt>
           <dd>{rule.destPorts || "—"}</dd>
         </div>
         <div>
-          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Description</dt>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Description</dt>
           <dd>{rule.description || "—"}</dd>
         </div>
       </dl>
@@ -4072,33 +5586,35 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
   const renderIpv6Editable = (rule: PortForwardIpv6Rule, index: number) => (
     <div
       key={`pfipv6-edit-${index}`}
-      className="space-y-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3 shadow-sm shadow-slate-950/30"
+      className="space-y-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-slate-950/30"
     >
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">
             Rule {index + 1}
           </span>
-          <label className="inline-flex items-center gap-2 text-xs text-slate-300">
+          <label className="inline-flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
             <input
               type="checkbox"
               checked={Boolean(rule.enabled)}
               onChange={(event) => updateRule(index, { enabled: event.target.checked })}
             />
-            <span>{rule.enabled ? "Enabled" : "Disabled"}</span>
+            <span className="text-sm text-slate-700 dark:text-slate-200">
+              {rule.enabled ? "Enabled" : "Disabled"}
+            </span>
           </label>
         </div>
         <button
           type="button"
           onClick={() => removeRule(index)}
-          className="text-xs text-rose-300 underline-offset-4 hover:underline"
+          className="text-xs text-rose-600 underline-offset-4 transition hover:text-rose-700 hover:underline dark:text-rose-300 dark:hover:text-rose-200"
         >
           Remove
         </button>
       </header>
       <div className="grid gap-3 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-xs text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Protocol</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Protocol</span>
           <select
             value={String(rule.protocol)}
             onChange={(event) => {
@@ -4106,7 +5622,7 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
               const valid = ["1", "2", "3"].includes(raw) ? raw : "1";
               updateRule(index, { protocol: valid });
             }}
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           >
             {protocolOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -4115,44 +5631,44 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Source Address</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Source Address</span>
           <input
             type="text"
             value={rule.srcAddress}
             onChange={(event) => updateRule(index, { srcAddress: event.target.value })}
             placeholder="::/0"
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Destination Address</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Destination Address</span>
           <input
             type="text"
             value={rule.destAddress}
             onChange={(event) => updateRule(index, { destAddress: event.target.value })}
             placeholder="2001:db8::100"
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Destination Ports</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Destination Ports</span>
           <input
             type="text"
             value={rule.destPorts}
             onChange={(event) => updateRule(index, { destPorts: event.target.value })}
             placeholder="80-80"
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           />
         </label>
-        <label className="flex flex-col gap-1 text-xs text-slate-300 sm:col-span-2">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500">Description</span>
+        <label className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300 sm:col-span-2">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Description</span>
           <input
             type="text"
             value={rule.description}
             onChange={(event) => updateRule(index, { description: event.target.value })}
             placeholder="Service"
-            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
           />
         </label>
       </div>
@@ -4162,7 +5678,7 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
   return (
     <div className="space-y-3">
       {rules.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-800 bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-400">
+        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400">
           {canEdit
             ? "No port forwarding rules. Add one to get started."
             : "No port forwarding rules configured."}
@@ -4229,10 +5745,10 @@ function SelectionChips({
         className={classNames(
           "rounded-full px-3 py-1 text-[11px] font-medium transition whitespace-nowrap",
           disabled
-            ? "cursor-not-allowed text-slate-600"
+            ? "cursor-not-allowed text-slate-400 dark:text-slate-600"
             : active
-              ? "bg-slate-800 text-white"
-              : "text-slate-400 hover:bg-slate-800 hover:text-slate-200",
+              ? "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-white"
+              : "text-slate-600 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200",
         )}
         disabled={disabled}
       >
@@ -4260,10 +5776,10 @@ function SelectionChips({
         className={classNames(
           "rounded-full px-3 py-1 text-[11px] font-medium transition whitespace-nowrap",
           unifiedDisabled
-            ? "cursor-not-allowed text-slate-600"
+            ? "cursor-not-allowed text-slate-400 dark:text-slate-600"
             : unifiedActive
-              ? "bg-slate-800 text-white"
-              : "text-slate-400 hover:bg-slate-800 hover:text-slate-200",
+              ? "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-white"
+              : "text-slate-600 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200",
         )}
         disabled={unifiedDisabled}
       >
@@ -4273,12 +5789,12 @@ function SelectionChips({
   };
 
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-950/70 p-1">
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-white p-1 shadow-sm dark:border-slate-800 dark:bg-slate-950/70">
       {showEdited ? (
         <button
           type="button"
           onClick={() => onSelectCustom?.()}
-          className="rounded-full bg-amber-500/20 px-3 py-1 text-[11px] font-semibold text-amber-200 hover:bg-amber-500/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 whitespace-nowrap"
+          className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-semibold text-amber-700 hover:bg-amber-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 whitespace-nowrap dark:bg-amber-500/20 dark:text-amber-200 dark:hover:bg-amber-500/30"
         >
           User Provided
         </button>

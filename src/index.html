@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="./logo.svg" />
     <title>Bun + React</title>
+    <script>
+      (() => {
+        try {
+          const storageKey = "tomato-router:theme";
+          const media = window.matchMedia("(prefers-color-scheme: dark)");
+          const stored = localStorage.getItem(storageKey);
+          const preference =
+            stored === "light" || stored === "dark" ? stored : "system";
+          const root = document.documentElement;
+          const shouldUseDark =
+            preference === "dark" ||
+            (preference === "system" && media.matches);
+          root.classList.toggle("dark", shouldUseDark);
+          root.dataset.theme = preference;
+        } catch {
+          // ignore
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
