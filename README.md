@@ -2,6 +2,7 @@
 
 Interactive browser-based tool for inspecting, comparing, and editing FreshTomato router backups.
 Runs fully locally, in your browser, so your config files never leave your computer.
+Use it to create a new config, or even just to preview your settings and apply them manually via the Web UI.
 
 ## Using the Workspace
 
