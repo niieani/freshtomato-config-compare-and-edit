@@ -67,7 +67,40 @@ const PRIMARY_DIFF_BADGE_THEME: Record<DiffStatus, string> = {
   changed: "bg-indigo-500/20 text-indigo-200 border border-indigo-400/50",
 };
 
-type ControlType = "boolean" | "select" | "number" | "textarea" | "text" | "list";
+type ControlType =
+  | "boolean"
+  | "select"
+  | "number"
+  | "textarea"
+  | "text"
+  | "list"
+  | "portforward"
+  | "structured"
+  | "ip"
+  | "mac"
+  | "netmask"
+  | "hex";
+
+interface PortForwardIpv4Rule {
+  enabled: boolean;
+  protocol: number;
+  srcAddr: string;
+  extPorts: string;
+  intPort?: number;
+  intAddr: string;
+  description: string;
+}
+
+interface PortForwardIpv6Rule {
+  enabled: boolean;
+  protocol: string;
+  srcAddress: string;
+  destAddress: string;
+  destPorts: string;
+  description: string;
+}
+
+type PortForwardRule = PortForwardIpv4Rule | PortForwardIpv6Rule;
 
 function resolveControlType(field: ResolvedField): ControlType {
   if (field.options && field.options.length > 0) return "select";
@@ -80,7 +113,18 @@ function resolveControlType(field: ResolvedField): ControlType {
     case "list":
       return "list";
     case "structured-string":
-      return "textarea";
+      if (field.key === "portforward" || field.key === "ipv6_portforward") {
+        return "portforward";
+      }
+      return "structured";
+    case "ip":
+      return "ip";
+    case "mac":
+      return "mac";
+    case "netmask":
+      return "netmask";
+    case "hex":
+      return "hex";
     default:
       return "text";
   }
@@ -114,6 +158,32 @@ function coerceDisplayValue(
       if (uiValue == null) return [];
       return Array.isArray(uiValue) ? uiValue : [];
     }
+    case "portforward": {
+      const uiValue = field.toUi(raw);
+      if (Array.isArray(uiValue)) {
+        return uiValue as PortForwardRule[];
+      }
+      return [];
+    }
+    case "structured": {
+      const uiValue = field.toUi(raw);
+      if (Array.isArray(uiValue)) {
+        return uiValue.filter(isPlainObject) as Array<Record<string, unknown>>;
+      }
+      if (isPlainObject(uiValue)) {
+        return [uiValue];
+      }
+      return [];
+    }
+    case "ip":
+    case "mac":
+    case "netmask":
+    case "hex": {
+      const uiValue = field.toUi(raw);
+      if (typeof uiValue === "string") return uiValue;
+      if (uiValue == null) return "";
+      return String(uiValue);
+    }
     case "select":
       return raw ?? "";
     case "textarea":
@@ -133,6 +203,18 @@ function formatDisplay(value: any, controlType: ControlType): string {
 
 function classNames(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(" ");
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+type StructuredFieldType = "boolean" | "number" | "string";
+
+function inferStructuredFieldType(value: unknown): StructuredFieldType {
+  if (typeof value === "boolean") return "boolean";
+  if (typeof value === "number" && Number.isFinite(value)) return "number";
+  return "string";
 }
 
 function formatBytes(bytes: number): string {
@@ -1071,7 +1153,7 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
     right: !hasRight || entry.rightRaw === undefined,
   } as const;
 
-  const handleCustomChange = (value: string | string[]) => {
+  const handleCustomChange = (value: unknown) => {
     onSelectionChange(key, { option: "custom", customRaw: field.fromUi(value) });
   };
 
@@ -1197,7 +1279,7 @@ interface ValueColumnProps {
   controlType: ControlType;
   readOnly?: boolean;
   hint?: string;
-  onCustomChange?: (value: string | string[]) => void;
+  onCustomChange?: (value: unknown) => void;
   onBooleanChange?: (value: boolean) => void;
   onNumberChange?: (value: string) => void;
   onListChange?: (value: string[]) => void;
@@ -1223,6 +1305,8 @@ function ValueColumn({
   fieldKey,
   options,
 }: ValueColumnProps) {
+  const portForwardVariant: PortForwardVariant = field.key === "ipv6_portforward" ? "ipv6" : "ipv4";
+
   const renderBooleanVisual = (checked: boolean) => (
     <div className="flex items-center gap-2">
       <span
@@ -1273,6 +1357,24 @@ function ValueColumn({
             : [];
         return <ListInput value={items} readOnly />;
       }
+      if (controlType === "structured") {
+        const records = Array.isArray(value)
+          ? (value as Array<Record<string, unknown>>)
+          : [];
+        return <StructuredStringEditor value={records} readOnly />;
+      }
+      if (controlType === "ip" || controlType === "mac" || controlType === "netmask" || controlType === "hex") {
+        const display = value == null || value === "" ? "—" : String(value);
+        return (
+          <div className="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-200">
+            <code className="font-mono text-slate-100">{display}</code>
+          </div>
+        );
+      }
+      if (controlType === "portforward") {
+        const rules = Array.isArray(value) ? (value as PortForwardRule[]) : [];
+        return <PortForwardEditor value={rules} variant={portForwardVariant} readOnly />;
+      }
       return (
         <pre className="max-h-40 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-200">
           {(() => {
@@ -1309,6 +1411,67 @@ function ValueColumn({
       );
     }
 
+    if (controlType === "portforward") {
+      const rules = Array.isArray(value) ? (value as PortForwardRule[]) : [];
+      const handleChange = (next: PortForwardRule[]) => {
+        if (onCustomChange) {
+          onCustomChange(next);
+        }
+      };
+      return <PortForwardEditor value={rules} onChange={handleChange} variant={portForwardVariant} />;
+    }
+
+    if (controlType === "ip" || controlType === "mac" || controlType === "netmask" || controlType === "hex") {
+      const stringValue = typeof value === "string" ? value : value == null ? "" : String(value);
+      const placeholderMap = {
+        ip: "e.g. 192.168.1.1",
+        mac: "e.g. AA:BB:CC:DD:EE:FF",
+        netmask: "e.g. 255.255.255.0",
+        hex: "e.g. 0A1B2C",
+      } as const;
+      const placeholder = placeholderMap[controlType];
+
+      if (controlType === "mac") {
+        return (
+          <input
+            type="text"
+            value={stringValue}
+            onChange={(event) => onCustomChange?.(event.target.value.toUpperCase())}
+            placeholder={placeholder}
+            className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            autoCapitalize="characters"
+            spellCheck={false}
+          />
+        );
+      }
+
+      if (controlType === "hex") {
+        return (
+          <input
+            type="text"
+            value={stringValue}
+            onChange={(event) => onCustomChange?.(event.target.value.toUpperCase())}
+            placeholder={placeholder}
+            className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            spellCheck={false}
+          />
+        );
+      }
+
+      const inputMode = controlType === "ip" || controlType === "netmask" ? "decimal" : undefined;
+      return (
+        <input
+          type="text"
+          value={stringValue}
+          onChange={(event) => onCustomChange?.(event.target.value)}
+          placeholder={placeholder}
+          className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          inputMode={inputMode}
+          spellCheck={false}
+        />
+      );
+    }
+
     if (controlType === "list") {
       const items = Array.isArray(value)
         ? (value as string[])
@@ -1329,6 +1492,16 @@ function ValueColumn({
           onChange={handleChange}
         />
       );
+    }
+
+    if (controlType === "structured") {
+      const records = Array.isArray(value)
+        ? (value as Array<Record<string, unknown>>)
+        : [];
+      const handleChange = (next: Array<Record<string, unknown>>) => {
+        onCustomChange?.(next);
+      };
+      return <StructuredStringEditor value={records} onChange={handleChange} />;
     }
 
     if (controlType === "select" && options && options.length > 0) {
@@ -1487,6 +1660,732 @@ function ListInput({ value, onChange, readOnly }: ListInputProps) {
             Add
           </button>
         </div>
+      ) : null}
+    </div>
+  );
+}
+
+interface StructuredStringEditorProps {
+  value: ReadonlyArray<Record<string, unknown>>;
+  onChange?: (next: Array<Record<string, unknown>>) => void;
+  readOnly?: boolean;
+}
+
+function StructuredStringEditor({ value, onChange, readOnly }: StructuredStringEditorProps) {
+  const records = Array.isArray(value) ? value : [];
+  const canEdit = Boolean(onChange) && !readOnly;
+
+  const fieldTypes = useMemo(() => {
+    const map = new Map<string, StructuredFieldType>();
+    for (const record of records) {
+      if (!isPlainObject(record)) continue;
+      for (const [key, raw] of Object.entries(record)) {
+        const inferred = inferStructuredFieldType(raw);
+        if (!map.has(key)) {
+          map.set(key, inferred);
+          continue;
+        }
+        const existing = map.get(key)!;
+        if (existing === "string") continue;
+        if (existing === "number" && inferred === "string") {
+          map.set(key, "string");
+        } else if (existing === "boolean" && inferred !== "boolean") {
+          map.set(key, "string");
+        }
+      }
+    }
+    return map;
+  }, [records]);
+
+  const handleRecordChange = useCallback(
+    (index: number, nextRecord: Record<string, unknown>) => {
+      if (!canEdit || !onChange) return;
+      const base = Array.isArray(value) ? value : [];
+      const next = base.map((record, idx) => (idx === index ? nextRecord : record));
+      onChange(next);
+    },
+    [canEdit, onChange, value],
+  );
+
+  const handleRecordRemove = useCallback(
+    (index: number) => {
+      if (!canEdit || !onChange) return;
+      const base = Array.isArray(value) ? value : [];
+      const next = base.filter((_, idx) => idx !== index);
+      onChange(next);
+    },
+    [canEdit, onChange, value],
+  );
+
+  const handleAddRecord = () => {
+    if (!canEdit || !onChange) return;
+    const template: Record<string, unknown> = {};
+    if (fieldTypes.size > 0) {
+      for (const [key, type] of fieldTypes.entries()) {
+        if (type === "boolean") {
+          template[key] = false;
+        } else if (type === "number") {
+          template[key] = undefined;
+        } else {
+          template[key] = "";
+        }
+      }
+    }
+    const base = Array.isArray(value) ? value : [];
+    onChange([...base, template]);
+  };
+
+  if (!records.length) {
+    return (
+      <div className="space-y-3">
+        <div className="rounded-xl border border-dashed border-slate-800 bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-400">
+          {canEdit
+            ? "No entries available. Add one to define structured data."
+            : "No entries available."}
+        </div>
+        {canEdit ? (
+          <button
+            type="button"
+            onClick={handleAddRecord}
+            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+          >
+            Add entry
+          </button>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (!canEdit) {
+    return (
+      <div className="space-y-3">
+        {records.map((record, index) => (
+          <div
+            key={`structured-ro-${index}`}
+            className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-200"
+          >
+            <div className="flex items-center justify-between text-xs uppercase tracking-wide text-slate-400">
+              <span>Entry {index + 1}</span>
+            </div>
+            <dl className="grid gap-2 sm:grid-cols-2">
+              {Object.entries(record).map(([key, raw]) => {
+                const display = raw === undefined || raw === null || raw === "" ? "—" : String(raw);
+                return (
+                  <div key={key}>
+                    <dt className="text-[10px] uppercase tracking-wide text-slate-500">{key}</dt>
+                    <dd>{display}</dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {records.map((record, index) => (
+        <StructuredRecordEditor
+          key={`structured-edit-${index}`}
+          index={index}
+          record={isPlainObject(record) ? record : {}}
+          fieldTypes={fieldTypes}
+          onChange={(nextRecord) => handleRecordChange(index, nextRecord)}
+          onRemove={() => handleRecordRemove(index)}
+        />
+      ))}
+      <button
+        type="button"
+        onClick={handleAddRecord}
+        className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+      >
+        Add entry
+      </button>
+    </div>
+  );
+}
+
+interface StructuredRecordEditorProps {
+  index: number;
+  record: Record<string, unknown>;
+  fieldTypes: ReadonlyMap<string, StructuredFieldType>;
+  onChange: (next: Record<string, unknown>) => void;
+  onRemove: () => void;
+}
+
+function StructuredRecordEditor({ index, record, fieldTypes, onChange, onRemove }: StructuredRecordEditorProps) {
+  const [newFieldKey, setNewFieldKey] = useState("");
+  const [newFieldType, setNewFieldType] = useState<StructuredFieldType>("string");
+  const [newFieldValue, setNewFieldValue] = useState("");
+  const [newFieldBoolean, setNewFieldBoolean] = useState(false);
+
+  const keys = useMemo(() => {
+    const set = new Set<string>();
+    for (const key of fieldTypes.keys()) {
+      set.add(key);
+    }
+    for (const key of Object.keys(record)) {
+      set.add(key);
+    }
+    return Array.from(set);
+  }, [fieldTypes, record]);
+
+  const handleFieldChange = (key: string, type: StructuredFieldType, raw: string) => {
+    const next: Record<string, unknown> = { ...record };
+    if (type === "number") {
+      if (raw === "") {
+        next[key] = undefined;
+      } else {
+        const parsed = Number(raw);
+        next[key] = Number.isNaN(parsed) ? undefined : parsed;
+      }
+    } else {
+      next[key] = raw;
+    }
+    onChange(next);
+  };
+
+  const handleBooleanChange = (key: string, checked: boolean) => {
+    const next: Record<string, unknown> = { ...record, [key]: checked };
+    onChange(next);
+  };
+
+  const handleRemoveField = (key: string) => {
+    const next: Record<string, unknown> = { ...record };
+    delete next[key];
+    onChange(next);
+  };
+
+  const handleAddField = () => {
+    const trimmedKey = newFieldKey.trim();
+    if (!trimmedKey) return;
+    const next: Record<string, unknown> = { ...record };
+    if (newFieldType === "boolean") {
+      next[trimmedKey] = newFieldBoolean;
+    } else if (newFieldType === "number") {
+      if (newFieldValue === "") {
+        next[trimmedKey] = undefined;
+      } else {
+        const parsed = Number(newFieldValue);
+        next[trimmedKey] = Number.isNaN(parsed) ? undefined : parsed;
+      }
+    } else {
+      next[trimmedKey] = newFieldValue;
+    }
+    onChange(next);
+    setNewFieldKey("");
+    setNewFieldValue("");
+    setNewFieldBoolean(false);
+  };
+
+  return (
+    <div className="space-y-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3 shadow-sm shadow-slate-950/30">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          Entry {index + 1}
+        </span>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-xs text-rose-300 underline-offset-4 hover:underline"
+        >
+          Remove
+        </button>
+      </header>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {keys.map((key) => {
+          const type = fieldTypes.get(key) ?? inferStructuredFieldType(record[key]);
+          const rawValue = record[key];
+          if (type === "boolean") {
+            return (
+              <div key={key} className="flex flex-col gap-1 text-xs text-slate-300">
+                <span className="text-[10px] uppercase tracking-wide text-slate-500">{key}</span>
+                <label className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(rawValue)}
+                    onChange={(event) => handleBooleanChange(key, event.target.checked)}
+                    aria-label={key}
+                  />
+                  <span className="text-sm text-slate-200">{Boolean(rawValue) ? "True" : "False"}</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveField(key)}
+                  className="self-start text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                >
+                  Remove field
+                </button>
+              </div>
+            );
+          }
+
+          if (type === "number") {
+            return (
+              <div key={key} className="flex flex-col gap-1 text-xs text-slate-300">
+                <span className="text-[10px] uppercase tracking-wide text-slate-500">{key}</span>
+                <input
+                  type="number"
+                  value={typeof rawValue === "number" && Number.isFinite(rawValue) ? rawValue : ""}
+                  onChange={(event) => handleFieldChange(key, "number", event.target.value)}
+                  className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                  aria-label={key}
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveField(key)}
+                  className="self-start text-[10px] text-rose-300 underline-offset-4 hover:underline"
+                >
+                  Remove field
+                </button>
+              </div>
+            );
+          }
+
+          return (
+            <div key={key} className="flex flex-col gap-1 text-xs text-slate-300">
+              <span className="text-[10px] uppercase tracking-wide text-slate-500">{key}</span>
+              <input
+                type="text"
+                value={rawValue == null ? "" : String(rawValue)}
+                onChange={(event) => handleFieldChange(key, "string", event.target.value)}
+                className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                aria-label={key}
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveField(key)}
+                className="self-start text-[10px] text-rose-300 underline-offset-4 hover:underline"
+              >
+                Remove field
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex flex-col gap-2 rounded-lg border border-dashed border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-300">
+        <span className="text-[10px] uppercase tracking-wide text-slate-500">Add field</span>
+        <div className="flex flex-wrap gap-2">
+          <input
+            type="text"
+            value={newFieldKey}
+            onChange={(event) => setNewFieldKey(event.target.value)}
+            placeholder="Field name"
+            className="flex-1 min-w-[140px] rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+          <select
+            value={newFieldType}
+            onChange={(event) => setNewFieldType(event.target.value as StructuredFieldType)}
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          >
+            <option value="string">String</option>
+            <option value="number">Number</option>
+            <option value="boolean">Boolean</option>
+          </select>
+          {newFieldType === "boolean" ? (
+            <label className="inline-flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2">
+              <input
+                type="checkbox"
+                checked={newFieldBoolean}
+                onChange={(event) => setNewFieldBoolean(event.target.checked)}
+              />
+              <span className="text-sm text-slate-200">{newFieldBoolean ? "True" : "False"}</span>
+            </label>
+          ) : (
+            <input
+              type={newFieldType === "number" ? "number" : "text"}
+              value={newFieldValue}
+              onChange={(event) => setNewFieldValue(event.target.value)}
+              placeholder="Value"
+              className="flex-1 min-w-[120px] rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            />
+          )}
+          <button
+            type="button"
+            onClick={handleAddField}
+            className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+type PortForwardVariant = "ipv4" | "ipv6";
+
+interface PortForwardEditorProps {
+  value: ReadonlyArray<PortForwardRule>;
+  onChange?: (next: PortForwardRule[]) => void;
+  readOnly?: boolean;
+  variant: PortForwardVariant;
+}
+
+function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEditorProps) {
+  const rules = Array.isArray(value) ? [...value] : [];
+  const canEdit = Boolean(onChange) && !readOnly;
+  const isIpv6 = variant === "ipv6";
+
+  const protocolOptions = isIpv6
+    ? [
+        { value: "1", label: "TCP" },
+        { value: "2", label: "UDP" },
+        { value: "3", label: "TCP & UDP" },
+      ]
+    : [
+        { value: "1", label: "TCP" },
+        { value: "2", label: "UDP" },
+        { value: "3", label: "TCP & UDP" },
+      ];
+
+  const protocolLabel = (protocol: number | string) => {
+    const raw = String(protocol);
+    const match = protocolOptions.find((option) => option.value === raw);
+    return match ? match.label : raw;
+  };
+
+  const updateRule = (index: number, patch: Partial<PortForwardRule>) => {
+    if (!canEdit) return;
+    const next = rules.map((rule, idx) => (idx === index ? { ...rule, ...patch } : rule));
+    onChange?.(next);
+  };
+
+  const removeRule = (index: number) => {
+    if (!canEdit) return;
+    onChange?.(rules.filter((_, idx) => idx !== index));
+  };
+
+  const addRule = () => {
+    if (!canEdit) return;
+    if (isIpv6) {
+      const defaultRule: PortForwardIpv6Rule = {
+        enabled: true,
+        protocol: "1",
+        srcAddress: "",
+        destAddress: "",
+        destPorts: "",
+        description: "",
+      };
+      onChange?.([...rules, defaultRule]);
+      return;
+    }
+    const defaultRule: PortForwardIpv4Rule = {
+      enabled: true,
+      protocol: 1,
+      srcAddr: "",
+      extPorts: "",
+      intPort: undefined,
+      intAddr: "",
+      description: "",
+    };
+    onChange?.([...rules, defaultRule]);
+  };
+
+  const renderIpv4ReadOnly = (rule: PortForwardIpv4Rule, index: number) => (
+    <div
+      key={`pfipv4-ro-${index}`}
+      className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-200"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-400">
+        <span>Rule {index + 1}</span>
+        <span>{rule.enabled ? "Enabled" : "Disabled"}</span>
+      </div>
+      <dl className="grid gap-2 sm:grid-cols-2">
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Protocol</dt>
+          <dd>{protocolLabel(rule.protocol)}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Source Address</dt>
+          <dd>{rule.srcAddr || "Any"}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">External Ports</dt>
+          <dd>{rule.extPorts || "—"}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Internal Port</dt>
+          <dd>{rule.intPort != null ? String(rule.intPort) : "Auto"}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Internal Address</dt>
+          <dd>{rule.intAddr || "—"}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Description</dt>
+          <dd>{rule.description || "—"}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+
+  const renderIpv4Editable = (rule: PortForwardIpv4Rule, index: number) => (
+    <div
+      key={`pfipv4-edit-${index}`}
+      className="space-y-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3 shadow-sm shadow-slate-950/30"
+    >
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Rule {index + 1}
+          </span>
+          <label className="inline-flex items-center gap-2 text-xs text-slate-300">
+            <input
+              type="checkbox"
+              checked={Boolean(rule.enabled)}
+              onChange={(event) => updateRule(index, { enabled: event.target.checked })}
+            />
+            <span>{rule.enabled ? "Enabled" : "Disabled"}</span>
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={() => removeRule(index)}
+          className="text-xs text-rose-300 underline-offset-4 hover:underline"
+        >
+          Remove
+        </button>
+      </header>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="flex flex-col gap-1 text-xs text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Protocol</span>
+          <select
+            value={String(rule.protocol)}
+            onChange={(event) => {
+              const raw = event.target.value;
+              const parsed = Number(raw);
+              const valid = [1, 2, 3].includes(parsed) ? parsed : 1;
+              updateRule(index, { protocol: valid });
+            }}
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          >
+            {protocolOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Source Address</span>
+          <input
+            type="text"
+            value={rule.srcAddr}
+            onChange={(event) => updateRule(index, { srcAddr: event.target.value })}
+            placeholder="0.0.0.0/0"
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">External Ports</span>
+          <input
+            type="text"
+            value={rule.extPorts}
+            onChange={(event) => updateRule(index, { extPorts: event.target.value })}
+            placeholder="80-80"
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Internal Port</span>
+          <input
+            type="number"
+            value={rule.intPort ?? ""}
+            onChange={(event) => {
+              const rawValue = event.target.value;
+              if (rawValue === "") {
+                updateRule(index, { intPort: undefined });
+                return;
+              }
+              const parsedValue = Number(rawValue);
+              updateRule(index, {
+                intPort: Number.isNaN(parsedValue) || !Number.isFinite(parsedValue) ? undefined : parsedValue,
+              });
+            }}
+            placeholder="auto"
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Internal Address</span>
+          <input
+            type="text"
+            value={rule.intAddr}
+            onChange={(event) => updateRule(index, { intAddr: event.target.value })}
+            placeholder="192.168.1.2"
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-300 sm:col-span-2">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Description</span>
+          <input
+            type="text"
+            value={rule.description}
+            onChange={(event) => updateRule(index, { description: event.target.value })}
+            placeholder="Web Server"
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+        </label>
+      </div>
+    </div>
+  );
+
+  const renderIpv6ReadOnly = (rule: PortForwardIpv6Rule, index: number) => (
+    <div
+      key={`pfipv6-ro-${index}`}
+      className="space-y-2 rounded-xl border border-slate-800 bg-slate-950/70 p-3 text-sm text-slate-200"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-400">
+        <span>Rule {index + 1}</span>
+        <span>{rule.enabled ? "Enabled" : "Disabled"}</span>
+      </div>
+      <dl className="grid gap-2 sm:grid-cols-2">
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Protocol</dt>
+          <dd>{protocolLabel(rule.protocol)}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Source Address</dt>
+          <dd>{rule.srcAddress || "Any"}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Destination Address</dt>
+          <dd>{rule.destAddress || "—"}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Destination Ports</dt>
+          <dd>{rule.destPorts || "—"}</dd>
+        </div>
+        <div>
+          <dt className="text-[10px] uppercase tracking-wide text-slate-500">Description</dt>
+          <dd>{rule.description || "—"}</dd>
+        </div>
+      </dl>
+    </div>
+  );
+
+  const renderIpv6Editable = (rule: PortForwardIpv6Rule, index: number) => (
+    <div
+      key={`pfipv6-edit-${index}`}
+      className="space-y-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3 shadow-sm shadow-slate-950/30"
+    >
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Rule {index + 1}
+          </span>
+          <label className="inline-flex items-center gap-2 text-xs text-slate-300">
+            <input
+              type="checkbox"
+              checked={Boolean(rule.enabled)}
+              onChange={(event) => updateRule(index, { enabled: event.target.checked })}
+            />
+            <span>{rule.enabled ? "Enabled" : "Disabled"}</span>
+          </label>
+        </div>
+        <button
+          type="button"
+          onClick={() => removeRule(index)}
+          className="text-xs text-rose-300 underline-offset-4 hover:underline"
+        >
+          Remove
+        </button>
+      </header>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="flex flex-col gap-1 text-xs text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Protocol</span>
+          <select
+            value={String(rule.protocol)}
+            onChange={(event) => {
+              const raw = event.target.value as "1" | "2" | "3";
+              const valid = ["1", "2", "3"].includes(raw) ? raw : "1";
+              updateRule(index, { protocol: valid });
+            }}
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          >
+            {protocolOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Source Address</span>
+          <input
+            type="text"
+            value={rule.srcAddress}
+            onChange={(event) => updateRule(index, { srcAddress: event.target.value })}
+            placeholder="::/0"
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Destination Address</span>
+          <input
+            type="text"
+            value={rule.destAddress}
+            onChange={(event) => updateRule(index, { destAddress: event.target.value })}
+            placeholder="2001:db8::100"
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-300">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Destination Ports</span>
+          <input
+            type="text"
+            value={rule.destPorts}
+            onChange={(event) => updateRule(index, { destPorts: event.target.value })}
+            placeholder="80-80"
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-slate-300 sm:col-span-2">
+          <span className="text-[10px] uppercase tracking-wide text-slate-500">Description</span>
+          <input
+            type="text"
+            value={rule.description}
+            onChange={(event) => updateRule(index, { description: event.target.value })}
+            placeholder="Service"
+            className="rounded-lg border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+        </label>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-3">
+      {rules.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-800 bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-400">
+          {canEdit
+            ? "No port forwarding rules. Add one to get started."
+            : "No port forwarding rules configured."}
+        </div>
+      ) : canEdit ? (
+        rules.map((rule, index) =>
+          isIpv6
+            ? renderIpv6Editable(rule as PortForwardIpv6Rule, index)
+            : renderIpv4Editable(rule as PortForwardIpv4Rule, index),
+        )
+      ) : (
+        rules.map((rule, index) =>
+          isIpv6
+            ? renderIpv6ReadOnly(rule as PortForwardIpv6Rule, index)
+            : renderIpv4ReadOnly(rule as PortForwardIpv4Rule, index),
+        )
+      )}
+      {canEdit ? (
+        <button
+          type="button"
+          onClick={addRule}
+          className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+        >
+          Add rule
+        </button>
       ) : null}
     </div>
   );
