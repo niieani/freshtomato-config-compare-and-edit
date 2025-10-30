@@ -9,7 +9,6 @@ import {
 } from "react";
 import { decodeCfg, encodeCfg } from "@/nvram/nvram-cfg";
 import {
-  multilineScriptTransformer,
   type StructuredPrimitiveField,
   type StructuredPrimitiveType,
   type StructuredSchema,
@@ -120,6 +119,7 @@ type ControlType =
   | "boolean"
   | "select"
   | "number"
+  | "integer"
   | "textarea"
   | "text"
   | "list"
@@ -153,12 +153,11 @@ type PortForwardRule = PortForwardIpv4Rule | PortForwardIpv6Rule;
 
 function resolveControlType(field: ResolvedField): ControlType {
   if (field.options && field.options.length > 0) return "select";
-  if (field.transform === multilineScriptTransformer) return "textarea";
   switch (field.type) {
     case "boolean":
       return "boolean";
     case "integer":
-      return "number";
+      return "integer";
     case "multiline-string":
       return "textarea";
     case "list":
@@ -189,12 +188,30 @@ function coerceDisplayValue(
   switch (controlType) {
     case "boolean":
       return Boolean(field.toUi(raw));
-    case "number": {
+    case "integer": {
+      const rawValue = raw ?? "";
+      if (rawValue === "-") return rawValue;
       const uiValue = field.toUi(raw);
       if (uiValue === null || uiValue === undefined || uiValue === "") return "";
-      if (typeof uiValue === "number") return uiValue;
-      const parsed = Number(raw ?? "");
-      return Number.isNaN(parsed) ? "" : parsed;
+      if (typeof uiValue === "number" && Number.isFinite(uiValue)) {
+        return Math.trunc(uiValue);
+      }
+      const sanitized = rawValue.replace(/[^0-9-]/g, "");
+      if (sanitized.startsWith("-")) {
+        return `-${sanitized.slice(1).replace(/-/g, "")}`;
+      }
+      return sanitized.replace(/-/g, "");
+    }
+    case "number": {
+      const uiValue = field.toUi(raw);
+      const rawValue = raw ?? "";
+      const isIntegerField = field.type === "integer";
+      if (rawValue === "-" || rawValue === "." || rawValue === "-.") return rawValue;
+      if (uiValue === null || uiValue === undefined || uiValue === "") return "";
+      if (typeof uiValue === "number" && Number.isFinite(uiValue)) {
+        return isIntegerField ? Math.trunc(uiValue) : uiValue;
+      }
+      return rawValue;
     }
     case "list": {
       const uiValue = field.toUi(raw);
@@ -1151,7 +1168,7 @@ export function App() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className="hidden w-72 shrink-0 border-r border-slate-900 bg-slate-950/60 backdrop-blur md:flex md:flex-col">
+        <aside className="hidden w-60 shrink-0 border-r border-slate-900 bg-slate-950/60 backdrop-blur md:flex md:flex-col">
           <div className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs uppercase tracking-wide text-slate-500">Pages</span>
@@ -1596,7 +1613,7 @@ function DropZoneCard({
       {config ? (
         <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3 text-xs text-slate-300">
           <div className="truncate font-medium text-slate-200">{config.name}</div>
-          <div className="mt-2 grid grid-cols-2 gap-1 leading-relaxed">
+          <div className="mt-2 grid grid-cols-4 gap-2 leading-relaxed">
             <InfoItem label="Entries" value={Object.keys(config.entries).length.toString()} />
             <InfoItem label="Size" value={formatBytes(config.size)} />
             <InfoItem label="Header" value={config.header} />
@@ -1698,11 +1715,57 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
     onSelectionChange(key, { option: "custom", customRaw: field.fromUi(value) });
   };
 
-  const handleNumberChange = (value: string) => {
-    const parsed = value === "" ? "" : Number(value);
+  const handleNumberChange = (value: string, kind: "integer" | "number") => {
+    const rawInput = value.trim();
+
+    if (rawInput === "") {
+      onSelectionChange(key, { option: "custom", customRaw: field.fromUi("") });
+      return;
+    }
+
+    if (kind === "integer") {
+      if (rawInput === "-") {
+        onSelectionChange(key, { option: "custom", customRaw: "-" });
+        return;
+      }
+      const digitsOnly = rawInput.replace(/[^0-9-]/g, "");
+      const normalized = digitsOnly.startsWith("-")
+        ? `-${digitsOnly.slice(1).replace(/-/g, "")}`
+        : digitsOnly.replace(/-/g, "");
+      if (normalized === "" || normalized === "-") {
+        onSelectionChange(key, { option: "custom", customRaw: normalized });
+        return;
+      }
+      if (!/^-?\d+$/.test(normalized)) {
+        return;
+      }
+      const parsed = Number.parseInt(normalized, 10);
+      if (Number.isNaN(parsed)) {
+        return;
+      }
+      onSelectionChange(key, {
+        option: "custom",
+        customRaw: field.fromUi(parsed),
+      });
+      return;
+    }
+
+    if (rawInput === "-" || rawInput === "." || rawInput === "-.") {
+      onSelectionChange(key, { option: "custom", customRaw: rawInput });
+      return;
+    }
+
+    if (!/^-?\d*(?:\.\d+)?$/.test(rawInput)) {
+      return;
+    }
+
+    const parsed = Number(rawInput);
+    if (Number.isNaN(parsed)) {
+      return;
+    }
     onSelectionChange(key, {
       option: "custom",
-      customRaw: field.fromUi(parsed === "" ? "" : parsed),
+      customRaw: field.fromUi(parsed),
     });
   };
 
@@ -1833,7 +1896,7 @@ interface ValueColumnProps {
   hint?: string;
   onCustomChange?: (value: unknown) => void;
   onBooleanChange?: (value: boolean) => void;
-  onNumberChange?: (value: string) => void;
+  onNumberChange?: (value: string, kind: "integer" | "number") => void;
   onListChange?: (value: string[]) => void;
   isRemovable?: boolean;
   onRemoveCustom?: (key: string) => void;
@@ -2167,13 +2230,51 @@ function ValueColumn({
       );
     }
 
-    if (controlType === "number") {
+    if (controlType === "integer" || controlType === "number") {
+      const isIntegerField = controlType === "integer";
+      const stringValue =
+        value === null || value === undefined
+          ? ""
+          : typeof value === "number"
+            ? isIntegerField
+              ? String(Math.trunc(value))
+              : String(value)
+            : String(value);
+      const allowedKeys = new Set([
+        "Backspace",
+        "Delete",
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End",
+        "Tab",
+        "Enter",
+      ]);
       return (
         <input
-          type="number"
-          value={value ?? ""}
-          onChange={(event) => onNumberChange?.(event.target.value)}
-          className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          type="text"
+          value={stringValue}
+          onChange={(event) => onNumberChange?.(event.target.value, controlType)}
+          onKeyDown={(event) => {
+            if (!isIntegerField) return;
+            if (allowedKeys.has(event.key)) return;
+            if (event.key === "-" && event.currentTarget.selectionStart === 0 && !event.currentTarget.value.includes("-")) {
+              return;
+            }
+            if (/^\d$/.test(event.key)) return;
+            event.preventDefault();
+          }}
+          onPaste={(event) => {
+            if (!isIntegerField) return;
+            const text = event.clipboardData.getData("text/plain");
+            if (/^-?\d*$/.test(text)) return;
+            event.preventDefault();
+          }}
+          inputMode={isIntegerField ? "numeric" : "decimal"}
+          autoComplete="off"
+          spellCheck={false}
+          pattern={isIntegerField ? "^-?[0-9]*$" : undefined}
+          className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
         />
       );
     }
@@ -2183,7 +2284,8 @@ function ValueColumn({
         type="text"
         value={value ?? ""}
         onChange={(event) => onCustomChange?.(event.target.value)}
-        className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+        className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+        spellCheck={false}
       />
     );
   };
