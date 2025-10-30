@@ -2728,7 +2728,7 @@ function FieldCard({
 
       <div className="mt-4 grid gap-3 md:grid-cols-3">
         <ValueColumn
-          title={sidesIdentical ? "Left and Right" : "Left"}
+          title={sidesIdentical ? "Left = Right" : "Left"}
           controlType={controlType}
           hint={entry.leftRaw === undefined ? "Not present" : undefined}
           value={leftValue}
@@ -2941,7 +2941,7 @@ function ValueColumn({
             )}
           >
             {display === null ? (
-              <span className="text-slate-600 dark:text-slate-500">&lt;EMPTY&gt;</span>
+              <span className="text-slate-400 dark:text-slate-500">&lt;EMPTY&gt;</span>
             ) : (
               display
             )}
@@ -3068,7 +3068,7 @@ function ValueColumn({
         >
           {(() => {
             if (value === null || value === undefined || value === "") {
-              return <span className="text-slate-600 dark:text-slate-500">&lt;EMPTY&gt;</span>;
+              return <span className="text-slate-400 dark:text-slate-500">&lt;EMPTY&gt;</span>;
             }
             if (controlType === "select" && options && options.length > 0) {
               const match = options.find(
@@ -3828,7 +3828,10 @@ function StructuredRecordEditor({
   };
 
   return (
-    <div className={surfaceClass("space-y-4 shadow-sm shadow-slate-200/60 dark:shadow-slate-950/30")}
+    <div
+      className={surfaceClass(
+        "space-y-4 shadow-sm shadow-slate-200/60 dark:shadow-slate-950/30",
+      )}
     >
       {(showHeader || onRemove) && (
         <header className="flex flex-wrap items-center justify-between gap-3">
@@ -3852,19 +3855,28 @@ function StructuredRecordEditor({
       )}
       <div className="grid gap-3 sm:grid-cols-2">
         {keys.map((key) => {
-          const type = fieldTypes.get(key) ?? inferStructuredFieldType(record[key]);
+          const type =
+            fieldTypes.get(key) ?? inferStructuredFieldType(record[key]);
           const rawValue = record[key];
           const label = fieldLabels?.get(key) ?? key;
-          const canRemoveField = allowCustomFields || !(schema && key in schema.fields);
+          const canRemoveField =
+            allowCustomFields || !(schema && key in schema.fields);
           if (type === "boolean") {
             return (
-              <div key={key} className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
-                <label className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 transition-colors dark:border-slate-800 dark:bg-slate-950/70">
+              <div
+                key={key}
+                className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300"
+              >
+                <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  {label}
+                </span>
+                <label className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 transition-colors dark:border-slate-800 dark:bg-slate-950/70">
                   <input
                     type="checkbox"
                     checked={Boolean(rawValue)}
-                    onChange={(event) => handleBooleanChange(key, event.target.checked)}
+                    onChange={(event) =>
+                      handleBooleanChange(key, event.target.checked)
+                    }
                     aria-label={label}
                   />
                   <span className="text-sm text-slate-700 dark:text-slate-200">
@@ -3886,13 +3898,24 @@ function StructuredRecordEditor({
 
           if (type === "number") {
             return (
-              <div key={key} className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
-                <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
+              <div
+                key={key}
+                className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300"
+              >
+                <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  {label}
+                </span>
                 <input
                   type="number"
-                  value={typeof rawValue === "number" && Number.isFinite(rawValue) ? rawValue : ""}
-                  onChange={(event) => handleFieldChange(key, "number", event.target.value)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
+                  value={
+                    typeof rawValue === "number" && Number.isFinite(rawValue)
+                      ? rawValue
+                      : ""
+                  }
+                  onChange={(event) =>
+                    handleFieldChange(key, "number", event.target.value)
+                  }
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
                   aria-label={label}
                 />
                 {canRemoveField ? (
@@ -3909,13 +3932,20 @@ function StructuredRecordEditor({
           }
 
           return (
-            <div key={key} className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
-              <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
+            <div
+              key={key}
+              className="flex flex-col gap-1 text-xs text-slate-600 dark:text-slate-300"
+            >
+              <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                {label}
+              </span>
               <input
                 type="text"
                 value={rawValue == null ? "" : String(rawValue)}
-                onChange={(event) => handleFieldChange(key, "string", event.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
+                onChange={(event) =>
+                  handleFieldChange(key, "string", event.target.value)
+                }
+                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
                 aria-label={label}
               />
               {canRemoveField ? (
@@ -3933,32 +3963,38 @@ function StructuredRecordEditor({
       </div>
       {allowCustomFields ? (
         <div className="flex flex-col gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-300">
-          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Add field</span>
+          <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            Add field
+          </span>
           <div className="flex flex-wrap gap-2">
             <input
               type="text"
               value={newFieldKey}
               onChange={(event) => setNewFieldKey(event.target.value)}
               placeholder="Field name"
-              className="flex-1 min-w-[140px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
+              className="flex-1 min-w-[140px] rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
             />
             <select
               value={newFieldType}
-              onChange={(event) => setNewFieldType(event.target.value as StructuredFieldType)}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
+              onChange={(event) =>
+                setNewFieldType(event.target.value as StructuredFieldType)
+              }
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
             >
               <option value="string">String</option>
               <option value="number">Number</option>
               <option value="boolean">Boolean</option>
             </select>
             {newFieldType === "boolean" ? (
-              <label className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 transition-colors dark:border-slate-800 dark:bg-slate-950/70">
+              <label className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 transition-colors dark:border-slate-800 dark:bg-slate-950/70">
                 <input
                   type="checkbox"
                   checked={newFieldBoolean}
                   onChange={(event) => setNewFieldBoolean(event.target.checked)}
                 />
-                <span className="text-sm text-slate-700 dark:text-slate-200">{newFieldBoolean ? "True" : "False"}</span>
+                <span className="text-sm text-slate-700 dark:text-slate-200">
+                  {newFieldBoolean ? "True" : "False"}
+                </span>
               </label>
             ) : (
               <input
@@ -3966,7 +4002,7 @@ function StructuredRecordEditor({
                 value={newFieldValue}
                 onChange={(event) => setNewFieldValue(event.target.value)}
                 placeholder="Value"
-                className="flex-1 min-w-[120px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
+                className="flex-1 min-w-[120px] rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
               />
             )}
             <button
@@ -3999,9 +4035,8 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly, to
   const surfaceClass = (
     ...extra: Array<string | false | null | undefined>
   ) => classNames("rounded-xl border px-3 py-2", toneClass, ...extra);
-  const inputToneClass = (
-    ...extra: Array<string | false | null | undefined>
-  ) => classNames("rounded-lg border px-3 py-2", toneClass, ...extra);
+  const inputToneClass = (...extra: Array<string | false | null | undefined>) =>
+    classNames("rounded-lg border px-3 py-1.5", toneClass, ...extra);
 
   const handleStringChange = (index: number, raw: string) => {
     if (!onChange) return;
