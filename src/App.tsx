@@ -1230,6 +1230,45 @@ export function App() {
     [leftEntries, rightEntries],
   );
 
+  const handleUndoPending = useCallback(
+    (key: string) => {
+      setSelections((prev) => {
+        const leftHas = leftEntries
+          ? Object.prototype.hasOwnProperty.call(leftEntries, key)
+          : false;
+        const rightHas = rightEntries
+          ? Object.prototype.hasOwnProperty.call(rightEntries, key)
+          : false;
+
+        if (!leftHas && !rightHas) {
+          if (!Object.prototype.hasOwnProperty.call(prev, key)) {
+            return prev;
+          }
+          const next = { ...prev };
+          delete next[key];
+          return next;
+        }
+
+        const baseline = initialSelectionForKey(key, leftEntries, rightEntries);
+        const prevState = prev[key];
+
+        if (
+          prevState &&
+          prevState.option === baseline.option &&
+          prevState.customRaw === baseline.customRaw
+        ) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [key]: baseline,
+        };
+      });
+    },
+    [leftEntries, rightEntries],
+  );
+
   const handleRemoveCustomKey = useCallback((key: string) => {
     setSelections((prev) => {
       const next = { ...prev };
@@ -1737,6 +1776,9 @@ export function App() {
                         event.preventDefault();
                         navigateToField(entry.key);
                       };
+                      const handleUndoClick = () => {
+                        handleUndoPending(entry.key);
+                      };
                       return (
                         <li
                           key={entry.key}
@@ -1753,14 +1795,25 @@ export function App() {
                           ) : (
                             <span className="truncate">{entry.key}</span>
                           )}
-                          <span
-                            className={classNames(
-                              "whitespace-nowrap rounded-full px-2 py-0.5 text-[11px]",
-                              DIFF_BADGE_THEME[entry.status],
-                            )}
-                          >
-                            {FINAL_STATUS_LABEL[entry.status]}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={classNames(
+                                "whitespace-nowrap rounded-full px-2 py-0.5 text-[11px]",
+                                DIFF_BADGE_THEME[entry.status],
+                              )}
+                            >
+                              {FINAL_STATUS_LABEL[entry.status]}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleUndoClick}
+                              className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-800 text-[11px] font-semibold text-slate-400 transition hover:border-slate-600 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-500/50"
+                              aria-label="Undo change"
+                              title="Undo change"
+                            >
+                              <span aria-hidden="true">×</span>
+                            </button>
+                          </div>
                         </li>
                       );
                     })}
