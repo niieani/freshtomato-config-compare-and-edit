@@ -5,6 +5,7 @@ import {
   useState,
   type ChangeEvent,
   type DragEvent,
+  type KeyboardEvent,
 } from "react";
 import { decodeCfg, encodeCfg } from "@/nvram/nvram-cfg";
 import { multilineScriptTransformer } from "@/nvram/nvram-catalog-types";
@@ -66,7 +67,7 @@ const PRIMARY_DIFF_BADGE_THEME: Record<DiffStatus, string> = {
   changed: "bg-indigo-500/20 text-indigo-200 border border-indigo-400/50",
 };
 
-type ControlType = "boolean" | "select" | "number" | "textarea" | "text";
+type ControlType = "boolean" | "select" | "number" | "textarea" | "text" | "list";
 
 function resolveControlType(field: ResolvedField): ControlType {
   if (field.options && field.options.length > 0) return "select";
@@ -77,6 +78,7 @@ function resolveControlType(field: ResolvedField): ControlType {
     case "integer":
       return "number";
     case "list":
+      return "list";
     case "structured-string":
       return "textarea";
     default:
@@ -98,6 +100,19 @@ function coerceDisplayValue(
       if (typeof uiValue === "number") return uiValue;
       const parsed = Number(raw ?? "");
       return Number.isNaN(parsed) ? "" : parsed;
+    }
+    case "list": {
+      const uiValue = field.toUi(raw);
+      if (Array.isArray(uiValue)) return uiValue;
+      if (typeof uiValue === "string") {
+        const parts = uiValue
+          .split(",")
+          .map((part) => part.trim())
+          .filter((part) => part.length > 0);
+        return parts;
+      }
+      if (uiValue == null) return [];
+      return Array.isArray(uiValue) ? uiValue : [];
     }
     case "select":
       return raw ?? "";
@@ -1056,7 +1071,7 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
     right: !hasRight || entry.rightRaw === undefined,
   } as const;
 
-  const handleCustomChange = (value: string) => {
+  const handleCustomChange = (value: string | string[]) => {
     onSelectionChange(key, { option: "custom", customRaw: field.fromUi(value) });
   };
 
@@ -1069,6 +1084,13 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
     onSelectionChange(key, {
       option: "custom",
       customRaw: field.fromUi(parsed === "" ? "" : parsed),
+    });
+  };
+
+  const handleListChange = (value: string[]) => {
+    onSelectionChange(key, {
+      option: "custom",
+      customRaw: field.fromUi(value),
     });
   };
 
@@ -1157,6 +1179,7 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
           onCustomChange={handleCustomChange}
           onBooleanChange={handleBooleanChange}
           onNumberChange={handleNumberChange}
+          onListChange={handleListChange}
           isRemovable={isFallback && entry.leftRaw === undefined && entry.rightRaw === undefined}
           onRemoveCustom={onRemoveCustom}
           fieldKey={key}
@@ -1174,9 +1197,10 @@ interface ValueColumnProps {
   controlType: ControlType;
   readOnly?: boolean;
   hint?: string;
-  onCustomChange?: (value: string) => void;
+  onCustomChange?: (value: string | string[]) => void;
   onBooleanChange?: (value: boolean) => void;
   onNumberChange?: (value: string) => void;
+  onListChange?: (value: string[]) => void;
   isRemovable?: boolean;
   onRemoveCustom?: (key: string) => void;
   fieldKey?: string;
@@ -1193,6 +1217,7 @@ function ValueColumn({
   onCustomChange,
   onBooleanChange,
   onNumberChange,
+  onListChange,
   isRemovable,
   onRemoveCustom,
   fieldKey,
@@ -1240,6 +1265,14 @@ function ValueColumn({
           </div>
         );
       }
+      if (controlType === "list") {
+        const items = Array.isArray(value)
+          ? (value as string[])
+          : typeof value === "string"
+            ? value.split(",").map((part) => part.trim()).filter((part) => part.length > 0)
+            : [];
+        return <ListInput value={items} readOnly />;
+      }
       return (
         <pre className="max-h-40 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-200">
           {(() => {
@@ -1273,6 +1306,28 @@ function ValueColumn({
             {Boolean(value) ? "ENABLED" : "DISABLED"}
           </span>
         </label>
+      );
+    }
+
+    if (controlType === "list") {
+      const items = Array.isArray(value)
+        ? (value as string[])
+        : typeof value === "string"
+          ? value.split(",").map((part) => part.trim()).filter((part) => part.length > 0)
+          : [];
+      const handleChange = (next: string[]) => {
+        if (onListChange) {
+          onListChange(next);
+        } else if (onCustomChange) {
+          onCustomChange(next);
+        }
+      };
+
+      return (
+        <ListInput
+          value={items}
+          onChange={handleChange}
+        />
       );
     }
 
@@ -1337,6 +1392,101 @@ function ValueColumn({
         >
           Remove field
         </button>
+      ) : null}
+    </div>
+  );
+}
+
+interface ListInputProps {
+  value: ReadonlyArray<string>;
+  onChange?: (next: string[]) => void;
+  readOnly?: boolean;
+}
+
+function ListInput({ value, onChange, readOnly }: ListInputProps) {
+  const [draft, setDraft] = useState("");
+  const items = useMemo(
+    () =>
+      (Array.isArray(value) ? value : [])
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0),
+    [value],
+  );
+  const canEdit = Boolean(onChange) && !readOnly;
+
+  const commitDraft = () => {
+    if (!canEdit) return;
+    const trimmed = draft.trim();
+    if (!trimmed) return;
+    onChange?.([...items, trimmed]);
+    setDraft("");
+  };
+
+  const handleRemove = (index: number) => {
+    if (!canEdit) return;
+    onChange?.(items.filter((_, idx) => idx !== index));
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (!canEdit) return;
+    if (event.key === "Enter") {
+      event.preventDefault();
+      commitDraft();
+    } else if (event.key === ",") {
+      event.preventDefault();
+      commitDraft();
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div
+        className={classNames(
+          "flex min-h-[42px] flex-wrap items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2",
+          items.length === 0 ? "text-xs text-slate-500" : undefined,
+        )}
+      >
+        {items.length === 0 ? (
+          <span>No entries</span>
+        ) : (
+          items.map((item, index) => (
+            <span
+              key={`${item}-${index}`}
+              className="inline-flex items-center gap-2 rounded-full bg-slate-800/60 px-3 py-1 text-xs text-slate-100"
+            >
+              {item}
+              {canEdit ? (
+                <button
+                  type="button"
+                  onClick={() => handleRemove(index)}
+                  className="text-slate-400 transition hover:text-rose-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300/60"
+                  aria-label={`Remove ${item}`}
+                >
+                  ×
+                </button>
+              ) : null}
+            </span>
+          ))
+        )}
+      </div>
+      {canEdit ? (
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Add value"
+            className="flex-1 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          />
+          <button
+            type="button"
+            onClick={commitDraft}
+            className="rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+          >
+            Add
+          </button>
+        </div>
       ) : null}
     </div>
   );
