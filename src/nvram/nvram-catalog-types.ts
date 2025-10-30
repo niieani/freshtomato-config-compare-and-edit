@@ -91,6 +91,7 @@ interface NvramPropertyBase<T> {
     | "boolean"
     | "integer"
     | "string"
+    | "multiline-string"
     | "enum"
     | "ip"
     | "mac"
@@ -150,33 +151,6 @@ export interface PatternedNvramProperty<
 export const booleanTransformer: ValueTransformer<boolean> = {
   toUi: (value: NvramValue) => value === "1",
   fromUi: (value: boolean) => (value ? "1" : "0"),
-};
-
-/**
- * Transform for multiline script content that uses escape sequences.
- * Converts between encoded format (with \x0a, \x27, etc.) and readable UI format.
- */
-export const multilineScriptTransformer: ValueTransformer<string> = {
-  toUi: (raw: string): string => {
-    // Decode hex escape sequences: \x0a -> newline, \x27 -> ', etc.
-    // Note: \x5c must be decoded last to avoid interfering with other escape sequences
-    return raw
-      .replace(/\\x0a/g, '\n')
-      .replace(/\\x09/g, '\t')
-      .replace(/\\x22/g, '"')
-      .replace(/\\x27/g, "'")
-      .replace(/\\x5c/g, '\\');
-  },
-  fromUi: (ui: string): string => {
-    // Encode special characters: newline -> \x0a, ' -> \x27, etc.
-    // Note: backslash must be encoded first to avoid double-encoding
-    return ui
-      .replace(/\\/g, '\\x5c')
-      .replace(/\n/g, '\\x0a')
-      .replace(/\t/g, '\\x09')
-      .replace(/"/g, '\\x22')
-      .replace(/'/g, "\\x27");
-  }
 };
 
 export const netmaskValidator: Validator<string> = (value) => {

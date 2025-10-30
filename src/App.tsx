@@ -159,6 +159,8 @@ function resolveControlType(field: ResolvedField): ControlType {
       return "boolean";
     case "integer":
       return "number";
+    case "multiline-string":
+      return "textarea";
     case "list":
       return "list";
     case "structured-string":

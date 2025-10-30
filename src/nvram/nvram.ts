@@ -5,7 +5,6 @@ import {
   type NvramValue,
   type Validator,
   booleanTransformer,
-  multilineScriptTransformer,
   netmaskValidator,
   pathValidator,
   portValidator,
@@ -2732,11 +2731,10 @@ export const dnsmasq_custom: NvramProperty<string> = {
   description:
     "Custom configuration options appended to the dnsmasq configuration file.",
   page: "advanced-dhcpdns.asp",
-  type: "string",
+  type: "multiline-string",
 
   validation: (value) =>
     value.length <= 4096 || "Maximum length is 4096 characters.",
-  transform: multilineScriptTransformer,
   ui: {
     label: "Dnsmasq Custom configuration",
   },
@@ -7754,11 +7752,10 @@ export const script_init: NvramProperty<string> = {
   description:
     "A shell script that runs once after the router has finished booting and all services are started.",
   page: "admin-scripts.asp",
-  type: "string",
+  type: "multiline-string",
   defaultValue: "",
   validation: (value) =>
     value.length <= 4096 || "Maximum length is 4096 characters.",
-  transform: multilineScriptTransformer,
   ui: {
     label: "Init",
   },
@@ -7769,11 +7766,10 @@ export const script_shut: NvramProperty<string> = {
   description:
     "A shell script that runs just before the router shuts down or reboots.",
   page: "admin-scripts.asp",
-  type: "string",
+  type: "multiline-string",
   defaultValue: "",
   validation: (value) =>
     value.length <= 4096 || "Maximum length is 4096 characters.",
-  transform: multilineScriptTransformer,
   ui: {
     label: "Halt",
   },
@@ -7783,11 +7779,10 @@ export const script_usbhotplug: NvramProperty<string> = {
   key: "script_usbhotplug",
   description: "A script that runs when any USB device is attached or removed.",
   page: "nas-usb.asp",
-  type: "string",
+  type: "multiline-string",
   defaultValue: "",
   validation: (value) =>
     value.length <= 2048 || "Maximum length is 2048 characters.",
-  transform: multilineScriptTransformer,
   ui: {
     label: "Hotplug script",
   },
@@ -7798,11 +7793,10 @@ export const script_usbmount: NvramProperty<string> = {
   description:
     "A script that runs after a USB storage device is successfully mounted.",
   page: "nas-usb.asp",
-  type: "string",
+  type: "multiline-string",
   defaultValue: "",
   validation: (value) =>
     value.length <= 2048 || "Maximum length is 2048 characters.",
-  transform: multilineScriptTransformer,
   ui: {
     label: "Run after mounting",
   },
@@ -7813,11 +7807,10 @@ export const script_usbumount: NvramProperty<string> = {
   description:
     "A script that runs just before a USB storage device is unmounted.",
   page: "nas-usb.asp",
-  type: "string",
+  type: "multiline-string",
   defaultValue: "",
   validation: (value) =>
     value.length <= 2048 || "Maximum length is 2048 characters.",
-  transform: multilineScriptTransformer,
   ui: {
     label: "Run before unmounting",
   },
@@ -7828,10 +7821,9 @@ export const script_fire: NvramProperty<string> = {
   description:
     "A shell script that is executed when the firewall is started or restarted.",
   page: "admin-scripts.asp",
-  type: "string",
+  type: "multiline-string",
   defaultValue: "",
   validation: (value) => v_length(value, 0, 8192),
-  transform: multilineScriptTransformer,
   ui: {
     label: "Firewall",
   },
@@ -7842,10 +7834,9 @@ export const script_wanup: NvramProperty<string> = {
   description:
     "A shell script that is executed after the main WAN interface (WAN0) comes up.",
   page: "admin-scripts.asp",
-  type: "string",
+  type: "multiline-string",
   defaultValue: "",
   validation: (value) => v_length(value, 0, 4096),
-  transform: multilineScriptTransformer,
   ui: {
     label: "WAN Up (main)",
   },
@@ -7931,7 +7922,7 @@ export const sesx_script: NvramProperty<string> = {
   description:
     "The custom script to be executed when a button press action is set to 'Run Custom Script'.",
   page: "admin-buttons.asp",
-  type: "string",
+  type: "multiline-string",
   defaultValue: "[ $1 -ge 20 ] && telnetd -p 233 -l /bin/sh\x0a",
   ui: {
     label: "Custom Script",
@@ -13571,7 +13562,7 @@ export const zfs_mount_script: NvramProperty<string> = {
   description:
     "A custom script to run for mounting ZFS partitions when automatic mounting is disabled.",
   page: "nas-usb.asp",
-  type: "string",
+  type: "multiline-string",
   defaultValue: "",
   validation: (v) =>
     v.length <= 2048 || "Script cannot exceed 2048 characters.",
@@ -13601,9 +13592,8 @@ export const script_mwanup: NvramProperty<string> = {
   description:
     "A shell script that is executed after a MultiWAN interface comes up. The active WAN number is passed as $1.",
   page: "admin-scripts.asp",
-  type: "string",
+  type: "multiline-string",
   defaultValue: "",
-  transform: multilineScriptTransformer,
   ui: {
     label: "MultiWAN Up",
   },
