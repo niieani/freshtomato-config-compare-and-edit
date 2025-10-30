@@ -8,6 +8,8 @@ import {
   type DragEvent,
   type MouseEvent,
   type KeyboardEvent,
+  type ReactNode,
+  type SVGProps,
 } from "react";
 import { decodeCfg, encodeCfg } from "@/nvram/nvram-cfg";
 import {
@@ -2867,6 +2869,7 @@ function FieldCard({
         entry.workingRaw !== ""
       ? "custom"
       : "neutral";
+  const [workingExpanded, setWorkingExpanded] = useState(false);
 
   const selectionValue =
     selection?.option ?? (entry.leftRaw !== undefined ? "left" : "remove");
@@ -2950,6 +2953,168 @@ function FieldCard({
     });
   };
 
+  const handleRawChange = (value: string) => {
+    onSelectionChange(key, { option: "custom", customRaw: value });
+  };
+
+  const makeIconButtonClass = (disabled?: boolean) =>
+    classNames(
+      "inline-flex h-6 w-6 items-center justify-center rounded-md border text-[11px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/50",
+      disabled
+        ? "cursor-not-allowed border-slate-200 text-slate-300 dark:border-slate-800 dark:text-slate-600"
+        : "border-slate-300 hover:border-slate-400 hover:text-slate-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-slate-500 dark:hover:text-slate-100",
+    );
+
+  const copyRawValue = async (raw: string | undefined) => {
+    if (raw === undefined) return;
+    const clipboard = globalThis.navigator?.clipboard;
+    if (!clipboard) return;
+    try {
+      await clipboard.writeText(raw);
+    } catch (error) {
+      console.error("Failed to copy value", error);
+    }
+  };
+
+  const handleCopyLeft = () => {
+    void copyRawValue(entry.leftRaw);
+  };
+
+  const handleCopyRight = () => {
+    void copyRawValue(entry.rightRaw);
+  };
+
+  const canCopyLeft = entry.leftRaw !== undefined;
+  const canCopyRight = hasRight && entry.rightRaw !== undefined;
+
+  const leftCopyLabel = sidesIdentical ? "Copy value" : "Copy left value";
+  const rightCopyLabel = "Copy right value";
+
+  const leftHeaderActions = (
+    <button
+      type="button"
+      className={makeIconButtonClass(!canCopyLeft)}
+      onClick={handleCopyLeft}
+      disabled={!canCopyLeft}
+      aria-label={leftCopyLabel}
+      title={leftCopyLabel}
+    >
+      <CopyIcon className="h-3.5 w-3.5" />
+    </button>
+  );
+
+  const rightHeaderActions = !sidesIdentical ? (
+    <button
+      type="button"
+      className={makeIconButtonClass(!canCopyRight)}
+      onClick={handleCopyRight}
+      disabled={!canCopyRight}
+      aria-label={rightCopyLabel}
+      title={rightCopyLabel}
+    >
+      <CopyIcon className="h-3.5 w-3.5" />
+    </button>
+  ) : null;
+
+  const handleToggleWorkingExpanded = () => {
+    setWorkingExpanded((previous) => !previous);
+  };
+
+  const workingHeaderActions = (
+    <button
+      type="button"
+      className={classNames(
+        makeIconButtonClass(false),
+        workingExpanded
+          ? "border-sky-400 text-sky-600 dark:border-sky-500 dark:text-sky-300"
+          : undefined,
+      )}
+      onClick={handleToggleWorkingExpanded}
+      aria-pressed={workingExpanded}
+      aria-label={workingExpanded ? "Collapse working editor" : "Expand working editor"}
+      title={workingExpanded ? "Collapse working editor" : "Expand working editor"}
+    >
+      <ExpandToggleIcon expanded={workingExpanded} className="h-3.5 w-3.5" />
+    </button>
+  );
+
+  const gridClassName = classNames(
+    "mt-4 grid gap-3",
+    workingExpanded ? "md:grid-cols-2" : "md:grid-cols-3",
+  );
+  const workingColumnClass = classNames(
+    workingExpanded ? "md:col-span-2" : undefined,
+    !workingExpanded && sidesIdentical ? "md:col-span-1" : undefined,
+  );
+  const leftColumnClass = classNames(
+    sidesIdentical ? "md:col-span-2" : undefined,
+  );
+  const showRightColumn = !sidesIdentical;
+
+  const leftColumn = (
+    <ValueColumn
+      title={sidesIdentical ? "Left = Right" : "Left"}
+      controlType={controlType}
+      hint={leftHint}
+      value={leftValue}
+      field={field}
+      readOnly
+      options={field.options}
+      className={leftColumnClass}
+      structuredMode={structuredMode}
+      structuredSchema={field.structuredSchema}
+      rawMode={rawModeActive}
+      tone={sidesIdentical ? "both" : "left"}
+      headerActions={leftHeaderActions}
+    />
+  );
+
+  const rightColumn = showRightColumn ? (
+    <ValueColumn
+      title="Right"
+      controlType={controlType}
+      hint={rightHint}
+      value={rightValue}
+      field={field}
+      readOnly
+      options={field.options}
+      structuredMode={structuredMode}
+      structuredSchema={field.structuredSchema}
+      rawMode={rawModeActive}
+      tone="right"
+      headerActions={rightHeaderActions}
+    />
+  ) : null;
+
+  const workingColumn = (
+    <ValueColumn
+      title="Working"
+      controlType={controlType}
+      value={workingValue}
+      field={field}
+      isRemovable={
+        isFallback &&
+        entry.leftRaw === undefined &&
+        entry.rightRaw === undefined
+      }
+      onRemoveCustom={onRemoveCustom}
+      fieldKey={key}
+      options={field.options}
+      className={workingColumnClass}
+      structuredMode={structuredMode}
+      structuredSchema={field.structuredSchema}
+      rawMode={rawModeActive}
+      hint={workingHint}
+      onRawChange={rawModeActive ? handleRawChange : undefined}
+      onCustomChange={rawModeActive ? undefined : handleCustomChange}
+      onBooleanChange={rawModeActive ? undefined : handleBooleanChange}
+      onNumberChange={rawModeActive ? undefined : handleNumberChange}
+      onListChange={rawModeActive ? undefined : handleListChange}
+      tone={workingTone}
+      headerActions={workingHeaderActions}
+    />
+  );
+
   const handleSelectOption = (option: Exclude<SelectionOption, "custom">) => {
     if (option === "left" && entry.leftRaw === undefined) return;
     if (option === "right" && (entry.rightRaw === undefined || !hasRight))
@@ -2969,10 +3134,6 @@ function FieldCard({
       option: "custom",
       customRaw: field.fromUi(workingValue),
     });
-  };
-
-  const handleRawChange = (value: string) => {
-    onSelectionChange(key, { option: "custom", customRaw: value });
   };
 
   const finalBadge = finalDiff.status !== "same" && (
@@ -3040,61 +3201,20 @@ function FieldCard({
         </p>
       ) : null}
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
-        <ValueColumn
-          title={sidesIdentical ? "Left = Right" : "Left"}
-          controlType={controlType}
-          hint={leftHint}
-          value={leftValue}
-          field={field}
-          readOnly
-          options={field.options}
-          className={sidesIdentical ? "md:col-span-2" : undefined}
-          structuredMode={structuredMode}
-          structuredSchema={field.structuredSchema}
-          rawMode={rawModeActive}
-          tone={sidesIdentical ? "both" : "left"}
-        />
-        {!sidesIdentical ? (
-          <ValueColumn
-            title="Right"
-            controlType={controlType}
-            hint={rightHint}
-            value={rightValue}
-            field={field}
-            readOnly
-            options={field.options}
-            structuredMode={structuredMode}
-            structuredSchema={field.structuredSchema}
-            rawMode={rawModeActive}
-            tone="right"
-          />
-        ) : null}
-        <ValueColumn
-          title="Working"
-          controlType={controlType}
-          value={workingValue}
-          field={field}
-          isRemovable={
-            isFallback &&
-            entry.leftRaw === undefined &&
-            entry.rightRaw === undefined
-          }
-          onRemoveCustom={onRemoveCustom}
-          fieldKey={key}
-          options={field.options}
-          className={sidesIdentical ? "md:col-span-1" : undefined}
-          structuredMode={structuredMode}
-          structuredSchema={field.structuredSchema}
-          rawMode={rawModeActive}
-          hint={workingHint}
-          onRawChange={rawModeActive ? handleRawChange : undefined}
-          onCustomChange={rawModeActive ? undefined : handleCustomChange}
-          onBooleanChange={rawModeActive ? undefined : handleBooleanChange}
-          onNumberChange={rawModeActive ? undefined : handleNumberChange}
-          onListChange={rawModeActive ? undefined : handleListChange}
-          tone={workingTone}
-        />
+      <div className={gridClassName}>
+        {workingExpanded ? (
+          <>
+            {workingColumn}
+            {leftColumn}
+            {rightColumn}
+          </>
+        ) : (
+          <>
+            {leftColumn}
+            {rightColumn}
+            {workingColumn}
+          </>
+        )}
       </div>
     </article>
   );
@@ -3121,6 +3241,7 @@ interface ValueColumnProps {
   rawMode?: boolean;
   onRawChange?: (value: string) => void;
   tone?: ValueTone;
+  headerActions?: ReactNode;
 }
 
 function ValueColumn({
@@ -3144,6 +3265,7 @@ function ValueColumn({
   rawMode = false,
   onRawChange,
   tone = "neutral",
+  headerActions,
 }: ValueColumnProps) {
   const portForwardVariant: PortForwardVariant =
     field.key === "ipv6_portforward" ? "ipv6" : "ipv4";
@@ -3723,13 +3845,20 @@ function ValueColumn({
 
   return (
     <div className={classNames("space-y-2", className)}>
-      <div
-        className={classNames(
-          "text-xs uppercase tracking-wide",
-          LABEL_TONE_CLASSES[tone] ?? LABEL_TONE_CLASSES.neutral,
-        )}
-      >
-        {title}
+      <div className="flex items-center justify-between gap-2">
+        <div
+          className={classNames(
+            "text-xs uppercase tracking-wide",
+            LABEL_TONE_CLASSES[tone] ?? LABEL_TONE_CLASSES.neutral,
+          )}
+        >
+          {title}
+        </div>
+        {headerActions ? (
+          <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400">
+            {headerActions}
+          </div>
+        ) : null}
       </div>
 
       {controlContent}
@@ -3751,6 +3880,60 @@ interface ListInputProps {
   onChange?: (next: string[]) => void;
   readOnly?: boolean;
   tone?: ValueTone;
+}
+
+type ExpandToggleIconProps = SVGProps<SVGSVGElement> & {
+  expanded?: boolean;
+};
+
+function CopyIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <path
+        d="M7 4.75A1.75 1.75 0 0 1 8.75 3h5.5A1.75 1.75 0 0 1 16 4.75v5.5A1.75 1.75 0 0 1 14.25 12H8.75A1.75 1.75 0 0 1 7 10.25v-5.5Z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 7.25A1.75 1.75 0 0 1 5.75 5.5H7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4 9.75v5.5A1.75 1.75 0 0 0 5.75 17h5.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ExpandToggleIcon({ expanded = false, className, ...props }: ExpandToggleIconProps) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      className={classNames(className, expanded ? "rotate-90" : undefined)}
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+    >
+      <path d="M4 10h12" strokeLinecap="round" />
+      <path d="M7.5 6.5 4.5 9.5l3 3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12.5 6.5l3 3-3 3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 function ListInput({ value, onChange, readOnly, tone = "neutral" }: ListInputProps) {
