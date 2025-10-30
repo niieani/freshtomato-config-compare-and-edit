@@ -2835,15 +2835,17 @@ function FieldCard({
     entry.leftRaw === undefined
       ? "Not present"
       : controlType === "boolean" && entry.leftRaw === ""
-      ? "Empty"
+      ? "<EMPTY>"
       : undefined;
   const rightHint = hasRight
     ? entry.rightRaw === undefined
       ? "Not present"
       : controlType === "boolean" && entry.rightRaw === ""
-      ? "Empty"
+      ? "<EMPTY>"
       : undefined
     : "No file loaded";
+  const workingHint =
+    controlType === "boolean" && entry.workingRaw === "" ? "<EMPTY>" : undefined;
   const sidesIdentical =
     hasRight &&
     entry.leftRaw !== undefined &&
@@ -3085,6 +3087,7 @@ function FieldCard({
           structuredMode={structuredMode}
           structuredSchema={field.structuredSchema}
           rawMode={rawModeActive}
+          hint={workingHint}
           onRawChange={rawModeActive ? handleRawChange : undefined}
           onCustomChange={rawModeActive ? undefined : handleCustomChange}
           onBooleanChange={rawModeActive ? undefined : handleBooleanChange}
@@ -3191,6 +3194,32 @@ function ValueColumn({
     return [];
   };
 
+  const renderHintSurface = () => {
+    if (!hint) return null;
+    if (hint === "<EMPTY>") {
+      return (
+        <pre
+          className={makeSurfaceClass(
+            "max-h-40 overflow-y-auto font-mono text-sm text-slate-700 dark:text-slate-200",
+          )}
+        >
+          <span className="text-slate-400 dark:text-slate-500">&lt;EMPTY&gt;</span>
+        </pre>
+      );
+    }
+    return (
+      <div
+        className={makeSurfaceClass(
+          "text-xs text-slate-600 dark:text-slate-500",
+        )}
+      >
+        {hint}
+      </div>
+    );
+  };
+
+  const hintSurface = renderHintSurface();
+
   const renderBooleanVisual = (checked: boolean) => (
     <div className="flex items-center gap-2">
       <span
@@ -3221,17 +3250,6 @@ function ValueColumn({
 
   const renderControl = () => {
     if (rawMode) {
-      if (hint) {
-        return (
-          <div
-            className={makeSurfaceClass(
-              "text-xs text-slate-600 dark:text-slate-500",
-            )}
-          >
-            {hint}
-          </div>
-        );
-      }
       if (readOnly) {
         const rawValue = value ?? "";
         const display =
@@ -3274,17 +3292,6 @@ function ValueColumn({
     }
 
     if (readOnly) {
-      if (hint) {
-        return (
-          <div
-            className={makeSurfaceClass(
-              "text-xs text-slate-600 dark:text-slate-500",
-            )}
-          >
-            {hint}
-          </div>
-        );
-      }
       if (controlType === "boolean") {
         return (
           <div className={makeSurfaceClass()}>
@@ -3397,6 +3404,7 @@ function ValueColumn({
         value === "1" ||
         value === "true" ||
         (typeof value === "string" && value.toLowerCase?.() === "on");
+      const offLabel = hint === "<EMPTY>" ? "<EMPTY>" : "DISABLED";
       return (
         <label
           className={makeSurfaceClass("inline-flex items-center gap-3")}
@@ -3429,7 +3437,7 @@ function ValueColumn({
               checked ? "text-sky-700 dark:text-sky-300" : "text-rose-600 dark:text-rose-300",
             )}
           >
-            {checked ? "ENABLED" : "DISABLED"}
+            {checked ? "ENABLED" : offLabel}
           </span>
         </label>
       );
@@ -3694,6 +3702,25 @@ function ValueColumn({
     );
   };
 
+  const controlContent = (() => {
+    if (rawMode && hintSurface) {
+      return hintSurface;
+    }
+    if (!rawMode && readOnly && hintSurface) {
+      return hintSurface;
+    }
+    const control = renderControl();
+    if (!rawMode && !readOnly && hintSurface && controlType !== "boolean") {
+      return (
+        <div className="flex flex-col gap-2">
+          {hintSurface}
+          {control}
+        </div>
+      );
+    }
+    return control;
+  })();
+
   return (
     <div className={classNames("space-y-2", className)}>
       <div
@@ -3705,7 +3732,7 @@ function ValueColumn({
         {title}
       </div>
 
-      {renderControl()}
+      {controlContent}
 
       {!readOnly && isRemovable && onRemoveCustom && fieldKey ? (
         <button
