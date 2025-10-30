@@ -567,11 +567,14 @@ const UNCATALOGUED_VARIANT_BY_ID = new Map(
 export function App() {
   const [leftConfig, setLeftConfig] = useState<LoadedConfig | null>(null);
   const [rightConfig, setRightConfig] = useState<LoadedConfig | null>(null);
-  const [selections, setSelections] = useState<Record<string, SelectionState>>({});
+  const [selections, setSelections] = useState<Record<string, SelectionState>>(
+    {},
+  );
   const [activePageId, setActivePageId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [diffFilter, setDiffFilter] = useState<DiffFilter>("different");
   const [focusPending, setFocusPending] = useState(false);
+  const [showRawValues, setShowRawValues] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showScript, setShowScript] = useState(false);
 
@@ -586,7 +589,10 @@ export function App() {
         }
       }
     } catch (restoreError) {
-      console.warn("Failed to restore primary configuration from storage", restoreError);
+      console.warn(
+        "Failed to restore primary configuration from storage",
+        restoreError,
+      );
     }
 
     try {
@@ -598,7 +604,10 @@ export function App() {
         }
       }
     } catch (restoreError) {
-      console.warn("Failed to restore comparison configuration from storage", restoreError);
+      console.warn(
+        "Failed to restore comparison configuration from storage",
+        restoreError,
+      );
     }
   }, []);
 
@@ -619,7 +628,10 @@ export function App() {
     if (typeof window === "undefined") return;
     try {
       if (rightConfig) {
-        localStorage.setItem(COMPARISON_STORAGE_KEY, JSON.stringify(rightConfig));
+        localStorage.setItem(
+          COMPARISON_STORAGE_KEY,
+          JSON.stringify(rightConfig),
+        );
       } else {
         localStorage.removeItem(COMPARISON_STORAGE_KEY);
       }
@@ -628,24 +640,23 @@ export function App() {
     }
   }, [rightConfig]);
 
-  const handleLoad = useCallback(
-    async (file: File, side: "left" | "right") => {
-      try {
-        const config = await loadCfg(file);
-        if (side === "left") {
-          setLeftConfig(config);
-          setActivePageId(null);
-        } else {
-          setRightConfig(config);
-        }
-        setError(null);
-      } catch (err) {
-        console.error(err);
-        setError(err instanceof Error ? err.message : "Failed to parse .cfg file.");
+  const handleLoad = useCallback(async (file: File, side: "left" | "right") => {
+    try {
+      const config = await loadCfg(file);
+      if (side === "left") {
+        setLeftConfig(config);
+        setActivePageId(null);
+      } else {
+        setRightConfig(config);
       }
-    },
-    [],
-  );
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof Error ? err.message : "Failed to parse .cfg file.",
+      );
+    }
+  }, []);
 
   const handleClear = useCallback(
     (side: "left" | "right") => {
@@ -694,8 +705,12 @@ export function App() {
 
       for (const key of keys) {
         const prevState = prev[key];
-        const leftHas = leftEntries ? Object.prototype.hasOwnProperty.call(leftEntries, key) : false;
-        const rightHas = rightEntries ? Object.prototype.hasOwnProperty.call(rightEntries, key) : false;
+        const leftHas = leftEntries
+          ? Object.prototype.hasOwnProperty.call(leftEntries, key)
+          : false;
+        const rightHas = rightEntries
+          ? Object.prototype.hasOwnProperty.call(rightEntries, key)
+          : false;
 
         if (!prevState) {
           next[key] = initialSelectionForKey(key, leftEntries, rightEntries);
@@ -756,7 +771,11 @@ export function App() {
   }, [leftEntries, rightEntries, rightConfig?.id]);
 
   const diffLeftFinal = useMemo(
-    () => computeDiff(leftEntries, Object.keys(finalEntries).length ? finalEntries : null),
+    () =>
+      computeDiff(
+        leftEntries,
+        Object.keys(finalEntries).length ? finalEntries : null,
+      ),
     [leftEntries, finalEntries],
   );
 
@@ -790,12 +809,12 @@ export function App() {
         finalEntries[key] === undefined && leftEntries?.[key] === undefined
           ? "same"
           : leftEntries?.[key] === finalEntries[key]
-            ? "same"
-            : finalEntries[key] === undefined
-              ? "removed"
-              : leftEntries?.[key] === undefined
-                ? "added"
-                : "different";
+          ? "same"
+          : finalEntries[key] === undefined
+          ? "removed"
+          : leftEntries?.[key] === undefined
+          ? "added"
+          : "different";
 
       const finalDiff = diffLeftFinal.byKey.get(key) ?? {
         key,
@@ -852,7 +871,15 @@ export function App() {
     }
 
     return pages;
-  }, [allKeys, diffLeftRight, diffLeftFinal, finalEntries, leftEntries, rightEntries, selections]);
+  }, [
+    allKeys,
+    diffLeftRight,
+    diffLeftFinal,
+    finalEntries,
+    leftEntries,
+    rightEntries,
+    selections,
+  ]);
 
   const [showEmptyPages, setShowEmptyPages] = useState(false);
 
@@ -872,7 +899,10 @@ export function App() {
     }> = [];
 
     const getGroupMeta = (pageId: string, title: string) => {
-      if (pageId === UNCATEGORISED_PAGE_ID || UNCATALOGUED_VARIANT_BY_ID.has(pageId)) {
+      if (
+        pageId === UNCATEGORISED_PAGE_ID ||
+        UNCATALOGUED_VARIANT_BY_ID.has(pageId)
+      ) {
         return {
           groupKey: "uncatalogued",
           groupLabel: "Uncatalogued",
@@ -891,8 +921,8 @@ export function App() {
       const title = variantMeta
         ? variantMeta.title
         : pageId === UNCATEGORISED_PAGE_ID
-          ? UNCATEGORISED_PAGE_LABEL
-          : prettifyPageId(pageId);
+        ? UNCATEGORISED_PAGE_LABEL
+        : prettifyPageId(pageId);
       const totalCount = entries.length;
       const pendingCount = entries.reduce(
         (count, entry) => count + (entry.finalDiff.status !== "same" ? 1 : 0),
@@ -922,7 +952,9 @@ export function App() {
 
       const { groupKey, groupLabel } = getGroupMeta(pageId, title);
       const prefix = `${groupKey}-`;
-      const displayTitle = title.startsWith(prefix) ? title.slice(prefix.length) : title;
+      const displayTitle = title.startsWith(prefix)
+        ? title.slice(prefix.length)
+        : title;
       const sortOrder = variantMeta?.order ?? 0;
       const hasMatches = filtered.length > 0;
 
@@ -959,7 +991,14 @@ export function App() {
       return a.title.localeCompare(b.title);
     });
     return result;
-  }, [activePageId, diffFilter, fieldViews, focusPending, searchTerm, showEmptyPages]);
+  }, [
+    activePageId,
+    diffFilter,
+    fieldViews,
+    focusPending,
+    searchTerm,
+    showEmptyPages,
+  ]);
 
   const groupedPages = useMemo(() => {
     const groups = new Map<
@@ -973,7 +1012,10 @@ export function App() {
     >();
     for (const page of filteredPages) {
       if (!groups.has(page.groupKey)) {
-        const position = page.groupKey === "__uncatalogued__" ? Number.POSITIVE_INFINITY : groups.size;
+        const position =
+          page.groupKey === "__uncatalogued__"
+            ? Number.POSITIVE_INFINITY
+            : groups.size;
         groups.set(page.groupKey, {
           key: page.groupKey,
           label: page.groupLabel,
@@ -983,20 +1025,26 @@ export function App() {
       }
       groups.get(page.groupKey)!.pages.push(page);
     }
-    return Array.from(groups.values()).sort((a, b) => a.position - b.position || a.label.localeCompare(b.label));
+    return Array.from(groups.values()).sort(
+      (a, b) => a.position - b.position || a.label.localeCompare(b.label),
+    );
   }, [filteredPages]);
 
   const selectedPage = activePageId
     ? filteredPages.find((page) => page.id === activePageId) ?? null
     : filteredPages[0] ?? null;
 
-  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [collapsedGroups, setCollapsedGroups] = useState<
+    Record<string, boolean>
+  >({});
 
   useEffect(() => {
     setCollapsedGroups((prev) => {
       const next: Record<string, boolean> = {};
       for (const group of groupedPages) {
-        const hasActive = group.pages.some((page) => page.id === (selectedPage?.id ?? null));
+        const hasActive = group.pages.some(
+          (page) => page.id === (selectedPage?.id ?? null),
+        );
         if (hasActive) {
           next[group.key] = false;
         } else {
@@ -1025,7 +1073,9 @@ export function App() {
     }
   }, [activePageId, filteredPages]);
 
-  const totalPending = diffLeftFinal.entries.filter((entry) => entry.status !== "same").length;
+  const totalPending = diffLeftFinal.entries.filter(
+    (entry) => entry.status !== "same",
+  ).length;
 
   const scriptText = useMemo(
     () => generateNvramScript(finalEntries, diffLeftFinal.entries),
@@ -1042,11 +1092,16 @@ export function App() {
           const customValue = state.customRaw ?? "";
           const leftValue = leftEntries?.[key];
           const rightValue = rightEntries?.[key];
-          const matchesLeft = leftValue !== undefined && customValue === leftValue;
-          const matchesRight = rightValue !== undefined && customValue === rightValue;
+          const matchesLeft =
+            leftValue !== undefined && customValue === leftValue;
+          const matchesRight =
+            rightValue !== undefined && customValue === rightValue;
 
           if (matchesLeft && matchesRight) {
-            nextState = previous?.option === "right" ? { option: "right" } : { option: "left" };
+            nextState =
+              previous?.option === "right"
+                ? { option: "right" }
+                : { option: "left" };
           } else if (matchesLeft) {
             nextState = { option: "left" };
           } else if (matchesRight) {
@@ -1104,7 +1159,10 @@ export function App() {
         leftConfig?.name.replace(/\.cfg$/i, "") ??
         rightConfig?.name.replace(/\.cfg$/i, "") ??
         "nvram-export";
-      const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[-:T]/g, "")
+        .slice(0, 14);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${name}-${timestamp}.cfg`;
@@ -1153,8 +1211,10 @@ export function App() {
                 FreshTomato NVRAM Workspace
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-slate-400">
-                Inspect, compare, and craft configuration backups visually. Start by dropping a
-                FreshTomato <code className="rounded bg-slate-900 px-2 py-1">.cfg</code> file.
+                Inspect, compare, and craft configuration backups visually.
+                Start by dropping a FreshTomato{" "}
+                <code className="rounded bg-slate-900 px-2 py-1">.cfg</code>{" "}
+                file.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -1163,7 +1223,11 @@ export function App() {
                   key={card.label}
                   className="rounded-xl border border-slate-800 bg-slate-900/60 p-3 text-center"
                 >
-                  <div className={classNames("text-lg font-semibold", card.tone)}>{card.value}</div>
+                  <div
+                    className={classNames("text-lg font-semibold", card.tone)}
+                  >
+                    {card.value}
+                  </div>
                   <div className="text-[12px] uppercase tracking-wide text-slate-500">
                     {card.label}
                   </div>
@@ -1182,7 +1246,10 @@ export function App() {
               onFile={(file) => handleLoad(file, "left")}
               onClear={() => handleClear("left")}
             />
-            <SwapButton disabled={!leftConfig || !rightConfig} onSwap={handleSwap} />
+            <SwapButton
+              disabled={!leftConfig || !rightConfig}
+              onSwap={handleSwap}
+            />
             <DropZoneCard
               side="right"
               title="Comparison snapshot"
@@ -1209,13 +1276,17 @@ export function App() {
         <aside className="hidden w-60 shrink-0 border-r border-slate-900 bg-slate-950/60 backdrop-blur md:flex md:flex-col">
           <div className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-wide text-slate-500">Pages</span>
+              <span className="text-xs uppercase tracking-wide text-slate-500">
+                Pages
+              </span>
               <button
                 type="button"
                 onClick={() => setShowEmptyPages((prev) => !prev)}
                 className={classNames(
                   "inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-800 text-slate-500 transition hover:border-slate-700 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50",
-                  showEmptyPages ? "border-sky-500/40 bg-sky-500/10 text-sky-300" : "",
+                  showEmptyPages
+                    ? "border-sky-500/40 bg-sky-500/10 text-sky-300"
+                    : "",
                 )}
                 aria-pressed={showEmptyPages}
                 title={showEmptyPages ? "Hide empty pages" : "Show empty pages"}
@@ -1233,7 +1304,13 @@ export function App() {
                   <path d="M4 6h12" />
                   <path d="M4 10h12" />
                   <path d="M4 14h8" />
-                  <circle cx="15" cy="14" r="1.2" fill="currentColor" stroke="none" />
+                  <circle
+                    cx="15"
+                    cy="14"
+                    r="1.2"
+                    fill="currentColor"
+                    stroke="none"
+                  />
                 </svg>
                 <span className="sr-only">
                   {showEmptyPages ? "Hide empty pages" : "Show empty pages"}
@@ -1244,7 +1321,9 @@ export function App() {
           <nav className="flex-1 overflow-y-auto">
             {groupedPages.map((group) => {
               const collapsed = collapsedGroups[group.key] ?? false;
-              const activeInGroup = group.pages.some((page) => page.id === (selectedPage?.id ?? null));
+              const activeInGroup = group.pages.some(
+                (page) => page.id === (selectedPage?.id ?? null),
+              );
               return (
                 <div key={group.key} className="pb-2">
                   <button
@@ -1252,7 +1331,9 @@ export function App() {
                     onClick={() => toggleGroup(group.key)}
                     className={classNames(
                       "flex w-full items-center justify-between px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wide transition",
-                      activeInGroup ? "text-slate-200" : "text-slate-500 hover:text-slate-300",
+                      activeInGroup
+                        ? "text-slate-200"
+                        : "text-slate-500 hover:text-slate-300",
                     )}
                   >
                     <span>{group.label}</span>
@@ -1272,7 +1353,12 @@ export function App() {
                       <path d="M4 6l4 4 4-4" />
                     </svg>
                   </button>
-                  <div className={classNames("space-y-0.5", collapsed ? "hidden" : "block")}>
+                  <div
+                    className={classNames(
+                      "space-y-0.5",
+                      collapsed ? "hidden" : "block",
+                    )}
+                  >
                     {group.pages.map((page) => {
                       const isActive = page.id === (selectedPage?.id ?? null);
                       return (
@@ -1286,7 +1372,9 @@ export function App() {
                               : "text-slate-400 hover:bg-slate-900/40 hover:text-slate-200",
                           )}
                         >
-                          <span className="flex-1 truncate">{page.displayTitle}</span>
+                          <span className="flex-1 truncate">
+                            {page.displayTitle}
+                          </span>
                           <span className="ml-3 flex items-center gap-1">
                             {page.pendingCount > 0 ? (
                               <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-amber-500/20 px-2 text-xs font-medium text-amber-200">
@@ -1305,7 +1393,9 @@ export function App() {
               );
             })}
             {filteredPages.length === 0 ? (
-              <div className="px-4 py-8 text-sm text-slate-500">No pages match the filters.</div>
+              <div className="px-4 py-8 text-sm text-slate-500">
+                No pages match the filters.
+              </div>
             ) : null}
           </nav>
           <div className="border-t border-slate-900 p-4 text-xs text-slate-500">
@@ -1351,19 +1441,29 @@ export function App() {
                     onChange={(event) => setFocusPending(event.target.checked)}
                     className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-sky-500"
                   />
-                  Show only pending edits
+                  Only edits
+                </label>
+                <label className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/50 px-4 py-2 text-xs uppercase tracking-wide text-slate-400">
+                  <input
+                    type="checkbox"
+                    checked={showRawValues}
+                    onChange={(event) => setShowRawValues(event.target.checked)}
+                    className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-sky-500"
+                  />
+                  Raw
                 </label>
               </div>
             </div>
           </div>
 
           <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
-
             {selectedPage ? (
               <section>
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-xl font-semibold text-white">{selectedPage.title}</h2>
+                    <h2 className="text-xl font-semibold text-white">
+                      {selectedPage.title}
+                    </h2>
                     <p className="text-sm text-slate-400">
                       {selectedPage.entries.length} field
                       {selectedPage.entries.length === 1 ? "" : "s"} in view
@@ -1386,6 +1486,7 @@ export function App() {
                         onSelectionChange={handleUpdateSelection}
                         onRemoveCustom={handleRemoveCustomKey}
                         hasRight={!!rightConfig}
+                        rawMode={showRawValues}
                       />
                     ))}
                   </div>
@@ -1405,15 +1506,20 @@ export function App() {
 
         <aside className="hidden w-[22rem] shrink-0 border-l border-slate-900 bg-slate-950/60 backdrop-blur lg:flex lg:flex-col">
           <div className="p-6">
-            <h3 className="text-lg font-semibold text-white">Preview & export</h3>
+            <h3 className="text-lg font-semibold text-white">
+              Preview & export
+            </h3>
             <p className="mt-1 text-sm text-slate-400">
-              Generate a curated backup or script reflecting the selections you have applied.
+              Generate a curated backup or script reflecting the selections you
+              have applied.
             </p>
           </div>
           <div className="flex-1 overflow-y-auto px-6 pb-6">
             <div className="space-y-4">
               <div className="rounded-xl border border-slate-900 bg-slate-900/60 p-4">
-                <h4 className="text-sm font-semibold text-slate-200">Pending edits</h4>
+                <h4 className="text-sm font-semibold text-slate-200">
+                  Pending edits
+                </h4>
                 <p className="mt-1 text-xs text-slate-400">
                   {totalPending} change
                   {totalPending === 1 ? "" : "s"} relative to the baseline file.
@@ -1423,7 +1529,10 @@ export function App() {
                     .filter((entry) => entry.status !== "same")
                     .slice(0, 12)
                     .map((entry) => (
-                      <li key={entry.key} className="flex items-center justify-between gap-2">
+                      <li
+                        key={entry.key}
+                        className="flex items-center justify-between gap-2"
+                      >
                         <span className="truncate">{entry.key}</span>
                         <span
                           className={classNames(
@@ -1437,22 +1546,32 @@ export function App() {
                     ))}
                   {totalPending === 0 ? <li>No changes yet.</li> : null}
                   {totalPending > 12 ? (
-                    <li className="text-slate-500">…and {totalPending - 12} more.</li>
+                    <li className="text-slate-500">
+                      …and {totalPending - 12} more.
+                    </li>
                   ) : null}
                 </ul>
               </div>
 
               <div className="rounded-xl border border-slate-900 bg-slate-900/60 p-4">
-                <h4 className="text-sm font-semibold text-slate-200">Download backup</h4>
+                <h4 className="text-sm font-semibold text-slate-200">
+                  Download backup
+                </h4>
                 <div className="mt-3 grid gap-2">
                   <button
-                    onClick={() => handleDownloadCfg(leftConfig?.header ?? "HDR2")}
+                    onClick={() =>
+                      handleDownloadCfg(leftConfig?.header ?? "HDR2")
+                    }
                     className="rounded-lg border border-sky-500/60 bg-sky-500/15 px-3 py-2 text-sm font-medium text-sky-200 transition hover:border-sky-400 hover:bg-sky-500/25"
                   >
                     Export as {leftConfig?.header ?? "HDR2"}
                   </button>
                   <button
-                    onClick={() => handleDownloadCfg(leftConfig?.header === "HDR1" ? "HDR2" : "HDR1")}
+                    onClick={() =>
+                      handleDownloadCfg(
+                        leftConfig?.header === "HDR1" ? "HDR2" : "HDR1",
+                      )
+                    }
                     className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-300 transition hover:border-slate-600 hover:bg-slate-800"
                   >
                     Export as {leftConfig?.header === "HDR1" ? "HDR2" : "HDR1"}
@@ -1462,7 +1581,9 @@ export function App() {
 
               <div className="rounded-xl border border-slate-900 bg-slate-900/60 p-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-slate-200">NVRAM CLI Script</h4>
+                  <h4 className="text-sm font-semibold text-slate-200">
+                    NVRAM CLI Script
+                  </h4>
                   <button
                     onClick={() => setShowScript((prev) => !prev)}
                     className="text-xs text-sky-300 underline-offset-4 hover:underline"
@@ -1620,7 +1741,9 @@ function DropZoneCard({
             event.stopPropagation();
             onClear();
           }}
-          aria-label={`Remove ${side === "left" ? "primary" : "comparison"} configuration`}
+          aria-label={`Remove ${
+            side === "left" ? "primary" : "comparison"
+          } configuration`}
           className="absolute right-3 top-3 rounded-full border border-transparent bg-slate-900/80 p-1.5 text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
         >
           <svg
@@ -1642,7 +1765,9 @@ function DropZoneCard({
         <div
           className={classNames(
             "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-sm font-semibold uppercase tracking-wide text-slate-400",
-            side === "left" ? "border-sky-500/50 text-sky-300" : "border-emerald-500/50 text-emerald-300",
+            side === "left"
+              ? "border-sky-500/50 text-sky-300"
+              : "border-emerald-500/50 text-emerald-300",
           )}
         >
           {side === "left" ? "L" : "R"}
@@ -1655,13 +1780,21 @@ function DropZoneCard({
 
       {config ? (
         <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3 text-xs text-slate-300">
-          <div className="truncate font-medium text-slate-200">{config.name}</div>
+          <div className="truncate font-medium text-slate-200">
+            {config.name}
+          </div>
           <div className="mt-2 grid grid-cols-4 gap-2 leading-relaxed">
-            <InfoItem label="Entries" value={Object.keys(config.entries).length.toString()} />
+            <InfoItem
+              label="Entries"
+              value={Object.keys(config.entries).length.toString()}
+            />
             <InfoItem label="Size" value={formatBytes(config.size)} />
             <InfoItem label="Header" value={config.header} />
             {config.salt !== undefined ? (
-              <InfoItem label="Salt" value={`0x${config.salt.toString(16).padStart(2, "0")}`} />
+              <InfoItem
+                label="Salt"
+                value={`0x${config.salt.toString(16).padStart(2, "0")}`}
+              />
             ) : (
               <InfoItem label="Length" value={`${config.fileLength} B`} />
             )}
@@ -1682,7 +1815,9 @@ function DropZoneCard({
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="text-[10px] uppercase tracking-wide text-slate-500">
+        {label}
+      </div>
       <div className="text-xs text-slate-300">{value}</div>
     </div>
   );
@@ -1728,34 +1863,58 @@ interface FieldCardProps {
   onSelectionChange: (key: string, state: SelectionState) => void;
   onRemoveCustom: (key: string) => void;
   hasRight: boolean;
+  rawMode: boolean;
 }
 
-function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: FieldCardProps) {
+function FieldCard({
+  entry,
+  onSelectionChange,
+  onRemoveCustom,
+  hasRight,
+  rawMode,
+}: FieldCardProps) {
   const { key, field, diff, finalDiff, selection } = entry;
   const isFallback = field.raw === null;
   const controlType = resolveControlType(field);
-  const structuredMode = controlType === "structured" ? detectStructuredMode(field, entry) : undefined;
-  const leftValue = coerceDisplayValue(field, entry.leftRaw, controlType);
-  const rightValue = coerceDisplayValue(field, entry.rightRaw, controlType);
-  const workingValue = coerceDisplayValue(field, entry.workingRaw, controlType);
+  const rawModeActive = rawMode && controlType !== "text";
+  const structuredMode =
+    !rawModeActive && controlType === "structured"
+      ? detectStructuredMode(field, entry)
+      : undefined;
+  const leftValue = rawModeActive
+    ? entry.leftRaw ?? ""
+    : coerceDisplayValue(field, entry.leftRaw, controlType);
+  const rightValue = rawModeActive
+    ? entry.rightRaw ?? ""
+    : coerceDisplayValue(field, entry.rightRaw, controlType);
+  const workingValue = rawModeActive
+    ? entry.workingRaw ?? ""
+    : coerceDisplayValue(field, entry.workingRaw, controlType);
   const sidesIdentical =
     hasRight &&
     entry.leftRaw !== undefined &&
     entry.rightRaw !== undefined &&
     entry.leftRaw === entry.rightRaw;
 
-  const selectionValue = selection?.option ?? (entry.leftRaw !== undefined ? "left" : "remove");
+  const selectionValue =
+    selection?.option ?? (entry.leftRaw !== undefined ? "left" : "remove");
   const disabledOptions = {
     left: entry.leftRaw === undefined,
     right: !hasRight || entry.rightRaw === undefined,
   } as const;
 
   const handleCustomChange = (value: unknown) => {
-    onSelectionChange(key, { option: "custom", customRaw: field.fromUi(value) });
+    onSelectionChange(key, {
+      option: "custom",
+      customRaw: field.fromUi(value),
+    });
   };
 
   const handleBooleanChange = (value: boolean) => {
-    onSelectionChange(key, { option: "custom", customRaw: field.fromUi(value) });
+    onSelectionChange(key, {
+      option: "custom",
+      customRaw: field.fromUi(value),
+    });
   };
 
   const handleNumberChange = (value: string, kind: "integer" | "number") => {
@@ -1821,12 +1980,27 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
 
   const handleSelectOption = (option: Exclude<SelectionOption, "custom">) => {
     if (option === "left" && entry.leftRaw === undefined) return;
-    if (option === "right" && (entry.rightRaw === undefined || !hasRight)) return;
+    if (option === "right" && (entry.rightRaw === undefined || !hasRight))
+      return;
     onSelectionChange(key, { option });
   };
 
   const handleSelectEdited = () => {
-    onSelectionChange(key, { option: "custom", customRaw: field.fromUi(workingValue) });
+    if (rawModeActive) {
+      onSelectionChange(key, {
+        option: "custom",
+        customRaw: entry.workingRaw ?? "",
+      });
+      return;
+    }
+    onSelectionChange(key, {
+      option: "custom",
+      customRaw: field.fromUi(workingValue),
+    });
+  };
+
+  const handleRawChange = (value: string) => {
+    onSelectionChange(key, { option: "custom", customRaw: value });
   };
 
   const finalBadge = finalDiff.status !== "same" && (
@@ -1853,7 +2027,9 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
               PRIMARY_DIFF_BADGE_THEME[diff.status],
             )}
           >
-            {diff.status === "different" ? "DIFFERENT" : diff.status.toUpperCase()}
+            {diff.status === "different"
+              ? "DIFFERENT"
+              : diff.status.toUpperCase()}
           </span>
         </div>
         <div className="flex flex-col items-start gap-2 min-[460px]:items-end md:gap-2 md:min-w-[320px]">
@@ -1871,7 +2047,9 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
         </div>
       </header>
       {field.description ? (
-        <p className="mt-1 text-xs leading-relaxed text-slate-400">{field.description}</p>
+        <p className="mt-1 text-xs leading-relaxed text-slate-400">
+          {field.description}
+        </p>
       ) : null}
 
       <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -1886,6 +2064,7 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
           className={sidesIdentical ? "md:col-span-2" : undefined}
           structuredMode={structuredMode}
           structuredSchema={field.structuredSchema}
+          rawMode={rawModeActive}
         />
         {!sidesIdentical ? (
           <ValueColumn
@@ -1904,6 +2083,7 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
             options={field.options}
             structuredMode={structuredMode}
             structuredSchema={field.structuredSchema}
+            rawMode={rawModeActive}
           />
         ) : null}
         <ValueColumn
@@ -1911,17 +2091,23 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
           controlType={controlType}
           value={workingValue}
           field={field}
-          onCustomChange={handleCustomChange}
-          onBooleanChange={handleBooleanChange}
-          onNumberChange={handleNumberChange}
-          onListChange={handleListChange}
-          isRemovable={isFallback && entry.leftRaw === undefined && entry.rightRaw === undefined}
+          isRemovable={
+            isFallback &&
+            entry.leftRaw === undefined &&
+            entry.rightRaw === undefined
+          }
           onRemoveCustom={onRemoveCustom}
           fieldKey={key}
           options={field.options}
           className={sidesIdentical ? "md:col-span-1" : undefined}
           structuredMode={structuredMode}
           structuredSchema={field.structuredSchema}
+          rawMode={rawModeActive}
+          onRawChange={rawModeActive ? handleRawChange : undefined}
+          onCustomChange={rawModeActive ? undefined : handleCustomChange}
+          onBooleanChange={rawModeActive ? undefined : handleBooleanChange}
+          onNumberChange={rawModeActive ? undefined : handleNumberChange}
+          onListChange={rawModeActive ? undefined : handleListChange}
         />
       </div>
     </article>
@@ -1946,6 +2132,8 @@ interface ValueColumnProps {
   className?: string;
   structuredMode?: StructuredEditorMode;
   structuredSchema?: StructuredSchema;
+  rawMode?: boolean;
+  onRawChange?: (value: string) => void;
 }
 
 function ValueColumn({
@@ -1966,8 +2154,11 @@ function ValueColumn({
   className,
   structuredMode,
   structuredSchema,
+  rawMode = false,
+  onRawChange,
 }: ValueColumnProps) {
-  const portForwardVariant: PortForwardVariant = field.key === "ipv6_portforward" ? "ipv6" : "ipv4";
+  const portForwardVariant: PortForwardVariant =
+    field.key === "ipv6_portforward" ? "ipv6" : "ipv4";
   const schema = structuredSchema;
   const resolvedStructuredMode: StructuredEditorMode =
     structuredMode ??
@@ -1975,20 +2166,30 @@ function ValueColumn({
       ? schema.kind === "object"
         ? "object"
         : schema.kind === "array" && isStructuredPrimitiveField(schema.items)
-          ? "primitive-array"
-          : "array"
+        ? "primitive-array"
+        : "array"
       : "array");
   const primitiveArraySchema =
-    schema && schema.kind === "array" && isStructuredPrimitiveField(schema.items) ? schema.items : undefined;
+    schema &&
+    schema.kind === "array" &&
+    isStructuredPrimitiveField(schema.items)
+      ? schema.items
+      : undefined;
   const objectSchema =
     schema && schema.kind === "object"
       ? schema
-      : schema && schema.kind === "array" && isStructuredObjectSchemaDefinition(schema.items)
-        ? schema.items
-        : undefined;
+      : schema &&
+        schema.kind === "array" &&
+        isStructuredObjectSchemaDefinition(schema.items)
+      ? schema.items
+      : undefined;
   const editorModeForRecords: "array" | "object" =
-    resolvedStructuredMode === "primitive-array" ? "array" : resolvedStructuredMode;
-  const toStructuredRecords = (input: unknown): Array<Record<string, unknown>> => {
+    resolvedStructuredMode === "primitive-array"
+      ? "array"
+      : resolvedStructuredMode;
+  const toStructuredRecords = (
+    input: unknown,
+  ): Array<Record<string, unknown>> => {
     if (Array.isArray(input)) {
       return input.filter(isPlainObject) as Array<Record<string, unknown>>;
     }
@@ -2003,7 +2204,9 @@ function ValueColumn({
       <span
         className={classNames(
           "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border transition-colors duration-200",
-          checked ? "border-sky-500 bg-sky-500/80" : "border-rose-500 bg-rose-500/30",
+          checked
+            ? "border-sky-500 bg-sky-500/80"
+            : "border-rose-500 bg-rose-500/30",
         )}
       >
         <span
@@ -2025,6 +2228,49 @@ function ValueColumn({
   );
 
   const renderControl = () => {
+    if (rawMode) {
+      if (hint) {
+        return (
+          <div className="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-xs text-slate-500">
+            {hint}
+          </div>
+        );
+      }
+      if (readOnly) {
+        const rawValue = value ?? "";
+        const display =
+          rawValue === null || rawValue === undefined || rawValue === ""
+            ? null
+            : typeof rawValue === "string"
+            ? rawValue
+            : String(rawValue);
+        return (
+          <pre className="max-h-40 overflow-auto rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-200 whitespace-pre">
+            {display === null ? (
+              <span className="text-slate-500">&lt;EMPTY&gt;</span>
+            ) : (
+              display
+            )}
+          </pre>
+        );
+      }
+      const editableRaw =
+        typeof value === "string"
+          ? value
+          : value === null || value === undefined
+          ? ""
+          : String(value);
+      return (
+        <textarea
+          value={editableRaw}
+          onChange={(event) => onRawChange?.(event.target.value)}
+          wrap="off"
+          className="h-32 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          spellCheck={false}
+        />
+      );
+    }
+
     if (readOnly) {
       if (hint) {
         return (
@@ -2044,8 +2290,11 @@ function ValueColumn({
         const items = Array.isArray(value)
           ? (value as string[])
           : typeof value === "string"
-            ? value.split(",").map((part) => part.trim()).filter((part) => part.length > 0)
-            : [];
+          ? value
+              .split(",")
+              .map((part) => part.trim())
+              .filter((part) => part.length > 0)
+          : [];
         return <ListInput value={items} readOnly />;
       }
       if (controlType === "structured") {
@@ -2053,15 +2302,24 @@ function ValueColumn({
           const items = Array.isArray(value)
             ? (value as Array<string | number | boolean>)
             : value == null
-              ? []
-              : [value].filter((item): item is string | number | boolean => typeof item !== "object");
+            ? []
+            : [value].filter(
+                (item): item is string | number | boolean =>
+                  typeof item !== "object",
+              );
           return (
-            <StructuredPrimitiveArrayEditor schema={primitiveArraySchema} values={items} readOnly />
+            <StructuredPrimitiveArrayEditor
+              schema={primitiveArraySchema}
+              values={items}
+              readOnly
+            />
           );
         }
         const records = toStructuredRecords(value);
         const normalisedRecords = objectSchema
-          ? records.map((record) => normaliseRecordWithSchema(record, objectSchema))
+          ? records.map((record) =>
+              normaliseRecordWithSchema(record, objectSchema),
+            )
           : records;
         return (
           <StructuredStringEditor
@@ -2072,7 +2330,12 @@ function ValueColumn({
           />
         );
       }
-      if (controlType === "ip" || controlType === "mac" || controlType === "netmask" || controlType === "hex") {
+      if (
+        controlType === "ip" ||
+        controlType === "mac" ||
+        controlType === "netmask" ||
+        controlType === "hex"
+      ) {
         const display = value == null || value === "" ? "—" : String(value);
         return (
           <div className="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-200">
@@ -2082,7 +2345,13 @@ function ValueColumn({
       }
       if (controlType === "portforward") {
         const rules = Array.isArray(value) ? (value as PortForwardRule[]) : [];
-        return <PortForwardEditor value={rules} variant={portForwardVariant} readOnly />;
+        return (
+          <PortForwardEditor
+            value={rules}
+            variant={portForwardVariant}
+            readOnly
+          />
+        );
       }
       return (
         <pre className="max-h-40 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-200">
@@ -2091,8 +2360,12 @@ function ValueColumn({
               return <span className="text-slate-500">&lt;EMPTY&gt;</span>;
             }
             if (controlType === "select" && options && options.length > 0) {
-              const match = options.find((option) => String(option.value) === String(value));
-              return match ? `${match.label} (${value})` : formatDisplay(value, controlType);
+              const match = options.find(
+                (option) => String(option.value) === String(value),
+              );
+              return match
+                ? `${match.label} (${value})`
+                : formatDisplay(value, controlType);
             }
             return formatDisplay(value, controlType);
           })()}
@@ -2119,7 +2392,9 @@ function ValueColumn({
           <span
             className={classNames(
               "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border transition-colors duration-200 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-500",
-              checked ? "border-sky-500 bg-sky-500/80" : "border-rose-500/60 bg-rose-500/30",
+              checked
+                ? "border-sky-500 bg-sky-500/80"
+                : "border-rose-500/60 bg-rose-500/30",
             )}
           >
             <span
@@ -2148,11 +2423,23 @@ function ValueColumn({
           onCustomChange(next);
         }
       };
-      return <PortForwardEditor value={rules} onChange={handleChange} variant={portForwardVariant} />;
+      return (
+        <PortForwardEditor
+          value={rules}
+          onChange={handleChange}
+          variant={portForwardVariant}
+        />
+      );
     }
 
-    if (controlType === "ip" || controlType === "mac" || controlType === "netmask" || controlType === "hex") {
-      const stringValue = typeof value === "string" ? value : value == null ? "" : String(value);
+    if (
+      controlType === "ip" ||
+      controlType === "mac" ||
+      controlType === "netmask" ||
+      controlType === "hex"
+    ) {
+      const stringValue =
+        typeof value === "string" ? value : value == null ? "" : String(value);
       const placeholderMap = {
         ip: "e.g. 192.168.1.1",
         mac: "e.g. AA:BB:CC:DD:EE:FF",
@@ -2166,7 +2453,9 @@ function ValueColumn({
           <input
             type="text"
             value={stringValue}
-            onChange={(event) => onCustomChange?.(event.target.value.toUpperCase())}
+            onChange={(event) =>
+              onCustomChange?.(event.target.value.toUpperCase())
+            }
             placeholder={placeholder}
             className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
             autoCapitalize="characters"
@@ -2180,7 +2469,9 @@ function ValueColumn({
           <input
             type="text"
             value={stringValue}
-            onChange={(event) => onCustomChange?.(event.target.value.toUpperCase())}
+            onChange={(event) =>
+              onCustomChange?.(event.target.value.toUpperCase())
+            }
             placeholder={placeholder}
             className="w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
             spellCheck={false}
@@ -2188,7 +2479,10 @@ function ValueColumn({
         );
       }
 
-      const inputMode = controlType === "ip" || controlType === "netmask" ? "decimal" : undefined;
+      const inputMode =
+        controlType === "ip" || controlType === "netmask"
+          ? "decimal"
+          : undefined;
       return (
         <input
           type="text"
@@ -2206,8 +2500,11 @@ function ValueColumn({
       const items = Array.isArray(value)
         ? (value as string[])
         : typeof value === "string"
-          ? value.split(",").map((part) => part.trim()).filter((part) => part.length > 0)
-          : [];
+        ? value
+            .split(",")
+            .map((part) => part.trim())
+            .filter((part) => part.length > 0)
+        : [];
       const handleChange = (next: string[]) => {
         if (onListChange) {
           onListChange(next);
@@ -2216,12 +2513,7 @@ function ValueColumn({
         }
       };
 
-      return (
-        <ListInput
-          value={items}
-          onChange={handleChange}
-        />
-      );
+      return <ListInput value={items} onChange={handleChange} />;
     }
 
     if (controlType === "structured") {
@@ -2229,9 +2521,14 @@ function ValueColumn({
         const items = Array.isArray(value)
           ? (value as Array<string | number | boolean>)
           : value == null
-            ? []
-            : [value].filter((item): item is string | number | boolean => typeof item !== "object");
-        const handlePrimitiveChange = (next: Array<string | number | boolean>) => {
+          ? []
+          : [value].filter(
+              (item): item is string | number | boolean =>
+                typeof item !== "object",
+            );
+        const handlePrimitiveChange = (
+          next: Array<string | number | boolean>,
+        ) => {
           onCustomChange?.(next);
         };
         return (
@@ -2244,7 +2541,9 @@ function ValueColumn({
       }
       const records = toStructuredRecords(value);
       const normalisedRecords = objectSchema
-        ? records.map((record) => normaliseRecordWithSchema(record, objectSchema))
+        ? records.map((record) =>
+            normaliseRecordWithSchema(record, objectSchema),
+          )
         : records;
       const handleChange = (next: Array<Record<string, unknown>>) => {
         if (!onCustomChange) return;
@@ -2286,7 +2585,8 @@ function ValueColumn({
         <textarea
           value={value ?? ""}
           onChange={(event) => onCustomChange?.(event.target.value)}
-          className="h-32 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          wrap="off"
+          className="h-32 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
           spellCheck={false}
         />
       );
@@ -2298,10 +2598,10 @@ function ValueColumn({
         value === null || value === undefined
           ? ""
           : typeof value === "number"
-            ? isIntegerField
-              ? String(Math.trunc(value))
-              : String(value)
-            : String(value);
+          ? isIntegerField
+            ? String(Math.trunc(value))
+            : String(value)
+          : String(value);
       const allowedKeys = new Set([
         "Backspace",
         "Delete",
@@ -2316,11 +2616,17 @@ function ValueColumn({
         <input
           type="text"
           value={stringValue}
-          onChange={(event) => onNumberChange?.(event.target.value, controlType)}
+          onChange={(event) =>
+            onNumberChange?.(event.target.value, controlType)
+          }
           onKeyDown={(event) => {
             if (!isIntegerField) return;
             if (allowedKeys.has(event.key)) return;
-            if (event.key === "-" && event.currentTarget.selectionStart === 0 && !event.currentTarget.value.includes("-")) {
+            if (
+              event.key === "-" &&
+              event.currentTarget.selectionStart === 0 &&
+              !event.currentTarget.value.includes("-")
+            ) {
               return;
             }
             if (/^\d$/.test(event.key)) return;
@@ -2354,7 +2660,9 @@ function ValueColumn({
 
   return (
     <div className={classNames("space-y-2", className)}>
-      <div className="text-xs uppercase tracking-wide text-slate-500">{title}</div>
+      <div className="text-xs uppercase tracking-wide text-slate-500">
+        {title}
+      </div>
 
       {renderControl()}
 
