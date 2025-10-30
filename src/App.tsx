@@ -1598,7 +1598,16 @@ export function App() {
       const bytes = encodeCfg(Object.entries(finalEntries), {
         format,
       });
-      const blob = new Blob([bytes], { type: "application/octet-stream" });
+      const offset = bytes.byteOffset;
+      const length = bytes.byteLength;
+      let buffer: ArrayBuffer;
+      if (bytes.buffer instanceof ArrayBuffer) {
+        buffer = bytes.buffer.slice(offset, offset + length);
+      } else {
+        buffer = new ArrayBuffer(length);
+        new Uint8Array(buffer).set(bytes);
+      }
+      const blob = new Blob([buffer], { type: "application/octet-stream" });
       const url = URL.createObjectURL(blob);
       const name =
         leftConfig?.name.replace(/\.cfg$/i, "") ??
@@ -1975,7 +1984,7 @@ export function App() {
                         : null;
                       const pageTitle = page.displayTitle || page.title;
 
-                      const externalLinks: JSX.Element[] = [];
+                      const externalLinks: ReactNode[] = [];
                       if (pagePath) {
                         const sharedLan =
                           leftLanIp && rightLanIp && leftLanIp === rightLanIp

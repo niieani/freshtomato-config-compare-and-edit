@@ -1,8 +1,7 @@
 import { expect, test, describe } from "bun:test";
 import { decodeCfg, encodeCfg } from "./nvram-cfg";
 
-const SAMPLE_CFG =
-  "sample-files/FreshTomato_2025_3~m30A0B0~Netgear_R7000~20251029.cfg";
+const SAMPLE_CFG = "sample-files/sample.cfg";
 
 const loadSample = async () => {
   const file = Bun.file(SAMPLE_CFG);
@@ -16,9 +15,14 @@ describe("decodeCfg", () => {
 
     expect(header).toBe("HDR2");
     expect(typeof salt).toBe("number");
-    expect(fileLength).toBeGreaterThan(entries.mwan_ckdst.length);
-
-    expect(entries.mwan_ckdst).toBe("1.1.1.1,google.com");
+    const mwanCkdst = entries.mwan_ckdst;
+    if (mwanCkdst === undefined) {
+      throw new Error(
+        "Expected entries.mwan_ckdst to be present in sample cfg",
+      );
+    }
+    expect(fileLength).toBeGreaterThan(mwanCkdst.length);
+    expect(mwanCkdst).toBe("1.1.1.1,google.com");
     expect(entries.wan2_dns).toBe("");
     expect(entries.wl_radius_port).toBe("1812");
   });

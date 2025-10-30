@@ -33,7 +33,10 @@ Example:
   process.exit(0);
 }
 
-const toCamelCase = (str: string): string => str.replace(/-([a-z])/g, g => g[1].toUpperCase());
+const toCamelCase = (str: string): string =>
+  str.replace(/-([a-z])/g, (_match: string, char?: string) =>
+    char ? char.toUpperCase() : "",
+  );
 
 const parseValue = (value: string): any => {
   if (value === "true") return true;
@@ -47,8 +50,10 @@ const parseValue = (value: string): any => {
   return value;
 };
 
+type MutableBuildConfig = Partial<Bun.BuildConfig> & Record<string, unknown>;
+
 function parseArgs(): Partial<Bun.BuildConfig> {
-  const config: Partial<Bun.BuildConfig> = {};
+  const config: MutableBuildConfig = {};
   const args = process.argv.slice(2);
 
   for (let i = 0; i < args.length; i++) {
@@ -81,9 +86,14 @@ function parseArgs(): Partial<Bun.BuildConfig> {
     key = toCamelCase(key);
 
     if (key.includes(".")) {
-      const [parentKey, childKey] = key.split(".");
-      config[parentKey] = config[parentKey] || {};
-      config[parentKey][childKey] = parseValue(value);
+      const [parentKey, childKey] = key.split(".", 2);
+      if (!parentKey || !childKey) {
+        continue;
+      }
+      const parentConfig =
+        (config[parentKey] as Record<string, unknown> | undefined) ?? {};
+      parentConfig[childKey] = parseValue(value);
+      config[parentKey] = parentConfig;
     } else {
       config[key] = parseValue(value);
     }
