@@ -1261,6 +1261,10 @@ export function App() {
 
       const filtered = entries.filter((entry) => {
         const isForced = forcedVisibleKey === entry.key;
+        const filterMatches =
+          diffFilter === "all" ? true : entry.diff.status === diffFilter;
+
+        if (!filterMatches) return false;
 
         if (!isForced) {
           const matchesQuery =
@@ -1276,11 +1280,6 @@ export function App() {
               : false);
 
           if (!matchesQuery) return false;
-
-          const filterMatches =
-            diffFilter === "all" ? true : entry.diff.status === diffFilter;
-
-          if (!filterMatches) return false;
 
           if (focusPending) {
             return entry.finalDiff.status !== "same";
