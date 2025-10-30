@@ -1218,8 +1218,9 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
             <p className="text-xs leading-relaxed text-slate-400">{field.description}</p>
           ) : null}
         </div>
-        <div className="flex flex-col items-start gap-2 md:items-end md:gap-2">
-          <div className="flex flex-wrap items-center gap-2 md:justify-end">
+        <div className="flex flex-col items-start gap-2 md:items-end md:gap-2 md:min-w-[320px]">
+          <div className="flex flex-wrap items-center gap-2 md:flex-nowrap md:justify-end">
+            {finalBadge}
             <SelectionChips
               current={selectionValue}
               onSelect={handleSelectOption}
@@ -1227,7 +1228,6 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
               disabledOptions={disabledOptions}
               showEdited={selectionValue === "custom"}
             />
-            {finalBadge}
           </div>
         </div>
       </header>
@@ -2414,6 +2414,15 @@ function SelectionChips({
 
   return (
     <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-950/70 p-1">
+      {showEdited ? (
+        <button
+          type="button"
+          onClick={() => onSelectCustom?.()}
+          className="rounded-full bg-amber-500/20 px-3 py-1 text-[11px] font-semibold text-amber-200 hover:bg-amber-500/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 whitespace-nowrap"
+        >
+          User Provided
+        </button>
+      ) : null}
       {options.map((option) => {
         const active = current === option.value;
         const disabled = disabledOptions?.[option.value] ?? false;
@@ -2425,7 +2434,7 @@ function SelectionChips({
               onSelect?.(option.value);
             }}
             className={classNames(
-              "rounded-full px-3 py-1 text-[11px] font-medium transition",
+              "rounded-full px-3 py-1 text-[11px] font-medium transition whitespace-nowrap",
               disabled
                 ? "cursor-not-allowed text-slate-600"
                 : active
@@ -2438,15 +2447,6 @@ function SelectionChips({
           </button>
         );
       })}
-      {showEdited ? (
-        <button
-          type="button"
-          onClick={() => onSelectCustom?.()}
-          className="rounded-full bg-amber-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-200 hover:bg-amber-500/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
-        >
-          Edited
-        </button>
-      ) : null}
     </div>
   );
 }
