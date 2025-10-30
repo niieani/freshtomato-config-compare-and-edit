@@ -1469,6 +1469,11 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
   const leftValue = coerceDisplayValue(field, entry.leftRaw, controlType);
   const rightValue = coerceDisplayValue(field, entry.rightRaw, controlType);
   const workingValue = coerceDisplayValue(field, entry.workingRaw, controlType);
+  const sidesIdentical =
+    hasRight &&
+    entry.leftRaw !== undefined &&
+    entry.rightRaw !== undefined &&
+    entry.leftRaw === entry.rightRaw;
 
   const selectionValue = selection?.option ?? (entry.leftRaw !== undefined ? "left" : "remove");
   const disabledOptions = {
@@ -1550,6 +1555,7 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
               onSelectCustom={handleSelectEdited}
               disabledOptions={disabledOptions}
               showEdited={selectionValue === "custom"}
+              sidesIdentical={sidesIdentical}
             />
           </div>
         </div>
@@ -1557,25 +1563,32 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
 
       <div className="mt-4 grid gap-3 md:grid-cols-3">
         <ValueColumn
-          title="Left"
+          title={sidesIdentical ? "Left and Right" : "Left"}
           controlType={controlType}
           hint={entry.leftRaw === undefined ? "Not present" : undefined}
           value={leftValue}
           field={field}
           readOnly
           options={field.options}
+          className={sidesIdentical ? "md:col-span-2" : undefined}
         />
-        <ValueColumn
-          title="Right"
-          controlType={controlType}
-          hint={
-            hasRight ? (entry.rightRaw === undefined ? "Not present" : undefined) : "No file loaded"
-          }
-          value={rightValue}
-          field={field}
-          readOnly
-          options={field.options}
-        />
+        {!sidesIdentical ? (
+          <ValueColumn
+            title="Right"
+            controlType={controlType}
+            hint={
+              hasRight
+                ? entry.rightRaw === undefined
+                  ? "Not present"
+                  : undefined
+                : "No file loaded"
+            }
+            value={rightValue}
+            field={field}
+            readOnly
+            options={field.options}
+          />
+        ) : null}
         <ValueColumn
           title="Working"
           controlType={controlType}
@@ -1589,6 +1602,7 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
           onRemoveCustom={onRemoveCustom}
           fieldKey={key}
           options={field.options}
+          className={sidesIdentical ? "md:col-span-1" : undefined}
         />
       </div>
     </article>
@@ -1610,6 +1624,7 @@ interface ValueColumnProps {
   onRemoveCustom?: (key: string) => void;
   fieldKey?: string;
   options?: ResolvedField["options"];
+  className?: string;
 }
 
 function ValueColumn({
@@ -1627,6 +1642,7 @@ function ValueColumn({
   onRemoveCustom,
   fieldKey,
   options,
+  className,
 }: ValueColumnProps) {
   const portForwardVariant: PortForwardVariant = field.key === "ipv6_portforward" ? "ipv6" : "ipv4";
 
@@ -1876,7 +1892,7 @@ function ValueColumn({
   };
 
   return (
-    <div className="space-y-2">
+    <div className={classNames("space-y-2", className)}>
       <div className="text-xs uppercase tracking-wide text-slate-500">{title}</div>
 
       {renderControl()}
@@ -2720,6 +2736,7 @@ interface SelectionChipsProps {
   onSelectCustom?: () => void;
   disabledOptions?: Partial<Record<Exclude<SelectionOption, "custom">, boolean>>;
   showEdited?: boolean;
+  sidesIdentical?: boolean;
 }
 
 function SelectionChips({
@@ -2728,12 +2745,69 @@ function SelectionChips({
   onSelectCustom,
   disabledOptions,
   showEdited,
+  sidesIdentical = false,
 }: SelectionChipsProps) {
-  const options: Array<{ value: Exclude<SelectionOption, "custom">; label: string }> = [
-    { value: "left", label: "Use Left" },
-    { value: "right", label: "Use Right" },
+  const standardOptions: Array<{ value: Exclude<SelectionOption, "custom">; label: string }> = [
+    { value: "left", label: "Keep Left" },
+    { value: "right", label: "Keep Right" },
     { value: "remove", label: "Remove" },
   ];
+
+  const renderOptionButton = (option: { value: Exclude<SelectionOption, "custom">; label: string }) => {
+    const active = current === option.value;
+    const disabled = disabledOptions?.[option.value] ?? false;
+    return (
+      <button
+        key={option.value}
+        onClick={() => {
+          if (disabled) return;
+          onSelect?.(option.value);
+        }}
+        className={classNames(
+          "rounded-full px-3 py-1 text-[11px] font-medium transition whitespace-nowrap",
+          disabled
+            ? "cursor-not-allowed text-slate-600"
+            : active
+              ? "bg-slate-800 text-white"
+              : "text-slate-400 hover:bg-slate-800 hover:text-slate-200",
+        )}
+        disabled={disabled}
+      >
+        {option.label}
+      </button>
+    );
+  };
+
+  const renderUnifiedButton = () => {
+    const leftDisabled = disabledOptions?.left ?? false;
+    const rightDisabled = disabledOptions?.right ?? false;
+    const unifiedDisabled = leftDisabled && rightDisabled;
+    const unifiedActive = current === "left" || current === "right";
+    const targetOption: Exclude<SelectionOption, "custom"> = leftDisabled && !rightDisabled ? "right" : "left";
+
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          if (unifiedDisabled) return;
+          if (targetOption === "left" && leftDisabled) return;
+          if (targetOption === "right" && rightDisabled) return;
+          onSelect?.(targetOption);
+        }}
+        className={classNames(
+          "rounded-full px-3 py-1 text-[11px] font-medium transition whitespace-nowrap",
+          unifiedDisabled
+            ? "cursor-not-allowed text-slate-600"
+            : unifiedActive
+              ? "bg-slate-800 text-white"
+              : "text-slate-400 hover:bg-slate-800 hover:text-slate-200",
+        )}
+        disabled={unifiedDisabled}
+      >
+        Keep Unchanged
+      </button>
+    );
+  };
 
   return (
     <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-950/70 p-1">
@@ -2746,30 +2820,14 @@ function SelectionChips({
           User Provided
         </button>
       ) : null}
-      {options.map((option) => {
-        const active = current === option.value;
-        const disabled = disabledOptions?.[option.value] ?? false;
-        return (
-          <button
-            key={option.value}
-            onClick={() => {
-              if (disabled) return;
-              onSelect?.(option.value);
-            }}
-            className={classNames(
-              "rounded-full px-3 py-1 text-[11px] font-medium transition whitespace-nowrap",
-              disabled
-                ? "cursor-not-allowed text-slate-600"
-                : active
-                  ? "bg-slate-800 text-white"
-                  : "text-slate-400 hover:bg-slate-800 hover:text-slate-200",
-            )}
-            disabled={disabled}
-          >
-            {option.label}
-          </button>
-        );
-      })}
+      {sidesIdentical ? (
+        <>
+          {renderUnifiedButton()}
+          {renderOptionButton({ value: "remove", label: "Remove" })}
+        </>
+      ) : (
+        standardOptions.map(renderOptionButton)
+      )}
     </div>
   );
 }
