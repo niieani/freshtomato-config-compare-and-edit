@@ -42,6 +42,48 @@ interface LoadedConfig {
   loadedAt: string;
 }
 
+const PRIMARY_STORAGE_KEY = "tomato-router:primary";
+const COMPARISON_STORAGE_KEY = "tomato-router:comparison";
+
+function parseStoredConfig(raw: string): LoadedConfig | null {
+  try {
+    const data = JSON.parse(raw) as Partial<LoadedConfig> | null;
+    if (!data || typeof data !== "object") {
+      return null;
+    }
+    const { id, name, size, header, fileLength, entries, loadedAt, salt } = data;
+    if (
+      typeof id !== "string" ||
+      typeof name !== "string" ||
+      typeof size !== "number" ||
+      (header !== "HDR1" && header !== "HDR2") ||
+      typeof fileLength !== "number" ||
+      typeof loadedAt !== "string" ||
+      !entries ||
+      typeof entries !== "object"
+    ) {
+      return null;
+    }
+    const normalised: NvramEntries = {};
+    for (const [key, value] of Object.entries(entries as Record<string, unknown>)) {
+      normalised[key] = typeof value === "string" ? value : value == null ? "" : String(value);
+    }
+    return {
+      id,
+      name,
+      size,
+      header,
+      fileLength,
+      salt: typeof salt === "number" ? salt : undefined,
+      entries: normalised,
+      loadedAt,
+    };
+  } catch (error) {
+    console.warn("Failed to parse stored configuration", error);
+    return null;
+  }
+}
+
 type DiffFilter = "all" | "changed" | "added" | "removed";
 
 interface FieldView {
@@ -371,6 +413,59 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [showScript, setShowScript] = useState(false);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const storedPrimary = localStorage.getItem(PRIMARY_STORAGE_KEY);
+      if (storedPrimary) {
+        const parsedPrimary = parseStoredConfig(storedPrimary);
+        if (parsedPrimary) {
+          setLeftConfig(parsedPrimary);
+        }
+      }
+    } catch (restoreError) {
+      console.warn("Failed to restore primary configuration from storage", restoreError);
+    }
+
+    try {
+      const storedComparison = localStorage.getItem(COMPARISON_STORAGE_KEY);
+      if (storedComparison) {
+        const parsedComparison = parseStoredConfig(storedComparison);
+        if (parsedComparison) {
+          setRightConfig(parsedComparison);
+        }
+      }
+    } catch (restoreError) {
+      console.warn("Failed to restore comparison configuration from storage", restoreError);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (leftConfig) {
+        localStorage.setItem(PRIMARY_STORAGE_KEY, JSON.stringify(leftConfig));
+      } else {
+        localStorage.removeItem(PRIMARY_STORAGE_KEY);
+      }
+    } catch (persistError) {
+      console.warn("Failed to persist primary configuration", persistError);
+    }
+  }, [leftConfig]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (rightConfig) {
+        localStorage.setItem(COMPARISON_STORAGE_KEY, JSON.stringify(rightConfig));
+      } else {
+        localStorage.removeItem(COMPARISON_STORAGE_KEY);
+      }
+    } catch (persistError) {
+      console.warn("Failed to persist comparison configuration", persistError);
+    }
+  }, [rightConfig]);
+
   const handleLoad = useCallback(
     async (file: File, side: "left" | "right") => {
       try {
@@ -390,15 +485,32 @@ export function App() {
     [],
   );
 
-  const handleClear = useCallback((side: "left" | "right") => {
-    if (side === "left") {
-      setLeftConfig(null);
-      setSelections({});
-      setActivePageId(null);
-    } else {
-      setRightConfig(null);
-    }
-  }, []);
+  const handleClear = useCallback(
+    (side: "left" | "right") => {
+      if (side === "left") {
+        if (rightConfig) {
+          const promoted = rightConfig;
+          setLeftConfig(promoted);
+          setRightConfig(null);
+        } else {
+          setLeftConfig(null);
+        }
+        setSelections({});
+        setActivePageId(null);
+      } else {
+        setRightConfig(null);
+      }
+    },
+    [rightConfig],
+  );
+
+  const handleSwap = useCallback(() => {
+    if (!leftConfig || !rightConfig) return;
+    setLeftConfig(rightConfig);
+    setRightConfig(leftConfig);
+    setSelections({});
+    setActivePageId(null);
+  }, [leftConfig, rightConfig]);
 
   useEffect(() => {
     const leftEntries = leftConfig?.entries ?? null;
@@ -723,7 +835,7 @@ export function App() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-[1fr_auto_1fr] md:items-stretch">
             <DropZoneCard
               side="left"
               title="Primary configuration"
@@ -733,6 +845,7 @@ export function App() {
               onFile={(file) => handleLoad(file, "left")}
               onClear={() => handleClear("left")}
             />
+            <SwapButton disabled={!leftConfig || !rightConfig} onSwap={handleSwap} />
             <DropZoneCard
               side="right"
               title="Comparison snapshot"
@@ -973,6 +1086,54 @@ interface DropZoneCardProps {
   onClear: () => void;
 }
 
+interface SwapButtonProps {
+  disabled: boolean;
+  onSwap: () => void;
+}
+
+function SwapButton({ disabled, onSwap }: SwapButtonProps) {
+  return (
+    <div className="flex items-center justify-center">
+      <button
+        type="button"
+        onClick={onSwap}
+        disabled={disabled}
+        aria-label="Swap primary and comparison configurations"
+        className={classNames(
+          "flex h-12 w-12 items-center justify-center rounded-full border transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60",
+          disabled
+            ? "cursor-not-allowed border-slate-800 bg-slate-900/40 text-slate-600"
+            : "border-slate-700 bg-slate-900/70 text-slate-200 hover:border-sky-500/60 hover:text-sky-200",
+        )}
+      >
+        <SwapIcon className="h-5 w-5" />
+      </button>
+    </div>
+  );
+}
+
+function SwapIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={classNames("h-5 w-5", className)}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M7 7h11" />
+      <path d="M18 7l-3-3" />
+      <path d="M18 7l-3 3" />
+      <path d="M17 17H6" />
+      <path d="M6 17l3 3" />
+      <path d="M6 17l3-3" />
+    </svg>
+  );
+}
+
 function DropZoneCard({
   side,
   title,
@@ -1035,6 +1196,32 @@ function DropZoneCard({
         onChange={handleChange}
         disabled={disabled}
       />
+      {config ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onClear();
+          }}
+          aria-label={`Remove ${side === "left" ? "primary" : "comparison"} configuration`}
+          className="absolute right-3 top-3 rounded-full border border-transparent bg-slate-900/80 p-1.5 text-slate-400 transition hover:border-slate-700 hover:bg-slate-800 hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60"
+        >
+          <svg
+            className="h-4 w-4"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4 4l8 8" />
+            <path d="M12 4l-8 8" />
+          </svg>
+        </button>
+      ) : null}
       <div className="flex items-center gap-3">
         <div
           className={classNames(
@@ -1052,19 +1239,7 @@ function DropZoneCard({
 
       {config ? (
         <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3 text-xs text-slate-300">
-          <div className="flex items-center justify-between gap-2">
-            <span className="truncate font-medium text-slate-200">{config.name}</span>
-            <button
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onClear();
-              }}
-              className="rounded-full border border-transparent px-2 py-0.5 text-[11px] text-slate-400 transition hover:border-slate-800 hover:bg-slate-800 hover:text-slate-200"
-            >
-              Clear
-            </button>
-          </div>
+          <div className="truncate font-medium text-slate-200">{config.name}</div>
           <div className="mt-2 grid grid-cols-2 gap-1 leading-relaxed">
             <InfoItem label="Entries" value={Object.keys(config.entries).length.toString()} />
             <InfoItem label="Size" value={formatBytes(config.size)} />
