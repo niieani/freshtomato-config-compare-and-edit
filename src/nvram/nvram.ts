@@ -362,6 +362,21 @@ export const adblock_blacklist: NvramProperty<AdblockBlacklistEntry[]> = {
   page: "advanced-adblock.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        url: { type: "string", label: "URL", defaultValue: "" },
+        description: {
+          type: "string",
+          label: "Description",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -1300,6 +1315,44 @@ export const bwl_rules: NvramProperty<BwlRule[]> = {
   page: "bwlimit.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        target: { type: "string", label: "Target", defaultValue: "" },
+        downloadRate: {
+          type: "integer",
+          label: "Download Rate",
+          defaultValue: 0,
+        },
+        downloadCeil: {
+          type: "integer",
+          label: "Download Ceiling",
+          defaultValue: 0,
+        },
+        uploadRate: {
+          type: "integer",
+          label: "Upload Rate",
+          defaultValue: 0,
+        },
+        uploadCeil: {
+          type: "integer",
+          label: "Upload Ceiling",
+          defaultValue: 0,
+        },
+        priority: { type: "string", label: "Priority", defaultValue: "2" },
+        tcpLimit: { type: "string", label: "TCP Limit", defaultValue: "0" },
+        udpLimit: { type: "string", label: "UDP Limit", defaultValue: "0" },
+        description: {
+          type: "string",
+          label: "Description",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -1542,6 +1595,44 @@ export const cifs: PatternedNvramProperty<{ index: 1 | 2 }, CifsConfig> = {
   page: "admin-cifs.asp",
   type: "structured-string",
   defaultValue: { enabled: false, unc: "", username: "" },
+  structuredSchema: {
+    kind: "object",
+    fields: {
+      enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+      unc: { type: "string", label: "UNC Path", defaultValue: "" },
+      username: { type: "string", label: "Username", defaultValue: "" },
+      password: {
+        type: "string",
+        label: "Password",
+        defaultValue: "",
+        optional: true,
+      },
+      domain: {
+        type: "string",
+        label: "Domain",
+        defaultValue: "",
+        optional: true,
+      },
+      exec: {
+        type: "string",
+        label: "Mount Script",
+        defaultValue: "",
+        optional: true,
+      },
+      netbiosName: {
+        type: "string",
+        label: "NetBIOS Name",
+        defaultValue: "",
+        optional: true,
+      },
+      security: {
+        type: "string",
+        label: "Security",
+        defaultValue: "",
+        optional: true,
+      },
+    },
+  },
   transform: {
     toUi: (value) => {
       const parts = value.split("<");
@@ -1808,6 +1899,14 @@ export const ct_tcp_timeout: NvramProperty<number[]> = {
   page: "advanced-ctnf.asp",
   type: "structured-string",
   defaultValue: [0, 1200, 120, 60, 120, 120, 10, 60, 30, 0],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      type: "integer",
+      label: "Timeout (s)",
+      defaultValue: 0,
+    },
+  },
   transform: {
     toUi: (v) => v.split(" ").map(Number),
     fromUi: (v) => v.join(" "),
@@ -1820,6 +1919,14 @@ export const ct_timeout: NvramProperty<[number, number]> = {
   page: "advanced-ctnf.asp",
   type: "structured-string",
   defaultValue: [600, 30],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      type: "integer",
+      label: "Timeout (s)",
+      defaultValue: 0,
+    },
+  },
   transform: {
     toUi: (v) => v.split(" ").map(Number) as [number, number],
     fromUi: (v) => v.join(" "),
@@ -1833,6 +1940,14 @@ export const ct_udp_timeout: NvramProperty<[number, number]> = {
   page: "advanced-ctnf.asp",
   type: "structured-string",
   defaultValue: [30, 180],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      type: "integer",
+      label: "Timeout (s)",
+      defaultValue: 0,
+    },
+  },
   transform: {
     toUi: (v) => v.split(" ").map(Number) as [number, number],
     fromUi: (v) => v.join(" "),
@@ -2284,6 +2399,26 @@ export const dhcpd_static: NvramProperty<DhcpReservation[]> = {
   page: "basic-static.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        macs: {
+          type: "string",
+          label: "MAC Addresses (comma-separated)",
+          defaultValue: "",
+        },
+        ip: { type: "string", label: "IP Address", defaultValue: "" },
+        hostname: { type: "string", label: "Hostname", defaultValue: "" },
+        arp_bind: {
+          type: "boolean",
+          label: "Static ARP Binding",
+          defaultValue: false,
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -2913,6 +3048,14 @@ export const ftp_limit: NvramProperty<FtpLimit> = {
   page: "nas-ftp.asp",
   type: "structured-string",
   defaultValue: { enabled: false, hits: 3, seconds: 60 },
+  structuredSchema: {
+    kind: "object",
+    fields: {
+      enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+      hits: { type: "integer", label: "Hits", defaultValue: 3 },
+      seconds: { type: "integer", label: "Seconds", defaultValue: 60 },
+    },
+  },
   transform: {
     toUi: (value) => {
       const parts = value.split(",");
@@ -3059,6 +3202,31 @@ export const ftp_users: NvramProperty<FtpUser[]> = {
   page: "nas-ftp.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        username: { type: "string", label: "Username", defaultValue: "" },
+        password_hash: {
+          type: "string",
+          label: "Password Hash",
+          defaultValue: "",
+          optional: true,
+        },
+        access: {
+          type: "string",
+          label: "Access Level",
+          defaultValue: "Read/Write",
+        },
+        root_dir: {
+          type: "string",
+          label: "Root Directory",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -3701,6 +3869,36 @@ export const ipv6_portforward: NvramProperty<Ipv6PortForwardRule[]> = {
   page: "forward-basic-ipv6.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        protocol: { type: "string", label: "Protocol", defaultValue: "3" },
+        srcAddress: {
+          type: "string",
+          label: "Source Address",
+          defaultValue: "",
+        },
+        destAddress: {
+          type: "string",
+          label: "Destination Address",
+          defaultValue: "",
+        },
+        destPorts: {
+          type: "string",
+          label: "Destination Ports",
+          defaultValue: "",
+        },
+        description: {
+          type: "string",
+          label: "Description",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -4081,6 +4279,40 @@ export const lan_access: NvramProperty<LanAccessRule[]> = {
   page: "advanced-access.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        srcBridge: {
+          type: "integer",
+          label: "Source Bridge",
+          defaultValue: 0,
+        },
+        srcAddress: {
+          type: "string",
+          label: "Source Address",
+          defaultValue: "",
+        },
+        dstBridge: {
+          type: "integer",
+          label: "Destination Bridge",
+          defaultValue: 0,
+        },
+        dstAddress: {
+          type: "string",
+          label: "Destination Address",
+          defaultValue: "",
+        },
+        description: {
+          type: "string",
+          label: "Description",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -4726,6 +4958,20 @@ export const ms_dirs: NvramProperty<MediaDir[]> = {
   page: "nas-media.asp",
   type: "structured-string",
   defaultValue: [{ directory: "/mnt", filter: "" }],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        directory: {
+          type: "string",
+          label: "Directory",
+          defaultValue: "",
+        },
+        filter: { type: "string", label: "Filter", defaultValue: "" },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -5780,6 +6026,36 @@ export const nfs_exports: NvramProperty<NfsExportEntry[]> = {
   page: "admin-nfs.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        directory: {
+          type: "string",
+          label: "Directory",
+          defaultValue: "",
+        },
+        ip_subnet: {
+          type: "string",
+          label: "IP/Subnet",
+          defaultValue: "",
+        },
+        access: { type: "string", label: "Access", defaultValue: "rw" },
+        sync: { type: "string", label: "Sync Mode", defaultValue: "sync" },
+        subtree_check: {
+          type: "string",
+          label: "Subtree Check",
+          defaultValue: "subtree_check",
+        },
+        other_options: {
+          type: "string",
+          label: "Other Options",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -6111,6 +6387,52 @@ export const pbr_rules: NvramProperty<PbrRule[]> = {
   page: "advanced-pbr.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        protocol: { type: "integer", label: "Protocol", defaultValue: -2 },
+        srcType: {
+          type: "integer",
+          label: "Source Type",
+          defaultValue: 0,
+        },
+        srcAddr: {
+          type: "string",
+          label: "Source Address",
+          defaultValue: "",
+        },
+        srcPort: {
+          type: "string",
+          label: "Source Port",
+          defaultValue: "",
+        },
+        destType: {
+          type: "integer",
+          label: "Destination Type",
+          defaultValue: 0,
+        },
+        destAddr: {
+          type: "string",
+          label: "Destination Address",
+          defaultValue: "",
+        },
+        destPort: {
+          type: "string",
+          label: "Destination Port",
+          defaultValue: "",
+        },
+        wan: { type: "integer", label: "WAN", defaultValue: 1 },
+        description: {
+          type: "string",
+          label: "Description",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -6209,6 +6531,42 @@ export const portforward: NvramProperty<PortForwardRule[]> = {
   page: "forward-basic.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        protocol: { type: "integer", label: "Protocol", defaultValue: 3 },
+        srcAddr: {
+          type: "string",
+          label: "Source Address",
+          defaultValue: "",
+        },
+        extPorts: {
+          type: "string",
+          label: "External Ports",
+          defaultValue: "",
+        },
+        intPort: {
+          type: "integer",
+          label: "Internal Port",
+          defaultValue: 0,
+          optional: true,
+        },
+        intAddr: {
+          type: "string",
+          label: "Internal Address",
+          defaultValue: "",
+        },
+        description: {
+          type: "string",
+          label: "Description",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -6635,6 +6993,21 @@ export const pptpd_users: NvramProperty<PptpdUser[]> = {
   page: "vpn-pptp-server.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        username: { type: "string", label: "Username", defaultValue: "" },
+        password: {
+          type: "string",
+          label: "Password",
+          defaultValue: "",
+          optional: true,
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -6873,6 +7246,47 @@ export const qos_orules: NvramProperty<QosRule[]> = {
       description: "DNS",
     },
   ],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        addrType: {
+          type: "integer",
+          label: "Address Type",
+          defaultValue: 0,
+        },
+        addr: { type: "string", label: "Address", defaultValue: "" },
+        proto: { type: "integer", label: "Protocol", defaultValue: -1 },
+        portMode: {
+          type: "string",
+          label: "Port Mode",
+          defaultValue: "d",
+        },
+        port: { type: "string", label: "Port", defaultValue: "" },
+        ipp2p: { type: "integer", label: "IPP2P", defaultValue: 0 },
+        layer7: { type: "string", label: "Layer7", defaultValue: "" },
+        transferredStart: {
+          type: "string",
+          label: "Transferred Start",
+          defaultValue: "",
+        },
+        transferredEnd: {
+          type: "string",
+          label: "Transferred End",
+          defaultValue: "",
+          optional: true,
+        },
+        dscp: { type: "string", label: "DSCP", defaultValue: "" },
+        class: { type: "integer", label: "Class", defaultValue: 0 },
+        description: {
+          type: "string",
+          label: "Description",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -7066,6 +7480,28 @@ export const routes_static: NvramProperty<StaticRoute[]> = {
   page: "advanced-routing.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        destination: {
+          type: "string",
+          label: "Destination",
+          defaultValue: "",
+        },
+        gateway: { type: "string", label: "Gateway", defaultValue: "" },
+        netmask: { type: "string", label: "Netmask", defaultValue: "" },
+        metric: { type: "integer", label: "Metric", defaultValue: 0 },
+        interface: { type: "string", label: "Interface", defaultValue: "" },
+        description: {
+          type: "string",
+          label: "Description",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -7234,6 +7670,14 @@ const scheduleProperty = (
   page,
   type: "structured-string",
   defaultValue: { enabled: false, time: 0, days: 0 },
+  structuredSchema: {
+    kind: "object",
+    fields: {
+      enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+      time: { type: "integer", label: "Time", defaultValue: 0 },
+      days: { type: "integer", label: "Days Mask", defaultValue: 0 },
+    },
+  },
   transform: scheduleTransformer,
 });
 
@@ -7642,6 +8086,27 @@ export const smbd_shares: NvramProperty<SambaShare[]> = {
   page: "nas-samba.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        name: { type: "string", label: "Share Name", defaultValue: "" },
+        directory: {
+          type: "string",
+          label: "Directory",
+          defaultValue: "",
+        },
+        description: {
+          type: "string",
+          label: "Description",
+          defaultValue: "",
+        },
+        access: { type: "string", label: "Access", defaultValue: "0" },
+        hidden: { type: "string", label: "Hidden", defaultValue: "0" },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -8173,6 +8638,40 @@ export const tinc_hosts: NvramProperty<TincHost[]> = {
   page: "vpn-tinc.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        connectTo: {
+          type: "boolean",
+          label: "Connect To",
+          defaultValue: false,
+        },
+        name: { type: "string", label: "Name", defaultValue: "" },
+        address: { type: "string", label: "Address", defaultValue: "" },
+        port: {
+          type: "integer",
+          label: "Port",
+          defaultValue: 0,
+          optional: true,
+        },
+        compression: {
+          type: "string",
+          label: "Compression",
+          defaultValue: "0",
+        },
+        subnet: { type: "string", label: "Subnet", defaultValue: "" },
+        rsa_key: { type: "string", label: "RSA Key", defaultValue: "" },
+        ed25519_key: {
+          type: "string",
+          label: "Ed25519 Key",
+          defaultValue: "",
+        },
+        custom: { type: "string", label: "Custom Script", defaultValue: "" },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -8585,6 +9084,31 @@ export const trigforward: NvramProperty<TriggeredForwardRule[]> = {
   page: "forward-triggered.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        protocol: { type: "integer", label: "Protocol", defaultValue: 3 },
+        trigger_ports: {
+          type: "string",
+          label: "Trigger Ports",
+          defaultValue: "",
+        },
+        forwarded_ports: {
+          type: "string",
+          label: "Forwarded Ports",
+          defaultValue: "",
+        },
+        description: {
+          type: "string",
+          label: "Description",
+          defaultValue: "",
+        },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -9990,6 +10514,30 @@ export const vpn_client_routing_val: PatternedNvramProperty<
   page: "vpn-client.asp",
   type: "structured-string",
   defaultValue: "",
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        ruleType: {
+          type: "integer",
+          label: "Rule Type",
+          defaultValue: 1,
+        },
+        match: {
+          type: "string",
+          label: "Match Value",
+          defaultValue: "",
+        },
+        killSwitch: {
+          type: "boolean",
+          label: "Kill Switch",
+          defaultValue: false,
+        },
+      },
+    },
+  },
 };
 
 export const vpn_client_static: PatternedNvramProperty<
@@ -10337,6 +10885,23 @@ export const vpn_server_ccd_val = vpnServerPatternedProperty<
   page: "vpn-server.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        commonName: {
+          type: "string",
+          label: "Common Name",
+          defaultValue: "",
+        },
+        subnet: { type: "string", label: "Subnet", defaultValue: "" },
+        netmask: { type: "string", label: "Netmask", defaultValue: "" },
+        push: { type: "boolean", label: "Push Route", defaultValue: false },
+      },
+    },
+  },
   transform: vpnServerCcdTransformer,
 });
 
@@ -10759,6 +11324,22 @@ export const vpn_server_users_val = vpnServerPatternedProperty<
   page: "vpn-server.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        username: { type: "string", label: "Username", defaultValue: "" },
+        password: {
+          type: "string",
+          label: "Password",
+          defaultValue: "",
+          optional: true,
+        },
+      },
+    },
+  },
   transform: vpnServerUserTransformer,
 });
 
@@ -11836,6 +12417,14 @@ export const wg_peers = wgProperty<string>("peers", {
   type: "structured-string",
   defaultValue: "",
   ui: { label: "Peers" },
+  structuredSchema: {
+    kind: "array",
+    items: {
+      type: "string",
+      label: "Peer Entry",
+      defaultValue: "",
+    },
+  },
 });
 
 export const wg_poll = wgProperty<number>("poll", {
@@ -11939,6 +12528,30 @@ export const wg_routing_val = wgProperty<string>("routing_val", {
   type: "structured-string",
   defaultValue: "",
   ui: { label: "Routing Policy Rules" },
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        enabled: { type: "boolean", label: "Enabled", defaultValue: false },
+        ruleType: {
+          type: "integer",
+          label: "Rule Type",
+          defaultValue: 1,
+        },
+        match: {
+          type: "string",
+          label: "Match Value",
+          defaultValue: "",
+        },
+        killSwitch: {
+          type: "boolean",
+          label: "Kill Switch",
+          defaultValue: false,
+        },
+      },
+    },
+  },
 });
 
 // --- Wireless Patterned Properties ---
@@ -13009,6 +13622,18 @@ export const stubby_resolvers: NvramProperty<StubbyResolver[]> = {
   page: "advanced-dhcpdns.asp",
   type: "structured-string",
   defaultValue: [],
+  structuredSchema: {
+    kind: "array",
+    items: {
+      kind: "object",
+      fields: {
+        ip: { type: "string", label: "IP Address", defaultValue: "" },
+        port: { type: "integer", label: "Port", defaultValue: 853 },
+        domain: { type: "string", label: "Domain", defaultValue: "" },
+        pinset: { type: "string", label: "Pinset", defaultValue: "" },
+      },
+    },
+  },
   transform: {
     toUi: (value) =>
       value
@@ -13084,6 +13709,30 @@ export const ddnsx: PatternedNvramProperty<
     backup_mx: false,
     custom_token: "",
   },
+  structuredSchema: {
+    kind: "object",
+    fields: {
+      service: { type: "string", label: "Service", defaultValue: "" },
+      user_pass: { type: "string", label: "User/Pass", defaultValue: "" },
+      host: { type: "string", label: "Host", defaultValue: "" },
+      wildcard: {
+        type: "boolean",
+        label: "Wildcard",
+        defaultValue: false,
+      },
+      mx: { type: "string", label: "Mail Exchanger", defaultValue: "" },
+      backup_mx: {
+        type: "boolean",
+        label: "Backup MX",
+        defaultValue: false,
+      },
+      custom_token: {
+        type: "string",
+        label: "Custom Token",
+        defaultValue: "",
+      },
+    },
+  },
   transform: {
     toUi: (value: NvramValue): DdnsConfig => {
       const parts = value.split("<");
@@ -13110,4 +13759,3 @@ export const ddnsx: PatternedNvramProperty<
     },
   },
 };
-
