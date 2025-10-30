@@ -131,6 +131,64 @@ const FINAL_STATUS_LABEL: Record<DiffStatus, string> = {
   removed: "REMOVED",
 };
 
+type ValueTone = "left" | "right" | "both" | "custom" | "neutral";
+
+const SURFACE_TONE_CLASSES: Record<ValueTone, string> = {
+  left:
+    "border-sky-200/80 bg-sky-50 dark:border-sky-400/40 dark:bg-sky-500/20",
+  right:
+    "border-rose-200/80 bg-rose-50 dark:border-rose-400/40 dark:bg-rose-500/20",
+  both:
+    "border-violet-200/80 bg-violet-50 dark:border-violet-400/40 dark:bg-violet-500/20",
+  custom:
+    "border-amber-200/80 bg-amber-50 dark:border-amber-400/40 dark:bg-amber-500/20",
+  neutral:
+    "border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950/70",
+};
+
+const CHIP_TONE_BASE_CLASSES: Record<ValueTone, string> = {
+  left:
+    "border border-sky-300 text-sky-700 hover:bg-sky-100 dark:border-sky-500/40 dark:text-sky-200 dark:hover:bg-sky-500/20",
+  right:
+    "border border-rose-300 text-rose-700 hover:bg-rose-100 dark:border-rose-500/40 dark:text-rose-200 dark:hover:bg-rose-500/20",
+  both:
+    "border border-violet-300 text-violet-700 hover:bg-violet-100 dark:border-violet-500/40 dark:text-violet-200 dark:hover:bg-violet-500/20",
+  custom:
+    "border border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-500/40 dark:text-amber-200 dark:hover:bg-amber-500/20",
+  neutral:
+    "border border-slate-300 text-slate-600 hover:bg-slate-200 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800",
+};
+
+const CHIP_TONE_ACTIVE_CLASSES: Record<ValueTone, string> = {
+  left:
+    "bg-sky-200 text-sky-900 shadow-[0_0_0_1px_rgba(56,189,248,0.4)] dark:bg-sky-500/40 dark:text-white dark:shadow-[0_0_0_1px_rgba(56,189,248,0.45)]",
+  right:
+    "bg-rose-200 text-rose-900 shadow-[0_0_0_1px_rgba(244,114,182,0.35)] dark:bg-rose-500/40 dark:text-white dark:shadow-[0_0_0_1px_rgba(244,114,182,0.45)]",
+  both:
+    "bg-violet-200 text-violet-900 shadow-[0_0_0_1px_rgba(196,181,253,0.4)] dark:bg-violet-500/40 dark:text-white dark:shadow-[0_0_0_1px_rgba(167,139,250,0.45)]",
+  custom:
+    "bg-amber-200 text-amber-900 shadow-[0_0_0_1px_rgba(251,191,36,0.35)] dark:bg-amber-500/40 dark:text-white dark:shadow-[0_0_0_1px_rgba(250,204,21,0.45)]",
+  neutral:
+    "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-white",
+};
+
+const DROPZONE_TONE_CLASSES = {
+  left:
+    "border-sky-300/80 bg-sky-50 hover:border-sky-400 hover:bg-sky-100 dark:border-sky-500/40 dark:bg-sky-500/15 dark:hover:border-sky-400/70 dark:hover:bg-sky-500/25",
+  right:
+    "border-rose-300/80 bg-rose-50 hover:border-rose-400 hover:bg-rose-100 dark:border-rose-500/40 dark:bg-rose-500/15 dark:hover:border-rose-400/70 dark:hover:bg-rose-500/25",
+  both:
+    "border-violet-300/80 bg-violet-50 hover:border-violet-400 hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-500/15 dark:hover:border-violet-400/70 dark:hover:bg-violet-500/25",
+} as const;
+
+const LABEL_TONE_CLASSES: Record<ValueTone, string> = {
+  left: "text-sky-700 dark:text-sky-200",
+  right: "text-rose-700 dark:text-rose-200",
+  both: "text-violet-700 dark:text-violet-200",
+  custom: "text-amber-700 dark:text-amber-200",
+  neutral: "text-slate-600 dark:text-slate-500",
+};
+
 type ControlType =
   | "boolean"
   | "select"
@@ -2241,6 +2299,14 @@ function DropZoneCard({
   onClear,
 }: DropZoneCardProps) {
   const [isDragging, setDragging] = useState(false);
+  const tone: ValueTone = side === "left" ? "left" : "right";
+  const dropzoneToneClass =
+    side === "left" ? DROPZONE_TONE_CLASSES.left : DROPZONE_TONE_CLASSES.right;
+  const draggingToneClass =
+    side === "left"
+      ? "border-sky-400/70 bg-sky-100 dark:bg-sky-500/20"
+      : "border-rose-400/70 bg-rose-100 dark:bg-rose-500/20";
+  const infoSurfaceClass = SURFACE_TONE_CLASSES[tone];
 
   const handleDrop = useCallback(
     (event: DragEvent<HTMLLabelElement>) => {
@@ -2279,11 +2345,10 @@ function DropZoneCard({
       }}
       onDrop={handleDrop}
       className={classNames(
-        "group relative flex min-w-0 cursor-pointer flex-col gap-3 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-6 shadow-sm transition dark:border-slate-800 dark:bg-slate-950/70",
-        disabled
-          ? "cursor-not-allowed opacity-40"
-          : "hover:border-sky-500/60 hover:bg-sky-50 dark:hover:bg-slate-900/80",
-        isDragging && !disabled ? "border-sky-400/70 bg-sky-500/10 dark:bg-sky-500/10" : "",
+        "group relative flex min-w-0 cursor-pointer flex-col gap-3 rounded-2xl border border-dashed px-6 py-6 shadow-sm transition",
+        dropzoneToneClass,
+        disabled ? "cursor-not-allowed opacity-40" : null,
+        isDragging && !disabled ? draggingToneClass : null,
       )}
     >
       <input
@@ -2324,10 +2389,10 @@ function DropZoneCard({
       <div className="flex items-center gap-3">
         <div
           className={classNames(
-            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-white text-sm font-semibold uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400",
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-sm font-semibold uppercase tracking-wide",
             side === "left"
-              ? "border-sky-500/50 text-sky-600 dark:text-sky-300"
-              : "border-emerald-500/50 text-emerald-600 dark:text-emerald-300",
+              ? "border-sky-400/60 bg-sky-100 text-sky-700 dark:border-sky-400/50 dark:bg-sky-500/25 dark:text-sky-200"
+              : "border-rose-400/60 bg-rose-100 text-rose-700 dark:border-rose-400/50 dark:bg-rose-500/25 dark:text-rose-200",
           )}
         >
           {side === "left" ? "L" : "R"}
@@ -2343,7 +2408,12 @@ function DropZoneCard({
       </div>
 
       {config ? (
-        <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+        <div
+          className={classNames(
+            "min-w-0 rounded-xl border p-3 text-xs text-slate-600 dark:text-slate-300",
+            infoSurfaceClass,
+          )}
+        >
           <div className="w-full truncate font-medium text-slate-900 dark:text-slate-200">
             {config.name}
           </div>
@@ -2368,7 +2438,12 @@ function DropZoneCard({
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-5 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-400">
+        <div
+          className={classNames(
+            "rounded-xl border px-4 py-5 text-center text-sm text-slate-600 dark:text-slate-400",
+            infoSurfaceClass,
+          )}
+        >
           Drop file here or click to browse
         </div>
       )}
@@ -2465,6 +2540,19 @@ function FieldCard({
     entry.leftRaw !== undefined &&
     entry.rightRaw !== undefined &&
     entry.leftRaw === entry.rightRaw;
+  const workingMatchesLeft =
+    entry.leftRaw !== undefined && entry.workingRaw === entry.leftRaw;
+  const workingMatchesRight =
+    entry.rightRaw !== undefined && entry.workingRaw === entry.rightRaw;
+  const workingTone: ValueTone = workingMatchesLeft && workingMatchesRight
+    ? "both"
+    : workingMatchesLeft
+    ? "left"
+    : workingMatchesRight
+    ? "right"
+    : entry.workingRaw !== undefined && entry.workingRaw !== null && entry.workingRaw !== ""
+    ? "custom"
+    : "neutral";
 
   const selectionValue =
     selection?.option ?? (entry.leftRaw !== undefined ? "left" : "remove");
@@ -2651,6 +2739,7 @@ function FieldCard({
           structuredMode={structuredMode}
           structuredSchema={field.structuredSchema}
           rawMode={rawModeActive}
+          tone={sidesIdentical ? "both" : "left"}
         />
         {!sidesIdentical ? (
           <ValueColumn
@@ -2670,6 +2759,7 @@ function FieldCard({
             structuredMode={structuredMode}
             structuredSchema={field.structuredSchema}
             rawMode={rawModeActive}
+            tone="right"
           />
         ) : null}
         <ValueColumn
@@ -2694,6 +2784,7 @@ function FieldCard({
           onBooleanChange={rawModeActive ? undefined : handleBooleanChange}
           onNumberChange={rawModeActive ? undefined : handleNumberChange}
           onListChange={rawModeActive ? undefined : handleListChange}
+          tone={workingTone}
         />
       </div>
     </article>
@@ -2720,6 +2811,7 @@ interface ValueColumnProps {
   structuredSchema?: StructuredSchema;
   rawMode?: boolean;
   onRawChange?: (value: string) => void;
+  tone?: ValueTone;
 }
 
 function ValueColumn({
@@ -2742,6 +2834,7 @@ function ValueColumn({
   structuredSchema,
   rawMode = false,
   onRawChange,
+  tone = "neutral",
 }: ValueColumnProps) {
   const portForwardVariant: PortForwardVariant =
     field.key === "ipv6_portforward" ? "ipv6" : "ipv4";
@@ -2755,6 +2848,13 @@ function ValueColumn({
         ? "primitive-array"
         : "array"
       : "array");
+  const surfaceToneClass = SURFACE_TONE_CLASSES[tone] ?? SURFACE_TONE_CLASSES.neutral;
+  const makeSurfaceClass = (
+    ...extras: Array<string | false | null | undefined>
+  ) => classNames("rounded-xl border px-3 py-2", surfaceToneClass, ...extras);
+  const makeInputClass = (
+    ...extras: Array<string | false | null | undefined>
+  ) => classNames("w-full rounded-xl border px-3 py-2", surfaceToneClass, ...extras);
   const primitiveArraySchema =
     schema &&
     schema.kind === "array" &&
@@ -2817,7 +2917,11 @@ function ValueColumn({
     if (rawMode) {
       if (hint) {
         return (
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-xs text-slate-600 dark:text-slate-500">
+          <div
+            className={makeSurfaceClass(
+              "text-xs text-slate-600 dark:text-slate-500",
+            )}
+          >
             {hint}
           </div>
         );
@@ -2831,7 +2935,11 @@ function ValueColumn({
             ? rawValue
             : String(rawValue);
         return (
-          <pre className="max-h-40 overflow-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-700 dark:text-slate-200 whitespace-pre">
+          <pre
+            className={makeSurfaceClass(
+              "max-h-40 overflow-auto font-mono text-sm text-slate-700 dark:text-slate-200 whitespace-pre",
+            )}
+          >
             {display === null ? (
               <span className="text-slate-600 dark:text-slate-500">&lt;EMPTY&gt;</span>
             ) : (
@@ -2851,7 +2959,9 @@ function ValueColumn({
           value={editableRaw}
           onChange={(event) => onRawChange?.(event.target.value)}
           wrap="off"
-          className="h-32 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className={makeInputClass(
+            "h-32 font-mono text-sm text-slate-800 dark:text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40",
+          )}
           spellCheck={false}
         />
       );
@@ -2860,14 +2970,18 @@ function ValueColumn({
     if (readOnly) {
       if (hint) {
         return (
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-xs text-slate-600 dark:text-slate-500">
+          <div
+            className={makeSurfaceClass(
+              "text-xs text-slate-600 dark:text-slate-500",
+            )}
+          >
             {hint}
           </div>
         );
       }
       if (controlType === "boolean") {
         return (
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2">
+          <div className={makeSurfaceClass()}>
             {renderBooleanVisual(Boolean(value))}
           </div>
         );
@@ -2881,7 +2995,7 @@ function ValueColumn({
               .map((part) => part.trim())
               .filter((part) => part.length > 0)
           : [];
-        return <ListInput value={items} readOnly />;
+        return <ListInput value={items} readOnly tone={tone} />;
       }
       if (controlType === "structured") {
         if (primitiveArraySchema) {
@@ -2898,6 +3012,7 @@ function ValueColumn({
               schema={primitiveArraySchema}
               values={items}
               readOnly
+              tone={tone}
             />
           );
         }
@@ -2913,6 +3028,7 @@ function ValueColumn({
             readOnly
             mode={editorModeForRecords}
             schema={schema}
+            tone={tone}
           />
         );
       }
@@ -2924,7 +3040,11 @@ function ValueColumn({
       ) {
         const display = value == null || value === "" ? "—" : String(value);
         return (
-          <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-sm text-slate-700 dark:text-slate-200">
+          <div
+            className={makeSurfaceClass(
+              "text-sm text-slate-700 dark:text-slate-200",
+            )}
+          >
             <code className="font-mono text-slate-800 dark:text-slate-100">{display}</code>
           </div>
         );
@@ -2936,11 +3056,16 @@ function ValueColumn({
             value={rules}
             variant={portForwardVariant}
             readOnly
+            tone={tone}
           />
         );
       }
       return (
-        <pre className="max-h-40 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-700 dark:text-slate-200">
+        <pre
+          className={makeSurfaceClass(
+            "max-h-40 overflow-y-auto font-mono text-sm text-slate-700 dark:text-slate-200",
+          )}
+        >
           {(() => {
             if (value === null || value === undefined || value === "") {
               return <span className="text-slate-600 dark:text-slate-500">&lt;EMPTY&gt;</span>;
@@ -2967,7 +3092,9 @@ function ValueColumn({
         value === "true" ||
         (typeof value === "string" && value.toLowerCase?.() === "on");
       return (
-        <label className="inline-flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2">
+        <label
+          className={makeSurfaceClass("inline-flex items-center gap-3")}
+        >
           <input
             type="checkbox"
             checked={checked}
@@ -3014,6 +3141,7 @@ function ValueColumn({
           value={rules}
           onChange={handleChange}
           variant={portForwardVariant}
+          tone={tone}
         />
       );
     }
@@ -3043,7 +3171,9 @@ function ValueColumn({
               onCustomChange?.(event.target.value.toUpperCase())
             }
             placeholder={placeholder}
-            className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className={makeInputClass(
+              "font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40",
+            )}
             autoCapitalize="characters"
             spellCheck={false}
           />
@@ -3059,7 +3189,9 @@ function ValueColumn({
               onCustomChange?.(event.target.value.toUpperCase())
             }
             placeholder={placeholder}
-            className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className={makeInputClass(
+              "font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40",
+            )}
             spellCheck={false}
           />
         );
@@ -3075,7 +3207,9 @@ function ValueColumn({
           value={stringValue}
           onChange={(event) => onCustomChange?.(event.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className={makeInputClass(
+            "font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40",
+          )}
           inputMode={inputMode}
           spellCheck={false}
         />
@@ -3099,7 +3233,7 @@ function ValueColumn({
         }
       };
 
-      return <ListInput value={items} onChange={handleChange} />;
+      return <ListInput value={items} onChange={handleChange} tone={tone} />;
     }
 
     if (controlType === "structured") {
@@ -3122,6 +3256,7 @@ function ValueColumn({
             schema={primitiveArraySchema}
             values={items}
             onChange={handlePrimitiveChange}
+            tone={tone}
           />
         );
       }
@@ -3146,6 +3281,7 @@ function ValueColumn({
           onChange={handleChange}
           mode={editorModeForRecords}
           schema={schema}
+          tone={tone}
         />
       );
     }
@@ -3155,7 +3291,9 @@ function ValueColumn({
         <select
           value={value ?? ""}
           onChange={(event) => onCustomChange?.(event.target.value)}
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className={makeInputClass(
+            "text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40",
+          )}
         >
           {options.map((option) => (
             <option key={String(option.value)} value={String(option.value)}>
@@ -3172,7 +3310,9 @@ function ValueColumn({
           value={value ?? ""}
           onChange={(event) => onCustomChange?.(event.target.value)}
           wrap="off"
-          className="h-32 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className={makeInputClass(
+            "h-32 font-mono text-sm text-slate-800 dark:text-slate-100 whitespace-pre overflow-auto focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40",
+          )}
           spellCheck={false}
         />
       );
@@ -3228,7 +3368,9 @@ function ValueColumn({
           autoComplete="off"
           spellCheck={false}
           pattern={isIntegerField ? "^-?[0-9]*$" : undefined}
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className={makeInputClass(
+            "font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40",
+          )}
         />
       );
     }
@@ -3238,7 +3380,9 @@ function ValueColumn({
         type="text"
         value={value ?? ""}
         onChange={(event) => onCustomChange?.(event.target.value)}
-        className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+        className={makeInputClass(
+          "font-mono text-sm text-slate-800 dark:text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40",
+        )}
         spellCheck={false}
       />
     );
@@ -3246,7 +3390,12 @@ function ValueColumn({
 
   return (
     <div className={classNames("space-y-2", className)}>
-      <div className="text-xs uppercase tracking-wide text-slate-600 dark:text-slate-500">
+      <div
+        className={classNames(
+          "text-xs uppercase tracking-wide",
+          LABEL_TONE_CLASSES[tone] ?? LABEL_TONE_CLASSES.neutral,
+        )}
+      >
         {title}
       </div>
 
@@ -3268,9 +3417,10 @@ interface ListInputProps {
   value: ReadonlyArray<string>;
   onChange?: (next: string[]) => void;
   readOnly?: boolean;
+  tone?: ValueTone;
 }
 
-function ListInput({ value, onChange, readOnly }: ListInputProps) {
+function ListInput({ value, onChange, readOnly, tone = "neutral" }: ListInputProps) {
   const [draft, setDraft] = useState("");
   const items = useMemo(
     () =>
@@ -3280,6 +3430,7 @@ function ListInput({ value, onChange, readOnly }: ListInputProps) {
     [value],
   );
   const canEdit = Boolean(onChange) && !readOnly;
+  const toneClass = SURFACE_TONE_CLASSES[tone] ?? SURFACE_TONE_CLASSES.neutral;
 
   const commitDraft = () => {
     if (!canEdit) return;
@@ -3309,7 +3460,8 @@ function ListInput({ value, onChange, readOnly }: ListInputProps) {
     <div className="flex w-full flex-col gap-2">
       <div
         className={classNames(
-          "flex w-full min-h-[42px] flex-wrap items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2",
+          "flex w-full min-h-[42px] flex-wrap items-center gap-2 rounded-xl border px-3 py-2",
+          toneClass,
           items.length === 0 ? "text-xs text-slate-600 dark:text-slate-500" : undefined,
         )}
       >
@@ -3344,7 +3496,10 @@ function ListInput({ value, onChange, readOnly }: ListInputProps) {
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Add value"
-            className="min-w-0 flex-1 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 px-3 py-2 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+            className={classNames(
+              "min-w-0 flex-1 rounded-xl border px-3 py-2 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40",
+              toneClass,
+            )}
           />
           <button
             type="button"
@@ -3366,9 +3521,10 @@ interface StructuredStringEditorProps {
   schema?: StructuredSchema;
   onChange?: (next: Array<Record<string, unknown>>) => void;
   readOnly?: boolean;
+  tone?: ValueTone;
 }
 
-function StructuredStringEditor({ value, onChange, readOnly, mode = "array", schema }: StructuredStringEditorProps) {
+function StructuredStringEditor({ value, onChange, readOnly, mode = "array", schema, tone = "neutral" }: StructuredStringEditorProps) {
   const objectSchema =
     schema && schema.kind === "object"
       ? schema
@@ -3387,6 +3543,10 @@ function StructuredStringEditor({ value, onChange, readOnly, mode = "array", sch
     return objectSchema ? list.map((entry) => normaliseRecordWithSchema(entry, objectSchema)) : list;
   }, [mode, objectSchema, value]);
   const canEdit = Boolean(onChange) && !readOnly;
+  const toneClass = SURFACE_TONE_CLASSES[tone] ?? SURFACE_TONE_CLASSES.neutral;
+  const surfaceClass = (
+    ...extra: Array<string | false | null | undefined>
+  ) => classNames("rounded-xl border px-3 py-2", toneClass, ...extra);
 
   const fieldTypes = useMemo(() => {
     const map = new Map<string, StructuredFieldType>();
@@ -3473,7 +3633,11 @@ function StructuredStringEditor({ value, onChange, readOnly, mode = "array", sch
   if (!records.length) {
     return (
       <div className="space-y-3">
-        <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/40 px-3 py-4 text-center text-sm text-slate-600 dark:text-slate-400">
+        <div
+          className={surfaceClass(
+            "border-dashed px-3 py-4 text-center text-sm text-slate-600 dark:text-slate-400",
+          )}
+        >
           {canEdit
             ? "No entries available. Add one to define structured data."
             : "No entries available."}
@@ -3501,7 +3665,9 @@ function StructuredStringEditor({ value, onChange, readOnly, mode = "array", sch
         {records.map((record, index) => (
           <div
             key={`structured-ro-${index}`}
-            className="space-y-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/70 p-3 text-sm text-slate-700 dark:text-slate-200"
+            className={surfaceClass(
+              "space-y-2 text-sm text-slate-700 dark:text-slate-200",
+            )}
           >
             {mode === "array" ? (
               <div className="flex items-center justify-between text-xs uppercase tracking-wide text-slate-600 dark:text-slate-400">
@@ -3540,6 +3706,7 @@ function StructuredStringEditor({ value, onChange, readOnly, mode = "array", sch
           onChange={(nextRecord) => handleRecordChange(index, nextRecord)}
           onRemove={mode === "array" ? () => handleRecordRemove(index) : undefined}
           showHeader={mode === "array"}
+          tone={tone}
         />
       ))}
       {canAddMoreRecords ? (
@@ -3565,6 +3732,7 @@ interface StructuredRecordEditorProps {
   onChange: (next: Record<string, unknown>) => void;
   onRemove?: () => void;
   showHeader?: boolean;
+  tone?: ValueTone;
 }
 
 function StructuredRecordEditor({
@@ -3577,11 +3745,16 @@ function StructuredRecordEditor({
   onChange,
   onRemove,
   showHeader = true,
+  tone = "neutral",
 }: StructuredRecordEditorProps) {
   const [newFieldKey, setNewFieldKey] = useState("");
   const [newFieldType, setNewFieldType] = useState<StructuredFieldType>("string");
   const [newFieldValue, setNewFieldValue] = useState("");
   const [newFieldBoolean, setNewFieldBoolean] = useState(false);
+  const toneClass = SURFACE_TONE_CLASSES[tone] ?? SURFACE_TONE_CLASSES.neutral;
+  const surfaceClass = (
+    ...extra: Array<string | false | null | undefined>
+  ) => classNames("rounded-xl border px-3 py-2", toneClass, ...extra);
 
   const keys = useMemo(() => {
     if (schema) {
@@ -3655,7 +3828,8 @@ function StructuredRecordEditor({
   };
 
   return (
-    <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-slate-950/30">
+    <div className={surfaceClass("space-y-4 shadow-sm shadow-slate-200/60 dark:shadow-slate-950/30")}
+    >
       {(showHeader || onRemove) && (
         <header className="flex flex-wrap items-center justify-between gap-3">
           {showHeader ? (
@@ -3814,12 +3988,20 @@ interface StructuredPrimitiveArrayEditorProps {
   values: ReadonlyArray<string | number | boolean>;
   onChange?: (next: Array<string | number | boolean>) => void;
   readOnly?: boolean;
+  tone?: ValueTone;
 }
 
-function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: StructuredPrimitiveArrayEditorProps) {
+function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly, tone = "neutral" }: StructuredPrimitiveArrayEditorProps) {
   const canEdit = Boolean(onChange) && !readOnly;
   const items = Array.isArray(values) ? values : [];
   const label = schema.label ?? "Value";
+  const toneClass = SURFACE_TONE_CLASSES[tone] ?? SURFACE_TONE_CLASSES.neutral;
+  const surfaceClass = (
+    ...extra: Array<string | false | null | undefined>
+  ) => classNames("rounded-xl border px-3 py-2", toneClass, ...extra);
+  const inputToneClass = (
+    ...extra: Array<string | false | null | undefined>
+  ) => classNames("rounded-lg border px-3 py-2", toneClass, ...extra);
 
   const handleStringChange = (index: number, raw: string) => {
     if (!onChange) return;
@@ -3867,7 +4049,11 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
   if (!canEdit) {
     if (items.length === 0) {
       return (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400">
+        <div
+          className={surfaceClass(
+            "border-dashed px-3 py-4 text-center text-sm text-slate-600 dark:text-slate-400",
+          )}
+        >
           No entries available.
         </div>
       );
@@ -3877,7 +4063,9 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
         {items.map((value, index) => (
           <div
             key={`primitive-ro-${index}`}
-            className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-200"
+            className={surfaceClass(
+              "flex items-center justify-between text-sm text-slate-700 dark:text-slate-200",
+            )}
           >
             <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
               {label} {index + 1}
@@ -3893,7 +4081,11 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
     <div className="space-y-3">
       <div className="space-y-2">
         {items.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400">
+          <div
+            className={surfaceClass(
+              "border-dashed px-3 py-4 text-center text-sm text-slate-600 dark:text-slate-400",
+            )}
+          >
             No entries available. Add one to get started.
           </div>
         ) : (
@@ -3902,7 +4094,9 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
               return (
                 <div
                   key={`primitive-${index}`}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-950/70"
+                  className={surfaceClass(
+                    "flex items-center justify-between gap-3",
+                  )}
                 >
                   <label className="flex flex-1 items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
                     <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -3929,7 +4123,7 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
               return (
                 <div
                   key={`primitive-${index}`}
-                  className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-950/70"
+                  className={surfaceClass("flex items-center gap-3")}
                 >
                   <div className="flex flex-1 flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
                     <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -3939,7 +4133,9 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
                       type="number"
                       value={typeof value === "number" && Number.isFinite(value) ? value : ""}
                       onChange={(event) => handleNumberChange(index, event.target.value)}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
+                      className={inputToneClass(
+                        "text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:text-slate-100",
+                      )}
                     />
                   </div>
                   <button
@@ -3956,7 +4152,7 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
             return (
               <div
                 key={`primitive-${index}`}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-950/70"
+                className={surfaceClass("flex items-center gap-3")}
               >
                 <div className="flex flex-1 flex-col gap-1 text-xs text-slate-600 dark:text-slate-300">
                   <span className="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
@@ -3966,7 +4162,9 @@ function StructuredPrimitiveArrayEditor({ schema, values, onChange, readOnly }: 
                     type="text"
                     value={typeof value === "string" ? value : ""}
                     onChange={(event) => handleStringChange(index, event.target.value)}
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-100"
+                    className={inputToneClass(
+                      "text-sm text-slate-800 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 dark:text-slate-100",
+                    )}
                   />
                 </div>
                 <button
@@ -3999,12 +4197,17 @@ interface PortForwardEditorProps {
   onChange?: (next: PortForwardRule[]) => void;
   readOnly?: boolean;
   variant: PortForwardVariant;
+  tone?: ValueTone;
 }
 
-function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEditorProps) {
+function PortForwardEditor({ value, onChange, readOnly, variant, tone = "neutral" }: PortForwardEditorProps) {
   const rules = Array.isArray(value) ? [...value] : [];
   const canEdit = Boolean(onChange) && !readOnly;
   const isIpv6 = variant === "ipv6";
+  const toneClass = SURFACE_TONE_CLASSES[tone] ?? SURFACE_TONE_CLASSES.neutral;
+  const surfaceClass = (
+    ...extra: Array<string | false | null | undefined>
+  ) => classNames("rounded-xl border px-3 py-2", toneClass, ...extra);
 
   const protocolOptions = isIpv6
     ? [
@@ -4064,7 +4267,9 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
   const renderIpv4ReadOnly = (rule: PortForwardIpv4Rule, index: number) => (
     <div
       key={`pfipv4-ro-${index}`}
-      className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-200"
+      className={surfaceClass(
+        "space-y-2 text-sm text-slate-700 dark:text-slate-200",
+      )}
     >
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-600 dark:text-slate-400">
         <span>Rule {index + 1}</span>
@@ -4102,7 +4307,9 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
   const renderIpv4Editable = (rule: PortForwardIpv4Rule, index: number) => (
     <div
       key={`pfipv4-edit-${index}`}
-      className="space-y-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-slate-950/30"
+      className={surfaceClass(
+        "space-y-4 shadow-sm shadow-slate-200/60 dark:shadow-slate-950/30",
+      )}
     >
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -4215,7 +4422,9 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
   const renderIpv6ReadOnly = (rule: PortForwardIpv6Rule, index: number) => (
     <div
       key={`pfipv6-ro-${index}`}
-      className="space-y-2 rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-200"
+      className={surfaceClass(
+        "space-y-2 text-sm text-slate-700 dark:text-slate-200",
+      )}
     >
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs uppercase tracking-wide text-slate-600 dark:text-slate-400">
         <span>Rule {index + 1}</span>
@@ -4249,7 +4458,9 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
   const renderIpv6Editable = (rule: PortForwardIpv6Rule, index: number) => (
     <div
       key={`pfipv6-edit-${index}`}
-      className="space-y-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/60 dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-slate-950/30"
+      className={surfaceClass(
+        "space-y-4 shadow-sm shadow-slate-200/60 dark:shadow-slate-950/30",
+      )}
     >
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -4341,7 +4552,11 @@ function PortForwardEditor({ value, onChange, readOnly, variant }: PortForwardEd
   return (
     <div className="space-y-3">
       {rules.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-center text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950/40 dark:text-slate-400">
+        <div
+          className={surfaceClass(
+            "border-dashed px-3 py-4 text-center text-sm text-slate-600 dark:text-slate-400",
+          )}
+        >
           {canEdit
             ? "No port forwarding rules. Add one to get started."
             : "No port forwarding rules configured."}
@@ -4394,10 +4609,17 @@ function SelectionChips({
     { value: "right", label: "Keep Right" },
     { value: "remove", label: "Remove" },
   ];
+  const optionToneMap: Record<Exclude<SelectionOption, "custom">, ValueTone> = {
+    left: "left",
+    right: "right",
+    remove: "neutral",
+  };
+  const disabledToneClass = "cursor-not-allowed text-slate-400 dark:text-slate-600";
 
   const renderOptionButton = (option: { value: Exclude<SelectionOption, "custom">; label: string }) => {
     const active = current === option.value;
     const disabled = disabledOptions?.[option.value] ?? false;
+    const tone = optionToneMap[option.value];
     return (
       <button
         key={option.value}
@@ -4408,10 +4630,10 @@ function SelectionChips({
         className={classNames(
           "rounded-full px-3 py-1 text-[11px] font-medium transition whitespace-nowrap",
           disabled
-            ? "cursor-not-allowed text-slate-400 dark:text-slate-600"
+            ? disabledToneClass
             : active
-              ? "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-white"
-              : "text-slate-600 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200",
+            ? CHIP_TONE_ACTIVE_CLASSES[tone]
+            : CHIP_TONE_BASE_CLASSES[tone],
         )}
         disabled={disabled}
       >
@@ -4426,6 +4648,7 @@ function SelectionChips({
     const unifiedDisabled = leftDisabled && rightDisabled;
     const unifiedActive = current === "left" || current === "right";
     const targetOption: Exclude<SelectionOption, "custom"> = leftDisabled && !rightDisabled ? "right" : "left";
+    const tone: ValueTone = "both";
 
     return (
       <button
@@ -4439,10 +4662,10 @@ function SelectionChips({
         className={classNames(
           "rounded-full px-3 py-1 text-[11px] font-medium transition whitespace-nowrap",
           unifiedDisabled
-            ? "cursor-not-allowed text-slate-400 dark:text-slate-600"
+            ? disabledToneClass
             : unifiedActive
-              ? "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-white"
-              : "text-slate-600 hover:bg-slate-200 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200",
+            ? CHIP_TONE_ACTIVE_CLASSES[tone]
+            : CHIP_TONE_BASE_CLASSES[tone],
         )}
         disabled={unifiedDisabled}
       >
