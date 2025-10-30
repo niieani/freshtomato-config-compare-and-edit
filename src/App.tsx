@@ -723,6 +723,8 @@ export function App() {
     return pages;
   }, [allKeys, diffLeftRight, diffLeftFinal, finalEntries, leftEntries, rightEntries, selections]);
 
+  const [showEmptyPages, setShowEmptyPages] = useState(false);
+
   const filteredPages = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
     const result: Array<{
@@ -730,6 +732,8 @@ export function App() {
       title: string;
       displayTitle: string;
       entries: FieldView[];
+      totalCount: number;
+      pendingCount: number;
       groupKey: string;
       groupLabel: string;
       hasMatches: boolean;
@@ -758,6 +762,11 @@ export function App() {
         : pageId === UNCATEGORISED_PAGE_ID
           ? UNCATEGORISED_PAGE_LABEL
           : prettifyPageId(pageId);
+      const totalCount = entries.length;
+      const pendingCount = entries.reduce(
+        (count, entry) => count + (entry.finalDiff.status !== "unchanged" ? 1 : 0),
+        0,
+      );
 
       const filtered = entries.filter((entry) => {
         const matchesQuery =
@@ -784,27 +793,19 @@ export function App() {
       const prefix = `${groupKey}-`;
       const displayTitle = title.startsWith(prefix) ? title.slice(prefix.length) : title;
       const sortOrder = variantMeta?.order ?? 0;
+      const hasMatches = filtered.length > 0;
 
-      if (filtered.length > 0) {
+      if (hasMatches || pageId === activePageId || showEmptyPages) {
         result.push({
           id: pageId,
           title,
           displayTitle: displayTitle || title,
           entries: filtered,
+          totalCount,
+          pendingCount,
           groupKey,
           groupLabel,
-          hasMatches: true,
-          sortOrder,
-        });
-      } else if (pageId === activePageId) {
-        result.push({
-          id: pageId,
-          title,
-          displayTitle: displayTitle || title,
-          entries: [],
-          groupKey,
-          groupLabel,
-          hasMatches: false,
+          hasMatches,
           sortOrder,
         });
       }
@@ -827,7 +828,7 @@ export function App() {
       return a.title.localeCompare(b.title);
     });
     return result;
-  }, [activePageId, diffFilter, fieldViews, focusPending, searchTerm]);
+  }, [activePageId, diffFilter, fieldViews, focusPending, searchTerm, showEmptyPages]);
 
   const groupedPages = useMemo(() => {
     const groups = new Map<
@@ -1047,7 +1048,38 @@ export function App() {
       <div className="flex flex-1 overflow-hidden">
         <aside className="hidden w-72 shrink-0 border-r border-slate-900 bg-slate-950/60 backdrop-blur md:flex md:flex-col">
           <div className="p-4">
-            <div className="text-xs uppercase tracking-wide text-slate-500">Pages</div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-wide text-slate-500">Pages</span>
+              <button
+                type="button"
+                onClick={() => setShowEmptyPages((prev) => !prev)}
+                className={classNames(
+                  "inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-800 text-slate-500 transition hover:border-slate-700 hover:text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/50",
+                  showEmptyPages ? "border-sky-500/40 bg-sky-500/10 text-sky-300" : "",
+                )}
+                aria-pressed={showEmptyPages}
+                title={showEmptyPages ? "Hide empty pages" : "Show empty pages"}
+              >
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.6}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M4 6h12" />
+                  <path d="M4 10h12" />
+                  <path d="M4 14h8" />
+                  <circle cx="15" cy="14" r="1.2" fill="currentColor" stroke="none" />
+                </svg>
+                <span className="sr-only">
+                  {showEmptyPages ? "Hide empty pages" : "Show empty pages"}
+                </span>
+              </button>
+            </div>
           </div>
           <nav className="flex-1 overflow-y-auto">
             {groupedPages.map((group) => {
@@ -1083,9 +1115,6 @@ export function App() {
                   <div className={classNames("space-y-0.5", collapsed ? "hidden" : "block")}>
                     {group.pages.map((page) => {
                       const isActive = page.id === (selectedPage?.id ?? null);
-                      const pendingCount = page.entries.filter(
-                        (entry) => entry.finalDiff.status !== "unchanged",
-                      ).length;
                       return (
                         <button
                           key={page.id}
@@ -1098,11 +1127,16 @@ export function App() {
                           )}
                         >
                           <span className="flex-1 truncate">{page.displayTitle}</span>
-                          {pendingCount > 0 ? (
-                            <span className="ml-3 inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-sky-500/20 px-2 text-xs text-sky-200">
-                              {pendingCount}
+                          <span className="ml-3 flex items-center gap-1">
+                            {page.pendingCount > 0 ? (
+                              <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-amber-500/20 px-2 text-xs font-medium text-amber-200">
+                                {page.pendingCount}
+                              </span>
+                            ) : null}
+                            <span className="inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-sky-500/10 px-2 text-xs text-sky-300">
+                              {page.totalCount}
                             </span>
-                          ) : null}
+                          </span>
                         </button>
                       );
                     })}
