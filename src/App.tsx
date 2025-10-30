@@ -666,7 +666,30 @@ export function App() {
 
   const filteredPages = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    const result: Array<{ id: string; title: string; entries: FieldView[] }> = [];
+    const result: Array<{
+      id: string;
+      title: string;
+      displayTitle: string;
+      entries: FieldView[];
+      groupKey: string;
+      groupLabel: string;
+      hasMatches: boolean;
+    }> = [];
+
+    const getGroupMeta = (pageId: string, title: string) => {
+      if (pageId === UNCATEGORISED_PAGE_ID) {
+        return {
+          groupKey: "__uncatalogued__",
+          groupLabel: "Uncatalogued",
+        };
+      }
+      const [group] = title.split(/[-_/]/);
+      const key = group || "other";
+      return {
+        groupKey: key,
+        groupLabel: key.toUpperCase(),
+      };
+    };
 
     for (const [pageId, entries] of fieldViews.entries()) {
       const title =
@@ -693,14 +716,102 @@ export function App() {
         return true;
       });
 
+      const { groupKey, groupLabel } = getGroupMeta(pageId, title);
+      const displayTitle =
+        groupKey !== "__uncatalogued__" && title.startsWith(`${groupKey}-`)
+          ? title.slice(groupKey.length + 1)
+          : title;
+
       if (filtered.length > 0) {
-        result.push({ id: pageId, title, entries: filtered });
+        result.push({
+          id: pageId,
+          title,
+          displayTitle: displayTitle || title,
+          entries: filtered,
+          groupKey,
+          groupLabel,
+          hasMatches: true,
+        });
+      } else if (pageId === activePageId) {
+        result.push({
+          id: pageId,
+          title,
+          displayTitle: displayTitle || title,
+          entries: [],
+          groupKey,
+          groupLabel,
+          hasMatches: false,
+        });
       }
     }
 
-    result.sort((a, b) => a.title.localeCompare(b.title));
+    const normaliseGroupKey = (key: string) =>
+      key === "__uncatalogued__" ? "zzzzzzzz" : key;
+
+    result.sort((a, b) => {
+      const groupCompare = normaliseGroupKey(a.groupKey).localeCompare(
+        normaliseGroupKey(b.groupKey),
+      );
+      if (groupCompare !== 0) {
+        return groupCompare;
+      }
+      return a.title.localeCompare(b.title);
+    });
     return result;
-  }, [diffFilter, fieldViews, focusPending, searchTerm]);
+  }, [activePageId, diffFilter, fieldViews, focusPending, searchTerm]);
+
+  const groupedPages = useMemo(() => {
+    const groups = new Map<
+      string,
+      {
+        key: string;
+        label: string;
+        pages: Array<(typeof filteredPages)[number]>;
+        position: number;
+      }
+    >();
+    for (const page of filteredPages) {
+      if (!groups.has(page.groupKey)) {
+        const position = page.groupKey === "__uncatalogued__" ? Number.POSITIVE_INFINITY : groups.size;
+        groups.set(page.groupKey, {
+          key: page.groupKey,
+          label: page.groupLabel,
+          pages: [],
+          position,
+        });
+      }
+      groups.get(page.groupKey)!.pages.push(page);
+    }
+    return Array.from(groups.values()).sort((a, b) => a.position - b.position || a.label.localeCompare(b.label));
+  }, [filteredPages]);
+
+  const selectedPage = activePageId
+    ? filteredPages.find((page) => page.id === activePageId) ?? null
+    : filteredPages[0] ?? null;
+
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setCollapsedGroups((prev) => {
+      const next: Record<string, boolean> = {};
+      for (const group of groupedPages) {
+        const hasActive = group.pages.some((page) => page.id === (selectedPage?.id ?? null));
+        if (hasActive) {
+          next[group.key] = false;
+        } else {
+          next[group.key] = prev[group.key] ?? true;
+        }
+      }
+      return next;
+    });
+  }, [groupedPages, selectedPage?.id]);
+
+  const toggleGroup = useCallback((groupKey: string) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [groupKey]: !prev[groupKey],
+    }));
+  }, []);
 
   useEffect(() => {
     if (activePageId) {
@@ -712,10 +823,6 @@ export function App() {
       setActivePageId(filteredPages[0]!.id);
     }
   }, [activePageId, filteredPages]);
-
-  const selectedPage = activePageId
-    ? filteredPages.find((page) => page.id === activePageId) ?? null
-    : filteredPages[0] ?? null;
 
   const totalPending = diffLeftFinal.entries.filter((entry) => entry.status !== "unchanged").length;
 
@@ -874,29 +981,64 @@ export function App() {
             <div className="text-xs uppercase tracking-wide text-slate-500">Pages</div>
           </div>
           <nav className="flex-1 overflow-y-auto">
-            {filteredPages.map((page) => {
-              const isActive = page.id === (selectedPage?.id ?? null);
-              const pendingCount = page.entries.filter(
-                (entry) => entry.finalDiff.status !== "unchanged",
-              ).length;
+            {groupedPages.map((group) => {
+              const collapsed = collapsedGroups[group.key] ?? false;
+              const activeInGroup = group.pages.some((page) => page.id === (selectedPage?.id ?? null));
               return (
-                <button
-                  key={page.id}
-                  onClick={() => setActivePageId(page.id)}
-                  className={classNames(
-                    "flex w-full items-center justify-between px-4 py-2 text-left text-sm transition",
-                    isActive
-                      ? "bg-slate-900/80 text-white"
-                      : "text-slate-400 hover:bg-slate-900/40 hover:text-slate-200",
-                  )}
-                >
-                  <span className="flex-1 truncate">{page.title}</span>
-                  {pendingCount > 0 ? (
-                    <span className="ml-3 inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-sky-500/20 px-2 text-xs text-sky-200">
-                      {pendingCount}
-                    </span>
-                  ) : null}
-                </button>
+                <div key={group.key} className="pb-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.key)}
+                    className={classNames(
+                      "flex w-full items-center justify-between px-4 py-2 text-left text-[11px] font-semibold uppercase tracking-wide transition",
+                      activeInGroup ? "text-slate-200" : "text-slate-500 hover:text-slate-300",
+                    )}
+                  >
+                    <span>{group.label}</span>
+                    <svg
+                      className={classNames(
+                        "h-4 w-4 transition-transform",
+                        collapsed ? "-rotate-90" : "rotate-0",
+                      )}
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M4 6l4 4 4-4" />
+                    </svg>
+                  </button>
+                  <div className={classNames("space-y-0.5", collapsed ? "hidden" : "block")}>
+                    {group.pages.map((page) => {
+                      const isActive = page.id === (selectedPage?.id ?? null);
+                      const pendingCount = page.entries.filter(
+                        (entry) => entry.finalDiff.status !== "unchanged",
+                      ).length;
+                      return (
+                        <button
+                          key={page.id}
+                          onClick={() => setActivePageId(page.id)}
+                          className={classNames(
+                            "flex w-full items-center justify-between py-2 pl-6 pr-4 text-left text-sm transition",
+                            isActive
+                              ? "bg-slate-900/80 text-white"
+                              : "text-slate-400 hover:bg-slate-900/40 hover:text-slate-200",
+                          )}
+                        >
+                          <span className="flex-1 truncate">{page.displayTitle}</span>
+                          {pendingCount > 0 ? (
+                            <span className="ml-3 inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-sky-500/20 px-2 text-xs text-sky-200">
+                              {pendingCount}
+                            </span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
             {filteredPages.length === 0 ? (
@@ -967,17 +1109,23 @@ export function App() {
                   </button>
                 </div>
 
-                <div className="space-y-3">
-                  {selectedPage.entries.map((entry) => (
-                    <FieldCard
-                      key={entry.key}
-                      entry={entry}
-                      onSelectionChange={handleUpdateSelection}
-                      onRemoveCustom={handleRemoveCustomKey}
-                      hasRight={!!rightConfig}
-                    />
-                  ))}
-                </div>
+                {selectedPage.entries.length > 0 ? (
+                  <div className="space-y-3">
+                    {selectedPage.entries.map((entry) => (
+                      <FieldCard
+                        key={entry.key}
+                        entry={entry}
+                        onSelectionChange={handleUpdateSelection}
+                        onRemoveCustom={handleRemoveCustomKey}
+                        hasRight={!!rightConfig}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-slate-900 bg-slate-900/60 px-4 py-8 text-center text-sm text-slate-400">
+                    No fields match the current filters on this page.
+                  </div>
+                )}
               </section>
             ) : (
               <div className="rounded-xl border border-slate-900 bg-slate-900/50 px-6 py-12 text-center text-slate-400">

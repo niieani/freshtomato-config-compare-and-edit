@@ -27,7 +27,7 @@ export const country_code: PatternedNvramProperty<{ id: 0 | 1 | 2 }, string> = {
   },
   description:
     "Specifies the wireless country code for regulatory compliance, affecting available channels and power levels.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   ui: {
     label: "Country / Region",
@@ -340,7 +340,7 @@ export const country_rev: PatternedNvramProperty<{ id: 0 | 1 | 2 }, number> = {
   },
   description:
     "Specifies the wireless country revision number for regulatory compliance.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "integer",
   defaultValue: 0,
   validation: (value) => (value >= 0 && value <= 999) || "Valid range: 0 - 999",
@@ -359,7 +359,7 @@ export const adblock_blacklist: NvramProperty<AdblockBlacklistEntry[]> = {
   key: "adblock_blacklist",
   description:
     "A list of blacklist URLs used by the Adblock feature. Each entry is a composite string.",
-  page: "advanced-adblock.asp.html",
+  page: "advanced-adblock.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -389,7 +389,7 @@ export const adblock_blacklist_custom: NvramProperty<string> = {
   key: "adblock_blacklist_custom",
   description:
     "Custom, user-defined domain blacklist. Can contain individual domains or paths to external files.",
-  page: "advanced-adblock.asp.html",
+  page: "advanced-adblock.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -400,7 +400,7 @@ export const adblock_blacklist_custom: NvramProperty<string> = {
 export const adblock_enable: NvramProperty<boolean> = {
   key: "adblock_enable",
   description: "Enables or disables the Adblock (DNS filtering) feature.",
-  page: "advanced-adblock.asp.html",
+  page: "advanced-adblock.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -416,7 +416,7 @@ export const adblock_limit: NvramProperty<string> = {
   key: "adblock_limit",
   description:
     "A hard limit in bytes for the generated dnsmasq.adblock file size to prevent excessive memory usage. An empty value resets it to an automatically calculated limit.",
-  page: "advanced-adblock.asp.html",
+  page: "advanced-adblock.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -429,7 +429,7 @@ export const adblock_limit: NvramProperty<string> = {
 export const adblock_logs: NvramProperty<0 | 3 | 4 | 5 | 6 | 7> = {
   key: "adblock_logs",
   description: "Sets the maximum logging level for the Adblock service.",
-  page: "advanced-adblock.asp.html",
+  page: "advanced-adblock.asp",
   type: "enum",
   defaultValue: 3,
   ui: {
@@ -449,7 +449,7 @@ export const adblock_path: NvramProperty<string> = {
   key: "adblock_path",
   description:
     "Optional custom path to save potentially large Adblock files on permanent storage (e.g., USB drive). Defaults to /tmp if empty.",
-  page: "advanced-adblock.asp.html",
+  page: "advanced-adblock.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -463,7 +463,7 @@ export const adblock_whitelist: NvramProperty<string> = {
   key: "adblock_whitelist",
   description:
     "Custom, user-defined domain whitelist. Can contain individual domains or paths to external files.",
-  page: "advanced-adblock.asp.html",
+  page: "advanced-adblock.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -475,7 +475,7 @@ export const bcmnat_disable: NvramProperty<boolean> = {
   key: "bcmnat_disable",
   description:
     "Internal setting to control Broadcom's NAT acceleration. It is linked to CTF (Cut-Through Forwarding) and disabling it is required for QoS and Bandwidth Limiter to function.",
-  page: "advanced-misc.asp.html",
+  page: "advanced-misc.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -488,7 +488,7 @@ export const bcmnat_disable: NvramProperty<boolean> = {
 export const blink_wl: NvramProperty<boolean> = {
   key: "blink_wl",
   description: "Enables blinking for the WiFi LEDs to indicate activity.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "boolean",
   defaultValue: true,
   transform: {
@@ -505,7 +505,7 @@ export const block_wan: NvramProperty<boolean> = {
   key: "block_wan",
   description:
     "Controls whether the router's WAN interface responds to ping (ICMP echo requests). If true (1), pings are blocked.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: true,
   transform: {
@@ -521,7 +521,7 @@ export const block_wan: NvramProperty<boolean> = {
 export const block_wan_limit: NvramProperty<boolean> = {
   key: "block_wan_limit",
   description: "Enables rate limiting for ICMP requests from the WAN.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: true,
   transform: {
@@ -537,7 +537,7 @@ export const block_wan_limit_icmp: NvramProperty<number> = {
   key: "block_wan_limit_icmp",
   description:
     "Specifies the number of ICMP requests per second allowed from the WAN when rate limiting is enabled.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "integer",
   defaultValue: 3,
   validation: (value) =>
@@ -557,7 +557,7 @@ export const boardflags: NvramProperty<string> = {
   key: "boardflags",
   description:
     "A read-only hexadecimal value representing hardware capabilities of the router board, used to determine feature support like VLAN.",
-  page: "advanced-vlan.asp.html",
+  page: "advanced-vlan.asp",
   type: "hex",
 };
 
@@ -565,7 +565,7 @@ export const boardtype: NvramProperty<string> = {
   key: "boardtype",
   description:
     "A read-only hexadecimal value identifying the router's board type.",
-  page: "advanced-vlan.asp.html",
+  page: "advanced-vlan.asp",
   type: "hex",
 };
 
@@ -573,7 +573,7 @@ export const bt_auth: NvramProperty<boolean> = {
   key: "bt_auth",
   description:
     "Enables username/password authentication for the BitTorrent client's web GUI.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: true,
   transform: {
@@ -589,7 +589,7 @@ export const bt_autoadd: NvramProperty<boolean> = {
   key: "bt_autoadd",
   description:
     "Automatically adds .torrent files found in the download directory to the BitTorrent client.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: true,
   transform: {
@@ -605,7 +605,7 @@ export const bt_binary: NvramProperty<"internal" | "optware" | "custom"> = {
   key: "bt_binary",
   description:
     "Specifies the location of the Transmission (BitTorrent) client binaries.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "enum",
   defaultValue: "internal",
   ui: {
@@ -622,7 +622,7 @@ export const bt_binary_custom: NvramProperty<string> = {
   key: "bt_binary_custom",
   description:
     "The custom path to the Transmission binaries, used when 'bt_binary' is set to 'custom'.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "string",
   defaultValue: "/path/to/binaries/directory",
   ui: {
@@ -638,7 +638,7 @@ export const bt_blocklist: NvramProperty<boolean> = {
   key: "bt_blocklist",
   description:
     "Enables the use of a peer blocklist to avoid connecting to malicious or unwanted peers.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -653,7 +653,7 @@ export const bt_blocklist: NvramProperty<boolean> = {
 export const bt_blocklist_url: NvramProperty<string> = {
   key: "bt_blocklist_url",
   description: "The URL from which to download the peer blocklist.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "string",
   defaultValue: "http://list.iblocklist.com/?list=bt_level1",
   ui: {
@@ -669,7 +669,7 @@ export const bt_check_time: NvramProperty<number> = {
   key: "bt_check_time",
   description:
     "The interval in minutes for the keep-alive check to ensure the Transmission daemon is running. 0 disables the check.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "integer",
   defaultValue: 15,
   validation: (value) =>
@@ -683,7 +683,7 @@ export const bt_custom: NvramProperty<string> = {
   key: "bt_custom",
   description:
     "Custom configuration parameters to be added to Transmission's settings.json file.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "string",
   defaultValue: "",
   validation: (value) => {
@@ -738,7 +738,7 @@ export const bt_custom: NvramProperty<string> = {
 export const bt_dht: NvramProperty<boolean> = {
   key: "bt_dht",
   description: "Enables Distributed Hash Table (DHT) for finding more peers.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -753,7 +753,7 @@ export const bt_dht: NvramProperty<boolean> = {
 export const bt_dir: NvramProperty<string> = {
   key: "bt_dir",
   description: "The default directory where completed torrents will be saved.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "string",
   defaultValue: "/mnt",
   validation: (value) =>
@@ -767,7 +767,7 @@ export const bt_dir: NvramProperty<string> = {
 export const bt_dl: NvramProperty<string> = {
   key: "bt_dl",
   description: "The global download speed limit in kB/s.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "string",
   defaultValue: "248",
   validation: (value) => /^\d+$/.test(value) || "Must be a number.",
@@ -776,7 +776,7 @@ export const bt_dl: NvramProperty<string> = {
 export const bt_dl_enable: NvramProperty<boolean> = {
   key: "bt_dl_enable",
   description: "Enables the global download speed limit.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -792,7 +792,7 @@ export const bt_dl_queue_enable: NvramProperty<boolean> = {
   key: "bt_dl_queue_enable",
   description:
     "Enables the download queue, limiting the number of torrents that can be downloaded simultaneously.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -807,7 +807,7 @@ export const bt_dl_queue_enable: NvramProperty<boolean> = {
 export const bt_dl_queue_size: NvramProperty<number> = {
   key: "bt_dl_queue_size",
   description: "The maximum number of torrents to download simultaneously.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "integer",
   defaultValue: 5,
   validation: (value) => (value >= 1 && value <= 30) || "Valid range: 1 - 30.",
@@ -824,7 +824,7 @@ export const bt_enable: NvramProperty<boolean> = {
   key: "bt_enable",
   description:
     "Enables the BitTorrent client to start automatically on router boot.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -840,7 +840,7 @@ export const bt_incomplete: NvramProperty<boolean> = {
   key: "bt_incomplete",
   description:
     "If enabled, incomplete downloads are stored in a subdirectory named '.incomplete' within the main download directory.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: true,
   transform: {
@@ -856,7 +856,7 @@ export const bt_log: NvramProperty<boolean> = {
   key: "bt_log",
   description:
     "Enables logging to a custom file path instead of the system log.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -871,7 +871,7 @@ export const bt_log: NvramProperty<boolean> = {
 export const bt_log_path: NvramProperty<string> = {
   key: "bt_log_path",
   description: "The directory where the transmission.log file will be stored.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "string",
   defaultValue: "/var/log",
   validation: (value) =>
@@ -889,7 +889,7 @@ export const bt_log_path: NvramProperty<string> = {
 export const bt_login: NvramProperty<string> = {
   key: "bt_login",
   description: "Username for accessing the Transmission web GUI.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "string",
   defaultValue: "admin",
   validation: (value) => value.trim() !== "" || "Username cannot be empty.",
@@ -902,7 +902,7 @@ export const bt_lpd: NvramProperty<boolean> = {
   key: "bt_lpd",
   description:
     "Enables Local Peer Discovery (LPD) to find peers on the local network.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -917,7 +917,7 @@ export const bt_lpd: NvramProperty<boolean> = {
 export const bt_message: NvramProperty<"0" | "1" | "2" | "3"> = {
   key: "bt_message",
   description: "Sets the verbosity level of Transmission's logging.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "enum",
   defaultValue: "2",
   ui: {
@@ -934,7 +934,7 @@ export const bt_message: NvramProperty<"0" | "1" | "2" | "3"> = {
 export const bt_password: NvramProperty<string> = {
   key: "bt_password",
   description: "Password for accessing the Transmission web GUI.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "string",
   defaultValue: "admin11",
   validation: (value) => value.trim() !== "" || "Password cannot be empty.",
@@ -946,7 +946,7 @@ export const bt_password: NvramProperty<string> = {
 export const bt_peer_limit_global: NvramProperty<number> = {
   key: "bt_peer_limit_global",
   description: "The maximum total number of peers across all torrents.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "integer",
   defaultValue: 150,
   validation: (value) =>
@@ -959,7 +959,7 @@ export const bt_peer_limit_global: NvramProperty<number> = {
 export const bt_peer_limit_per_torrent: NvramProperty<number> = {
   key: "bt_peer_limit_per_torrent",
   description: "The maximum number of peers for a single torrent.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "integer",
   defaultValue: 30,
   validation: (value) =>
@@ -972,7 +972,7 @@ export const bt_peer_limit_per_torrent: NvramProperty<number> = {
 export const bt_pex: NvramProperty<boolean> = {
   key: "bt_pex",
   description: "Enables Peer Exchange (PEX) to find more peers.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -987,7 +987,7 @@ export const bt_pex: NvramProperty<boolean> = {
 export const bt_port: NvramProperty<number> = {
   key: "bt_port",
   description: "The incoming TCP port for peer connections.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "integer",
   defaultValue: 51515,
   validation: (value) =>
@@ -1000,7 +1000,7 @@ export const bt_port: NvramProperty<number> = {
 export const bt_port_gui: NvramProperty<number> = {
   key: "bt_port_gui",
   description: "The port for accessing the Transmission web GUI.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "integer",
   defaultValue: 9091,
   validation: (value) =>
@@ -1018,7 +1018,7 @@ export const bt_port_gui: NvramProperty<number> = {
 export const bt_ratio: NvramProperty<string> = {
   key: "bt_ratio",
   description: "The share ratio at which seeding will stop for a torrent.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "enum",
   defaultValue: "1.0000",
   ui: {
@@ -1040,7 +1040,7 @@ export const bt_ratio_enable: NvramProperty<boolean> = {
   key: "bt_ratio_enable",
   description:
     "Enables stopping torrents when they reach a specific share ratio.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -1056,7 +1056,7 @@ export const bt_ratio_idle: NvramProperty<number> = {
   key: "bt_ratio_idle",
   description:
     "The number of minutes a torrent can be idle (no download/upload activity) before seeding is stopped, regardless of ratio.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "integer",
   defaultValue: 30,
   validation: (value) =>
@@ -1074,7 +1074,7 @@ export const bt_ratio_idle_enable: NvramProperty<boolean> = {
   key: "bt_ratio_idle_enable",
   description:
     "Enables stopping torrents after they have been idle for a specified time.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -1089,7 +1089,7 @@ export const bt_ratio_idle_enable: NvramProperty<boolean> = {
 export const bt_rpc_enable: NvramProperty<boolean> = {
   key: "bt_rpc_enable",
   description: "Enables the Transmission web GUI (RPC interface).",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: true,
   transform: {
@@ -1105,7 +1105,7 @@ export const bt_rpc_wan: NvramProperty<boolean> = {
   key: "bt_rpc_wan",
   description:
     "Allows the Transmission web GUI to be accessed from the WAN interface.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -1123,7 +1123,7 @@ export const bt_settings: NvramProperty<
   key: "bt_settings",
   description:
     "Specifies where Transmission's configuration files (settings.json) are stored.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "enum",
   defaultValue: "down_dir",
   ui: {
@@ -1143,7 +1143,7 @@ export const bt_settings_custom: NvramProperty<string> = {
   key: "bt_settings_custom",
   description:
     "Custom path for storing Transmission configuration files, used when 'bt_settings' is 'custom'.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "string",
   defaultValue: "/etc/transmission",
   ui: {
@@ -1159,7 +1159,7 @@ export const bt_sleep: NvramProperty<number> = {
   key: "bt_sleep",
   description:
     "Delay in seconds before starting the Transmission daemon at boot.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "integer",
   defaultValue: 10,
   validation: (value) =>
@@ -1172,7 +1172,7 @@ export const bt_sleep: NvramProperty<number> = {
 export const bt_ul: NvramProperty<string> = {
   key: "bt_ul",
   description: "The global upload speed limit in kB/s.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "string",
   defaultValue: "64",
   validation: (value) => /^\d+$/.test(value) || "Must be a number.",
@@ -1181,7 +1181,7 @@ export const bt_ul: NvramProperty<string> = {
 export const bt_ul_enable: NvramProperty<boolean> = {
   key: "bt_ul_enable",
   description: "Enables the global upload speed limit.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -1197,7 +1197,7 @@ export const bt_ul_queue_enable: NvramProperty<boolean> = {
   key: "bt_ul_queue_enable",
   description:
     "Enables the seed queue, limiting the number of torrents that can be seeded simultaneously.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -1212,7 +1212,7 @@ export const bt_ul_queue_enable: NvramProperty<boolean> = {
 export const bt_ul_queue_size: NvramProperty<number> = {
   key: "bt_ul_queue_size",
   description: "The maximum number of torrents to seed simultaneously.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "integer",
   defaultValue: 5,
   validation: (value) => (value >= 1 && value <= 30) || "Valid range: 1 - 30.",
@@ -1229,7 +1229,7 @@ export const bt_ul_slot_per_torrent: NvramProperty<number> = {
   key: "bt_ul_slot_per_torrent",
   description:
     "The maximum number of upload slots (peers) for a single torrent.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "integer",
   defaultValue: 10,
   validation: (value) => (value >= 1 && value <= 50) || "Valid range: 1 - 50.",
@@ -1242,7 +1242,7 @@ export const bt_utp: NvramProperty<boolean> = {
   key: "bt_utp",
   description:
     "Enables the Micro Transport Protocol (µTP) for peer connections.",
-  page: "nas-bittorrent.asp.html",
+  page: "nas-bittorrent.asp",
   type: "boolean",
   defaultValue: true,
   transform: {
@@ -1262,7 +1262,7 @@ export const bwl_enable: NvramProperty<boolean> = {
   key: "bwl_enable",
   description:
     "Enables or disables the IP/Range Bandwidth Limiter feature. This feature requires CTF (Cut-Through Forwarding) to be disabled.",
-  page: "bwlimit.asp.html",
+  page: "bwlimit.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -1297,7 +1297,7 @@ export const bwl_rules: NvramProperty<BwlRule[]> = {
   key: "bwl_rules",
   description:
     "A list of rules for the Bandwidth Limiter. Each rule specifies bandwidth limits and priority for a given IP, IP range, or MAC address.",
-  page: "bwlimit.asp.html",
+  page: "bwlimit.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -1358,7 +1358,7 @@ export const bwl_bridge_enable: PatternedNvramProperty<BridgeParam, boolean> = {
   },
   description:
     "Enables the default bandwidth limiting class for unlisted clients on a specific LAN bridge.",
-  page: "bwlimit.asp.html",
+  page: "bwlimit.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -1389,7 +1389,7 @@ const commonBwlBridgeProps = (
   description: `Default ${prop.includes("dl") ? "Download" : "Upload"} ${
     prop.endsWith("r") ? "Rate" : "Ceiling"
   } in kbit/s for the bridge.`,
-  page: "bwlimit.asp.html",
+  page: "bwlimit.asp",
   type: "integer",
   defaultValue: "",
   validation: (value) =>
@@ -1430,7 +1430,7 @@ export const bwl_br_prio: PatternedNvramProperty<
     },
   },
   description: "Default traffic priority for the LAN bridge.",
-  page: "bwlimit.asp.html",
+  page: "bwlimit.asp",
   type: "enum",
   defaultValue: "2",
   ui: {
@@ -1457,7 +1457,7 @@ export const bwl_br0_tcp: NvramProperty<string> = {
   key: "bwl_br0_tcp",
   description:
     "Default TCP connection limit for unlisted clients on LAN0 (br0).",
-  page: "bwlimit.asp.html",
+  page: "bwlimit.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -1489,7 +1489,7 @@ export const bwl_br0_udp: NvramProperty<string> = {
   key: "bwl_br0_udp",
   description:
     "Default UDP packets per second limit for unlisted clients on LAN0 (br0).",
-  page: "bwlimit.asp.html",
+  page: "bwlimit.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -1539,7 +1539,7 @@ export const cifs: PatternedNvramProperty<{ index: 1 | 2 }, CifsConfig> = {
   },
   description:
     "Configuration for a CIFS client mount point. Stored as a composite string.",
-  page: "admin-cifs.asp.html",
+  page: "admin-cifs.asp",
   type: "structured-string",
   defaultValue: { enabled: false, unc: "", username: "" },
   transform: {
@@ -1585,7 +1585,7 @@ export const console_loglevel: NvramProperty<1 | 2 | 3 | 4 | 5 | 6 | 7 | 8> = {
   key: "console_loglevel",
   description:
     "Sets the minimum kernel printk log level. A reboot is required to apply changes.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "enum",
   defaultValue: 1,
   ui: {
@@ -1609,7 +1609,7 @@ export const cstats_all: NvramProperty<boolean> = {
   key: "cstats_all",
   description:
     "Enables auto-discovery of new IP addresses for traffic monitoring.",
-  page: "admin-iptraffic.asp.html",
+  page: "admin-iptraffic.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -1621,7 +1621,7 @@ export const cstats_all: NvramProperty<boolean> = {
 export const cstats_bak: NvramProperty<boolean> = {
   key: "cstats_bak",
   description: "Creates backups of the IP traffic monitoring data file.",
-  page: "admin-iptraffic.asp.html",
+  page: "admin-iptraffic.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -1641,7 +1641,7 @@ export const cstats_bak: NvramProperty<boolean> = {
 export const cstats_enable: NvramProperty<boolean> = {
   key: "cstats_enable",
   description: "Enables the IP Traffic Monitoring feature.",
-  page: "admin-iptraffic.asp.html",
+  page: "admin-iptraffic.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -1654,7 +1654,7 @@ export const cstats_exclude: NvramProperty<string[]> = {
   key: "cstats_exclude",
   description:
     "A comma-separated list of IP addresses to exclude from traffic monitoring.",
-  page: "admin-iptraffic.asp.html",
+  page: "admin-iptraffic.asp",
   type: "list",
   defaultValue: [],
   transform: {
@@ -1670,7 +1670,7 @@ export const cstats_include: NvramProperty<string[]> = {
   key: "cstats_include",
   description:
     "A comma-separated list of IP addresses to include in traffic monitoring. Also used to enable IP Traffic stats for DHCP reservations.",
-  page: "admin-iptraffic.asp.html", // Also modified on basic-static.asp.html
+  page: "admin-iptraffic.asp", // Also modified on basic-static.asp
   type: "list",
   defaultValue: [],
   transform: {
@@ -1691,7 +1691,7 @@ export const cstats_labels: NvramProperty<0 | 1 | 2> = {
   key: "cstats_labels",
   description:
     "Controls how hostnames and IP addresses are displayed on IP Traffic graphs.",
-  page: "admin-iptraffic.asp.html",
+  page: "admin-iptraffic.asp",
   type: "enum",
   defaultValue: 0,
   ui: {
@@ -1711,7 +1711,7 @@ export const cstats_offset: NvramProperty<number> = {
   key: "cstats_offset",
   description:
     "The day of the month to use as the start for monthly traffic calculations (1-31).",
-  page: "admin-iptraffic.asp.html",
+  page: "admin-iptraffic.asp",
   type: "integer",
   defaultValue: 1,
   validation: (value) => (value >= 1 && value <= 31) || "Valid range: 1 - 31.",
@@ -1723,7 +1723,7 @@ export const cstats_offset: NvramProperty<number> = {
 export const cstats_path: NvramProperty<string> = {
   key: "cstats_path",
   description: "Location to save the IP Traffic history data.",
-  page: "admin-iptraffic.asp.html",
+  page: "admin-iptraffic.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -1734,7 +1734,7 @@ export const cstats_path: NvramProperty<string> = {
 export const cstats_sshut: NvramProperty<boolean> = {
   key: "cstats_sshut",
   description: "If enabled, saves the IP traffic data on router halt/reboot.",
-  page: "admin-iptraffic.asp.html",
+  page: "admin-iptraffic.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -1747,7 +1747,7 @@ export const cstats_stime: NvramProperty<number> = {
   key: "cstats_stime",
   description:
     "Frequency at which IP traffic data is saved to the specified location.",
-  page: "admin-iptraffic.asp.html",
+  page: "admin-iptraffic.asp",
   type: "enum",
   defaultValue: 24, // Assuming a common default, was empty in source
   ui: {
@@ -1777,7 +1777,7 @@ export const cstats_stime: NvramProperty<number> = {
 export const ct_hashsize: NvramProperty<number> = {
   key: "ct_hashsize",
   description: "The size of the connection tracking hash table.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "integer",
   defaultValue: 1023,
   validation: (value) =>
@@ -1791,7 +1791,7 @@ export const ct_max: NvramProperty<number> = {
   key: "ct_max",
   description:
     "The maximum number of connections the router can track simultaneously.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "integer",
   defaultValue: 4096,
   validation: (value) =>
@@ -1805,7 +1805,7 @@ export const ct_tcp_timeout: NvramProperty<number[]> = {
   key: "ct_tcp_timeout",
   description:
     "Space-separated list of TCP connection state timeout values in seconds.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "structured-string",
   defaultValue: [0, 1200, 120, 60, 120, 120, 10, 60, 30, 0],
   transform: {
@@ -1817,7 +1817,7 @@ export const ct_tcp_timeout: NvramProperty<number[]> = {
 export const ct_timeout: NvramProperty<[number, number]> = {
   key: "ct_timeout",
   description: "Space-separated timeouts for Generic and ICMP connections.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "structured-string",
   defaultValue: [600, 30],
   transform: {
@@ -1830,7 +1830,7 @@ export const ct_udp_timeout: NvramProperty<[number, number]> = {
   key: "ct_udp_timeout",
   description:
     "Space-separated timeouts for Unreplied and Assured UDP connections.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "structured-string",
   defaultValue: [30, 180],
   transform: {
@@ -1843,7 +1843,7 @@ export const ctf_disable: NvramProperty<boolean> = {
   key: "ctf_disable",
   description:
     "Controls CTF (Cut-Through Forwarding) and hardware acceleration. A value of '0' means CTF is enabled, '1' means disabled. Disabling is required for QoS and BW Limiter.",
-  page: "advanced-misc.asp.html",
+  page: "advanced-misc.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -1861,7 +1861,7 @@ export const ddnsx_custom_if: NvramProperty<string> = {
   key: "ddnsx_custom_if",
   description:
     "Custom interface name to use for IP address checking when no WAN is active and the IP source is an external checker.",
-  page: "basic-ddns.asp.html",
+  page: "basic-ddns.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -1897,7 +1897,7 @@ const ddnsSubProperty = <T>(
     index: { type: "integer", description: "DDNS client index", range: [0, 3] },
   },
   description: desc,
-  page: "basic-ddns.asp.html",
+  page: "basic-ddns.asp",
   type: type as any,
   defaultValue,
   validation,
@@ -1920,7 +1920,7 @@ export const ddnsx_cktime: PatternedNvramProperty<
     index: { type: "integer", description: "DDNS client index", range: [0, 3] },
   },
   description: "Check interval in minutes for external IP checkers.",
-  page: "basic-ddns.asp.html",
+  page: "basic-ddns.asp",
   type: "integer",
   defaultValue: 10,
   validation: (v) => (v >= 5 && v <= 99999) || "Valid range: 5-99999 minutes.",
@@ -1959,7 +1959,7 @@ export const debug_cprintf: NvramProperty<boolean> = {
   key: "debug_cprintf",
   description:
     "Redirects cprintf output to the console, making it visible in the browser.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v !== "0", fromUi: (v) => (v ? "1" : "0") },
@@ -1971,7 +1971,7 @@ export const debug_cprintf: NvramProperty<boolean> = {
 export const debug_cprintf_file: NvramProperty<boolean> = {
   key: "debug_cprintf_file",
   description: "Redirects cprintf output to the file /tmp/cprintf for viewing.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v !== "0", fromUi: (v) => (v ? "1" : "0") },
@@ -1984,7 +1984,7 @@ export const debug_ddns: NvramProperty<boolean> = {
   key: "debug_ddns",
   description:
     "Enables DDNS debug output to files in /tmp/mdu-*, where * is the provider name.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v !== "0", fromUi: (v) => (v ? "1" : "0") },
@@ -1997,7 +1997,7 @@ export const debug_logsegfault: NvramProperty<boolean> = {
   key: "debug_logsegfault",
   description:
     "If enabled, logs extensive messages when a program crashes due to a segmentation fault.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v !== "0", fromUi: (v) => (v ? "1" : "0") },
@@ -2010,7 +2010,7 @@ export const debug_nocommit: NvramProperty<boolean> = {
   key: "debug_nocommit",
   description:
     "Prevents configuration changes from being permanently saved to NVRAM. For debugging purposes only.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v !== "0", fromUi: (v) => (v ? "1" : "0") },
@@ -2025,7 +2025,7 @@ export const debug_norestart: NvramProperty<NoRestartService[]> = {
   key: "debug_norestart",
   description:
     "A comma-separated list of processes that should not be automatically restarted if they die.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "list",
   defaultValue: [],
   transform: {
@@ -2041,7 +2041,7 @@ export const debug_wlx_shdown: NvramProperty<string> = {
   key: "debug_wlx_shdown",
   description:
     "An internal or legacy setting related to wireless shutdown. Not exposed in the UI.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "string",
   defaultValue: "",
 };
@@ -2083,7 +2083,7 @@ export const dhcp_lease: PatternedNvramProperty<
   },
   description:
     "Specifies the DHCP lease time in minutes for a specific LAN bridge.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "integer",
   defaultValue: 1440,
   validation: (value) => v_range(value, 1, 10080),
@@ -2096,7 +2096,7 @@ export const dhcp_moveip: NvramProperty<"0" | "1" | "2"> = {
   key: "dhcp_moveip",
   description:
     "Internal transient flag used by the UI to signal the backend on how to handle service restarts after a LAN IP address change. Not a persistent user setting.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "0",
 };
@@ -2105,7 +2105,7 @@ export const dhcpc_121: NvramProperty<boolean> = {
   key: "dhcpc_121",
   description:
     "Allows the WAN DHCP client to accept classless static routes (option 121) from the ISP.",
-  page: "advanced-routing.asp.html",
+  page: "advanced-routing.asp",
   type: "boolean",
   defaultValue: true,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2118,7 +2118,7 @@ export const dhcpc_33: NvramProperty<boolean> = {
   key: "dhcpc_33",
   description:
     "Allows the WAN DHCP client to accept static routes (option 33) from the ISP.",
-  page: "advanced-routing.asp.html",
+  page: "advanced-routing.asp",
   type: "boolean",
   defaultValue: true,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2131,7 +2131,7 @@ export const dhcpc_custom: NvramProperty<string> = {
   key: "dhcpc_custom",
   description:
     "Specifies extra command-line options for the WAN DHCP client (udhcpc).",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "string",
   defaultValue: "",
   validation: (value) => v_length(value, 0, 256),
@@ -2144,7 +2144,7 @@ export const dhcpc_minpkt: NvramProperty<boolean> = {
   key: "dhcpc_minpkt",
   description:
     "Instructs the DHCP client to use a smaller packet size, which may be required by some ISPs.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: true,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2156,7 +2156,7 @@ export const dhcpc_minpkt: NvramProperty<boolean> = {
 export const dhcpd_dmdns: NvramProperty<boolean> = {
   key: "dhcpd_dmdns",
   description: "Enables dnsmasq to act as the DNS server for the LAN.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: true,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2176,7 +2176,7 @@ export const dhcpd_endip: PatternedNvramProperty<
   },
   description:
     "The last IP address in the DHCP pool for a specific LAN bridge.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "ip",
   validation: (value, allValues) => v_ip(value),
   ui: {
@@ -2188,7 +2188,7 @@ export const dhcpd_gwmode: NvramProperty<boolean> = {
   key: "dhcpd_gwmode",
   description:
     "Instructs the DHCP server to use the router's IP as the default gateway for clients if the WAN is disabled.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2200,7 +2200,7 @@ export const dhcpd_gwmode: NvramProperty<boolean> = {
 export const dhcpd_lmax: NvramProperty<number> = {
   key: "dhcpd_lmax",
   description: "Maximum number of active DHCP leases allowed.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "integer",
   defaultValue: 255,
   validation: (value) => v_range(value, 1, 0xffff),
@@ -2220,7 +2220,7 @@ export const dhcpd_ostatic: PatternedNvramProperty<
   },
   description:
     "If enabled, dnsmasq will ignore DHCP requests from devices with MAC addresses not listed in the static DHCP/ARP table.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -2238,7 +2238,7 @@ export const dhcpd_slt: NvramProperty<number> = {
   key: "dhcpd_slt",
   description:
     "Sets the lease time for static DHCP reservations. Can be '0' (same as normal), '-1' (infinite), or a custom value in minutes.",
-  page: "basic-static.asp.html",
+  page: "basic-static.asp",
   type: "integer",
   defaultValue: 0,
   validation: (value) =>
@@ -2262,7 +2262,7 @@ export const dhcpd_startip: PatternedNvramProperty<
   },
   description:
     "The first IP address in the DHCP pool for a specific LAN bridge.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "ip",
   validation: (value, allValues) => v_ip(value),
   ui: {
@@ -2281,7 +2281,7 @@ export const dhcpd_static: NvramProperty<DhcpReservation[]> = {
   key: "dhcpd_static",
   description:
     "A composite string containing all DHCP reservations and static ARP bindings. Each entry is delimited by '>'.",
-  page: "basic-static.asp.html",
+  page: "basic-static.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -2319,7 +2319,7 @@ export const dmz_enable: NvramProperty<boolean> = {
   key: "dmz_enable",
   description:
     "Enables or disables the Demilitarized Zone (DMZ), which forwards all incoming WAN traffic to a single specified LAN IP address.",
-  page: "forward-dmz.asp.html",
+  page: "forward-dmz.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2332,7 +2332,7 @@ export const dmz_ipaddr: NvramProperty<string> = {
   key: "dmz_ipaddr",
   description:
     "The IP address of the LAN device to which all WAN traffic will be forwarded when DMZ is enabled.",
-  page: "forward-dmz.asp.html",
+  page: "forward-dmz.asp",
   type: "ip",
   defaultValue: "0",
   validation: (value, allValues) => {
@@ -2351,7 +2351,7 @@ export const dmz_ra: NvramProperty<boolean> = {
   key: "dmz_ra",
   description:
     "If enabled, remote access ports (like SSH and web admin) configured on the router are not forwarded to the DMZ host.",
-  page: "forward-dmz.asp.html",
+  page: "forward-dmz.asp",
   type: "boolean",
   defaultValue: true,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2364,7 +2364,7 @@ export const dmz_sip: NvramProperty<string> = {
   key: "dmz_sip",
   description:
     "Restricts DMZ access to a specific list of source IP addresses or ranges from the WAN.",
-  page: "forward-dmz.asp.html",
+  page: "forward-dmz.asp",
   type: "list",
   defaultValue: "",
   ui: {
@@ -2376,7 +2376,7 @@ export const dns_fwd_local: NvramProperty<boolean> = {
   key: "dns_fwd_local",
   description:
     "If enabled, DNS queries for the local domain (defined in Basic > Identification) are forwarded to the upstream DNS servers.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2389,7 +2389,7 @@ export const dns_intcpt: NvramProperty<boolean> = {
   key: "dns_intcpt",
   description:
     "Enables DNS interception (transparent DNS proxy), redirecting all client DNS requests on TCP/UDP port 53 to the router's internal DNS server.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2402,7 +2402,7 @@ export const dns_norebind: NvramProperty<boolean> = {
   key: "dns_norebind",
   description:
     "Enables DNS rebind protection, preventing upstream DNS servers from resolving queries to non-routable IP addresses (e.g., 192.168.x.x).",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: true,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2420,7 +2420,7 @@ export const dns_priv_override: NvramProperty<boolean> = {
   key: "dns_priv_override",
   description:
     "Attempts to prevent clients from automatically using DNS-over-HTTPS (DoH), forcing them to use the router's configured DNS servers.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2433,7 +2433,7 @@ export const dnscrypt_ephemeral_keys: NvramProperty<boolean> = {
   key: "dnscrypt_ephemeral_keys",
   description:
     "Generates a new key pair for every DNS query when using dnscrypt-proxy. This enhances privacy but increases CPU load.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -2450,7 +2450,7 @@ export const dnscrypt_ephemeral_keys: NvramProperty<boolean> = {
 export const dnscrypt_log: NvramProperty<string> = {
   key: "dnscrypt_log",
   description: "Sets the logging level for the dnscrypt-proxy service.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "string", // Although it's a number, it's treated as text in the UI
   defaultValue: "6",
   ui: {
@@ -2462,7 +2462,7 @@ export const dnscrypt_manual: NvramProperty<boolean> = {
   key: "dnscrypt_manual",
   description:
     "Switches dnscrypt-proxy configuration from a predefined resolver to manual entry.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -2480,7 +2480,7 @@ export const dnscrypt_port: NvramProperty<number> = {
   key: "dnscrypt_port",
   description:
     "The local port on which dnscrypt-proxy listens for DNS queries from dnsmasq.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "integer",
   defaultValue: 40,
   validation: (value) => v_range(value, 1, 65535),
@@ -2493,7 +2493,7 @@ export const dnscrypt_priority: NvramProperty<"0" | "1" | "2"> = {
   key: "dnscrypt_priority",
   description:
     "Determines how dnscrypt-proxy interacts with other DNS servers. 'No-Resolv' forces all traffic through dnscrypt-proxy.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "enum",
   defaultValue: "2",
   ui: {
@@ -2509,7 +2509,7 @@ export const dnscrypt_priority: NvramProperty<"0" | "1" | "2"> = {
 export const dnscrypt_provider_key: NvramProperty<string> = {
   key: "dnscrypt_provider_key",
   description: "The public key of the manually configured DNSCrypt resolver.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -2527,7 +2527,7 @@ export const dnscrypt_provider_key: NvramProperty<string> = {
 export const dnscrypt_provider_name: NvramProperty<string> = {
   key: "dnscrypt_provider_name",
   description: "The name of the manually configured DNSCrypt provider.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -2545,7 +2545,7 @@ export const dnscrypt_provider_name: NvramProperty<string> = {
 export const dnscrypt_proxy: NvramProperty<boolean> = {
   key: "dnscrypt_proxy",
   description: "Master switch to enable or disable the dnscrypt-proxy service.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2557,7 +2557,7 @@ export const dnscrypt_proxy: NvramProperty<boolean> = {
 export const dnscrypt_resolver: NvramProperty<string> = {
   key: "dnscrypt_resolver",
   description: "The selected predefined DNSCrypt resolver.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "enum",
   defaultValue: "opendns",
   ui: {
@@ -2577,7 +2577,7 @@ export const dnscrypt_resolver_address: NvramProperty<string> = {
   key: "dnscrypt_resolver_address",
   description:
     "The IP address and port of the manually configured DNSCrypt resolver.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -2596,7 +2596,7 @@ export const dnsmasq_custom: NvramProperty<string> = {
   key: "dnsmasq_custom",
   description:
     "Custom configuration options appended to the dnsmasq configuration file.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "string",
 
   validation: (value) =>
@@ -2611,7 +2611,7 @@ export const dnsmasq_debug: NvramProperty<boolean> = {
   key: "dnsmasq_debug",
   description:
     "Enables debug mode for dnsmasq, providing more verbose logging.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2623,7 +2623,7 @@ export const dnsmasq_debug: NvramProperty<boolean> = {
 export const dnsmasq_edns_size: NvramProperty<number> = {
   key: "dnsmasq_edns_size",
   description: "Sets the advertised EDNS packet size for DNS queries.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "integer",
   defaultValue: 1232,
   validation: (value) => v_range(value, 512, 4096),
@@ -2636,7 +2636,7 @@ export const dnsmasq_gen_names: NvramProperty<boolean> = {
   key: "dnsmasq_gen_names",
   description:
     "Automatically generates a hostname for DHCP clients that do not provide one.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2649,7 +2649,7 @@ export const dnsmasq_onion_support: NvramProperty<boolean> = {
   key: "dnsmasq_onion_support",
   description:
     "Enables resolving of .onion addresses via the Tor network (if Tor is enabled).",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2669,7 +2669,7 @@ export const dnsmasq_pxelan: PatternedNvramProperty<
   },
   description:
     "Enables PXE boot support on the specified LAN bridge when the TFTP server is active.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -2689,7 +2689,7 @@ export const dnsmasq_q: NvramProperty<number> = {
   key: "dnsmasq_q",
   description:
     "A bitmask to control dnsmasq logging verbosity. 1=mute dhcpv4, 2=mute dhcpv6, 4=mute RA.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "integer",
   defaultValue: 0,
 };
@@ -2698,7 +2698,7 @@ export const dnsmasq_safe: NvramProperty<boolean> = {
   key: "dnsmasq_safe",
   description:
     "An internal flag that, if set, prevents the 'dnsmasq_custom' configuration from being loaded to allow dnsmasq to start even with a syntax error in the custom config.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2707,7 +2707,7 @@ export const dnsmasq_safe: NvramProperty<boolean> = {
 export const dnsmasq_tftp: NvramProperty<boolean> = {
   key: "dnsmasq_tftp",
   description: "Enables the built-in TFTP server in dnsmasq.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2719,7 +2719,7 @@ export const dnsmasq_tftp: NvramProperty<boolean> = {
 export const dnsmasq_tftp_path: NvramProperty<string> = {
   key: "dnsmasq_tftp_path",
   description: "The root directory for the TFTP server.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "string",
   defaultValue: "",
   validation: (value) => v_length(value, 0, 128),
@@ -2731,7 +2731,7 @@ export const dnsmasq_tftp_path: NvramProperty<string> = {
 export const dnssec_enable: NvramProperty<boolean> = {
   key: "dnssec_enable",
   description: "Enables DNSSEC validation for DNS queries.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2744,7 +2744,7 @@ export const dnssec_method: NvramProperty<0 | 1 | 2> = {
   key: "dnssec_method",
   description:
     "Selects the method for DNSSEC validation. '0' for dnsmasq, '1' for Stubby, '2' for server-only.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "enum",
   defaultValue: 0,
   ui: {
@@ -2766,7 +2766,7 @@ export const DSCP_fix_enable: NvramProperty<boolean> = {
   key: "DSCP_fix_enable",
   description:
     "Enables a fix for incorrect DSCP markings, often an issue with Comcast ISPs.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2779,7 +2779,7 @@ export const emf_enable: NvramProperty<boolean> = {
   key: "emf_enable",
   description:
     "Enables Efficient Multicast Forwarding (IGMP Snooping) to optimize multicast traffic on the LAN.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2792,7 +2792,7 @@ export const force_igmpv2: NvramProperty<boolean> = {
   key: "force_igmpv2",
   description:
     "Forces the use of IGMP version 2 for multicast group management.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -2805,7 +2805,7 @@ export const ftp_anonrate: NvramProperty<number> = {
   key: "ftp_anonrate",
   description:
     "Maximum bandwidth in KBytes/sec for anonymous FTP users. 0 means unlimited.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "integer",
   validation: (value) => v_range(value, 0, 99999),
   ui: {
@@ -2817,7 +2817,7 @@ export const ftp_anonroot: NvramProperty<string> = {
   key: "ftp_anonroot",
   description:
     "The root directory for anonymous FTP connections. Defaults to /mnt if not specified.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "string",
   validation: (value) =>
     value === "" ||
@@ -2831,7 +2831,7 @@ export const ftp_anonroot: NvramProperty<string> = {
 export const ftp_anonymous: NvramProperty<"0" | "1" | "2" | "3"> = {
   key: "ftp_anonymous",
   description: "Controls access level for anonymous FTP users.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -2848,7 +2848,7 @@ export const ftp_anonymous: NvramProperty<"0" | "1" | "2" | "3"> = {
 export const ftp_custom: NvramProperty<string> = {
   key: "ftp_custom",
   description: "Custom configuration options for the vsftpd server.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "string",
   defaultValue: "",
   validation: (value) => v_length(value, 0, 2048),
@@ -2860,7 +2860,7 @@ export const ftp_custom: NvramProperty<string> = {
 export const ftp_dirlist: NvramProperty<"0" | "1" | "2"> = {
   key: "ftp_dirlist",
   description: "Controls whether directory listings are allowed for FTP users.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -2876,7 +2876,7 @@ export const ftp_dirlist: NvramProperty<"0" | "1" | "2"> = {
 export const ftp_enable: NvramProperty<"0" | "1" | "2"> = {
   key: "ftp_enable",
   description: "Controls the FTP server's startup behavior and accessibility.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -2893,7 +2893,7 @@ export const ftp_ipmax: NvramProperty<number> = {
   key: "ftp_ipmax",
   description:
     "Maximum number of connections allowed from a single IP address. 0 means unlimited.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "integer",
   validation: (value) => v_range(value, 0, 12),
   ui: {
@@ -2910,7 +2910,7 @@ export const ftp_limit: NvramProperty<FtpLimit> = {
   key: "ftp_limit",
   description:
     "Configures rate limiting for FTP connection attempts to mitigate brute-force attacks.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "structured-string",
   defaultValue: { enabled: false, hits: 3, seconds: 60 },
   transform: {
@@ -2934,7 +2934,7 @@ export const ftp_max: NvramProperty<number> = {
   key: "ftp_max",
   description:
     "Maximum number of simultaneous FTP users allowed. 0 means unlimited.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "integer",
   validation: (value) => v_range(value, 0, 12),
   ui: {
@@ -2945,7 +2945,7 @@ export const ftp_max: NvramProperty<number> = {
 export const ftp_port: NvramProperty<number> = {
   key: "ftp_port",
   description: "The TCP port on which the FTP server listens.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "integer",
   defaultValue: 21,
   validation: (value) => v_range(value, 1, 65535),
@@ -2958,7 +2958,7 @@ export const ftp_pubroot: NvramProperty<string> = {
   key: "ftp_pubroot",
   description:
     "The default root directory for authenticated users if a specific one is not defined for them. Defaults to /mnt.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "string",
   validation: (value) =>
     value === "" ||
@@ -2973,7 +2973,7 @@ export const ftp_pvtroot: NvramProperty<string> = {
   key: "ftp_pvtroot",
   description:
     "The base directory for 'private' user access. Each private user will be chrooted to a subdirectory named after their username inside this path.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "string",
   validation: (value) =>
     value === "" ||
@@ -2988,7 +2988,7 @@ export const ftp_rate: NvramProperty<number> = {
   key: "ftp_rate",
   description:
     "Maximum bandwidth in KBytes/sec for authenticated FTP users. 0 means unlimited.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "integer",
   validation: (value) => v_range(value, 0, 99999),
   ui: {
@@ -3000,7 +3000,7 @@ export const ftp_sip: NvramProperty<string> = {
   key: "ftp_sip",
   description:
     "Restricts FTP access from the WAN to a specific list of source IP addresses or ranges.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "list",
   defaultValue: "",
   ui: {
@@ -3012,7 +3012,7 @@ export const ftp_staytimeout: NvramProperty<number> = {
   key: "ftp_staytimeout",
   description:
     "The idle timeout in seconds for FTP connections. 0 means no timeout.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "integer",
   validation: (value) => v_range(value, 0, 65535),
   ui: {
@@ -3024,7 +3024,7 @@ export const ftp_super: NvramProperty<boolean> = {
   key: "ftp_super",
   description:
     "Allows the router's admin/root user to log in via FTP, providing full filesystem access. This is a security risk if exposed to the WAN.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -3037,7 +3037,7 @@ export const ftp_tls: NvramProperty<boolean> = {
   key: "ftp_tls",
   description:
     "Enables FTP over TLS (FTPS) for secure connections, using the router's web server certificate.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -3056,7 +3056,7 @@ export const ftp_users: NvramProperty<FtpUser[]> = {
   key: "ftp_users",
   description:
     "List of user accounts for the FTP server, stored in a composite string format.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -3088,7 +3088,7 @@ export const ftp_users: NvramProperty<FtpUser[]> = {
 export const fw_blackhole: NvramProperty<boolean> = {
   key: "fw_blackhole",
   description: "Enables smart Path MTU Discovery black hole detection.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: true,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -3101,7 +3101,7 @@ export const fw_nat_tuning: NvramProperty<"0" | "1" | "2"> = {
   key: "fw_nat_tuning",
   description:
     "Adjusts TCP/UDP buffer sizes. 0=Small (default), 1=Medium, 2=Large.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -3118,7 +3118,7 @@ export const gro_disable: NvramProperty<boolean> = {
   key: "gro_disable",
   description:
     "Disables Generic Receive Offload (GRO) for the network stack. Disabling it may be necessary for Samba to work correctly.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -3138,7 +3138,7 @@ export const http_enable: NvramProperty<boolean> = {
   key: "http_enable",
   description:
     "Enables local HTTP access to the router's web interface. The UI combines this with `https_enable` into a single 'Local Access' dropdown.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -3148,7 +3148,7 @@ export const http_id: NvramProperty<string> = {
   key: "http_id",
   description:
     "A session security token (CSRF token) used to validate POST requests. This is a read-only, session-specific value generated at login.",
-  page: "about.asp.html", // Appears on every page
+  page: "about.asp", // Appears on every page
   type: "string",
 };
 
@@ -3156,7 +3156,7 @@ export const http_ipv6: NvramProperty<boolean> = {
   key: "http_ipv6",
   description:
     "Allows the router's web interface to listen for connections on IPv6 addresses.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -3177,7 +3177,7 @@ export const http_lan_listeners: NvramProperty<number> = {
   key: "http_lan_listeners",
   description:
     "A bitmask controlling which LAN bridges (br0-br3) the web server listens on. Bit 0 for br0, bit 1 for br1, etc. UI shows separate checkboxes per LAN.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "integer",
   defaultValue: 7,
 };
@@ -3185,7 +3185,7 @@ export const http_lan_listeners: NvramProperty<number> = {
 export const http_lanport: NvramProperty<number> = {
   key: "http_lanport",
   description: "The TCP port for local HTTP access to the web interface.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "integer",
   defaultValue: 80,
   validation: portValidator,
@@ -3205,7 +3205,7 @@ export const http_nocache: NvramProperty<boolean> = {
   key: "http_nocache",
   description:
     "Adds 'no-cache' headers to HTTP responses for the web interface, telling browsers not to cache pages.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -3218,7 +3218,7 @@ export const http_username: NvramProperty<string> = {
   key: "http_username",
   description:
     "The username for logging into the web interface. Defaults to 'root' if empty.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "string",
   defaultValue: "root",
   validation: (value) => v_length(value, 0, 20),
@@ -3232,7 +3232,7 @@ export const http_wanport: NvramProperty<number> = {
   key: "http_wanport",
   description:
     "The TCP port for remote (WAN) access to the web interface. Ports 80 and 443 are disallowed.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "integer",
   defaultValue: 8080,
   validation: (value, allValues) => {
@@ -3261,7 +3261,7 @@ export const http_wanport_bfm: NvramProperty<boolean> = {
   key: "http_wanport_bfm",
   description:
     "Enables a brute force mitigation rule in the firewall for the remote web access port.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: true,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -3274,7 +3274,7 @@ export const https_crt_cn: NvramProperty<string> = {
   key: "https_crt_cn",
   description:
     "Optional Common Name(s) to be embedded in the self-signed SSL certificate for HTTPS.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "string",
   defaultValue: "",
   validation: (value) => v_length(value, 0, 64),
@@ -3287,7 +3287,7 @@ export const https_crt_save: NvramProperty<boolean> = {
   key: "https_crt_save",
   description:
     "If enabled, the generated SSL certificate and key will be saved to NVRAM, persisting across reboots.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: false,
   transform: { toUi: (v) => v === "1", fromUi: (v) => (v ? "1" : "0") },
@@ -3300,7 +3300,7 @@ export const https_enable: NvramProperty<boolean> = {
   key: "https_enable",
   description:
     "Enables local HTTPS access to the router's web interface. The UI combines this with `http_enable` into a single 'Local Access' dropdown.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -3309,7 +3309,7 @@ export const https_enable: NvramProperty<boolean> = {
 export const https_lanport: NvramProperty<number> = {
   key: "https_lanport",
   description: "The TCP port for local HTTPS access to the web interface.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "integer",
   defaultValue: 443,
   validation: (value, allValues) => {
@@ -3335,7 +3335,7 @@ export const idle_enable: NvramProperty<boolean> = {
   key: "idle_enable",
   description:
     "Enables spinning down each connected HDD when idle. Not necessary for flash drives.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -3355,7 +3355,7 @@ export const ipsec_pass: NvramProperty<"0" | "1" | "2" | "3"> = {
   key: "ipsec_pass",
   description:
     "Controls the passthrough of IPSec VPN traffic through the router's firewall.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "enum",
   defaultValue: "1",
   ui: {
@@ -3372,7 +3372,7 @@ export const ipsec_pass: NvramProperty<"0" | "1" | "2" | "3"> = {
 export const ipv6_6rd_borderrelay: NvramProperty<string> = {
   key: "ipv6_6rd_borderrelay",
   description: "The IPv4 address of the 6rd border relay provided by the ISP.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "ip",
   defaultValue: "68.113.165.1",
   ui: {
@@ -3391,7 +3391,7 @@ export const ipv6_6rd_ipv4masklen: NvramProperty<string> = {
   key: "ipv6_6rd_ipv4masklen",
   description:
     "The number of high-order bits of the ISP's IPv4 address that are identical across all 6rd CEs. Usually 0.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // Stored as a string, but represents a number
   defaultValue: "0",
   ui: {
@@ -3409,7 +3409,7 @@ export const ipv6_6rd_ipv4masklen: NvramProperty<string> = {
 export const ipv6_6rd_prefix: NvramProperty<string> = {
   key: "ipv6_6rd_prefix",
   description: "The IPv6 prefix assigned by the ISP for the 6rd tunnel.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // IPv6 Prefix
   defaultValue: "2602:100::",
   ui: {
@@ -3427,7 +3427,7 @@ export const ipv6_6rd_prefix: NvramProperty<string> = {
 export const ipv6_6rd_prefix_length: NvramProperty<string> = {
   key: "ipv6_6rd_prefix_length",
   description: "The length of the ISP-assigned IPv6 prefix for the 6rd tunnel.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // Stored as string, but represents a number
   defaultValue: "32",
   validation: (value) =>
@@ -3449,7 +3449,7 @@ export const ipv6_accept_ra: NvramProperty<number> = {
   key: "ipv6_accept_ra",
   description:
     "Bitmask controlling acceptance of IPv6 Router Advertisements. 1=WAN, 2=LAN.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "integer",
   defaultValue: 1,
   transform: {
@@ -3464,7 +3464,7 @@ export const ipv6_accept_ra: NvramProperty<number> = {
 export const ipv6_debug: NvramProperty<boolean> = {
   key: "ipv6_debug",
   description: "Starts the DHCPv6 client in debug mode for troubleshooting.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -3482,7 +3482,7 @@ export const ipv6_dhcpd: NvramProperty<boolean> = {
   key: "ipv6_dhcpd",
   description:
     "Enables the DHCPv6 server function on the LAN, allowing clients to obtain IPv6 addresses.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -3499,7 +3499,7 @@ export const ipv6_dhcpd: NvramProperty<boolean> = {
 export const ipv6_dns: NvramProperty<string> = {
   key: "ipv6_dns",
   description: "A space-separated list of static IPv6 DNS servers.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string",
   defaultValue: "2606:4700:4700::1111 2606:4700:4700::1001",
   ui: {
@@ -3511,7 +3511,7 @@ export const ipv6_dns_lan: NvramProperty<string> = {
   key: "ipv6_dns_lan",
   description:
     "A space-separated list of IPv6 DNS servers to be advertised to LAN clients via DHCPv6 or RA.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -3531,7 +3531,7 @@ export const ipv6_duid_type: NvramProperty<"1" | "3"> = {
   key: "ipv6_duid_type",
   description:
     "Specifies the type of DHCP Unique Identifier (DUID) to use for the DHCPv6 client.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "enum",
   defaultValue: "3",
   ui: {
@@ -3552,7 +3552,7 @@ export const ipv6_fast_ra: NvramProperty<boolean> = {
   key: "ipv6_fast_ra",
   description:
     "Forces dnsmasq to always be in frequent Router Advertisement (RA) mode.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -3570,7 +3570,7 @@ export const ipv6_ifname: NvramProperty<string> = {
   key: "ipv6_ifname",
   description:
     "Specifies the network interface name for the IPv6 tunnel (e.g., 'six0').",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string",
   defaultValue: "six0",
   validation: (value) =>
@@ -3591,7 +3591,7 @@ export const ipv6_isp_gw: NvramProperty<string> = {
   key: "ipv6_isp_gw",
   description:
     "The gateway IPv6 address provided by the ISP for a static IPv6 connection.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "ip",
   defaultValue: "",
   ui: {
@@ -3608,7 +3608,7 @@ export const ipv6_isp_opt: NvramProperty<boolean> = {
   key: "ipv6_isp_opt",
   description:
     "Adds a default IPv6 route (::/0) via the WAN interface. A workaround for some ISPs.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -3630,7 +3630,7 @@ export const ipv6_lease_time: NvramProperty<string> = {
   key: "ipv6_lease_time",
   description:
     "The lease time in hours for DHCPv6 addresses assigned to LAN clients.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "string", // Stored as string, but is a number
   defaultValue: "12",
   validation: (value) =>
@@ -3654,7 +3654,7 @@ export const ipv6_pd_norelease: NvramProperty<boolean> = {
   key: "ipv6_pd_norelease",
   description:
     "Prevents the DHCPv6 client from sending a release message on exit, increasing the likelihood of receiving the same prefix on subsequent requests.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -3672,7 +3672,7 @@ export const ipv6_pdonly: NvramProperty<boolean> = {
   key: "ipv6_pdonly",
   description:
     "Instructs the DHCPv6 client to only request a Prefix Delegation (PD), not a specific address. Often used for PPPoE connections.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -3698,7 +3698,7 @@ interface Ipv6PortForwardRule {
 export const ipv6_portforward: NvramProperty<Ipv6PortForwardRule[]> = {
   key: "ipv6_portforward",
   description: "A list of IPv6 port forwarding rules.",
-  page: "forward-basic-ipv6.asp.html",
+  page: "forward-basic-ipv6.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -3732,7 +3732,7 @@ export const ipv6_portforward: NvramProperty<Ipv6PortForwardRule[]> = {
 export const ipv6_prefix: NvramProperty<string> = {
   key: "ipv6_prefix",
   description: "The IPv6 prefix assigned to the LAN side of the router.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // IPv6 prefix
   validation: (value) => value === "" || true || "Invalid IPv6 prefix.", // TODO: implement ExpandIPv6Address validation
   ui: {
@@ -3750,7 +3750,7 @@ export const ipv6_prefix: NvramProperty<string> = {
 export const ipv6_prefix_len_wan: NvramProperty<string> = {
   key: "ipv6_prefix_len_wan",
   description: "The prefix length for the static WAN IPv6 address.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string",
   defaultValue: "64",
   validation: (value) =>
@@ -3769,7 +3769,7 @@ export const ipv6_prefix_len_wan: NvramProperty<string> = {
 export const ipv6_prefix_length: NvramProperty<string> = {
   key: "ipv6_prefix_length",
   description: "The prefix length for the assigned LAN IPv6 prefix.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string",
   defaultValue: "56",
   validation: (value) =>
@@ -3795,7 +3795,7 @@ export const ipv6_radvd: NvramProperty<boolean> = {
   key: "ipv6_radvd",
   description:
     "Enables Router Advertisement Daemon (radvd), allowing SLAAC (Stateless Address Autoconfiguration) on the LAN.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -3813,7 +3813,7 @@ export const ipv6_relay: NvramProperty<string> = {
   key: "ipv6_relay",
   description:
     "The last octet of the 6to4 anycast relay address (192.88.99.x).",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string",
   defaultValue: "1",
   validation: (value) =>
@@ -3833,7 +3833,7 @@ export const ipv6_rtr_addr: NvramProperty<string> = {
   key: "ipv6_rtr_addr",
   description:
     "Manually specified IPv6 address for the router on the LAN interface.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // IPv6 address
   ui: {
     label: "IPv6 Router LAN Address",
@@ -3852,7 +3852,7 @@ export const ipv6_service: NvramProperty<
 > = {
   key: "ipv6_service",
   description: "Defines the method for obtaining IPv6 connectivity.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "enum",
   defaultValue: "native-pd",
   ui: {
@@ -3874,7 +3874,7 @@ export const ipv6_tun_addr: NvramProperty<string> = {
   key: "ipv6_tun_addr",
   description:
     "The IPv6 address of the client (this router) side of a 6in4 static tunnel.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // IPv6 Address
   defaultValue: "",
   validation: (value) => value === "" || true || "Invalid IPv6 address.", // TODO: implement ExpandIPv6Address validation
@@ -3892,7 +3892,7 @@ export const ipv6_tun_addrlen: NvramProperty<string> = {
   key: "ipv6_tun_addrlen",
   description:
     "The prefix length of the client-side IPv6 address for a 6in4 static tunnel.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // number
   defaultValue: "64",
   validation: (value) =>
@@ -3910,7 +3910,7 @@ export const ipv6_tun_addrlen: NvramProperty<string> = {
 export const ipv6_tun_mtu: NvramProperty<string> = {
   key: "ipv6_tun_mtu",
   description: "The MTU for the IPv6 tunnel. 0 for default.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // number
   defaultValue: "0",
   validation: (value) => {
@@ -3936,7 +3936,7 @@ export const ipv6_tun_mtu: NvramProperty<string> = {
 export const ipv6_tun_ttl: NvramProperty<string> = {
   key: "ipv6_tun_ttl",
   description: "The TTL (Time To Live) for packets traversing the IPv6 tunnel.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // number
   defaultValue: "255",
   validation: (value) =>
@@ -3959,7 +3959,7 @@ export const ipv6_tun_ttl: NvramProperty<string> = {
 export const ipv6_tun_v4end: NvramProperty<string> = {
   key: "ipv6_tun_v4end",
   description: "The remote IPv4 endpoint of the 6in4 static tunnel.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "ip",
   defaultValue: "0.0.0.0",
   ui: {
@@ -3976,7 +3976,7 @@ export const ipv6_vlan: NvramProperty<string> = {
   key: "ipv6_vlan",
   description:
     "Bitmask to enable IPv6 subnet delegation to secondary LAN bridges. 1=LAN1, 2=LAN2, 4=LAN3.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // Bitmask
   defaultValue: "0",
   ui: {
@@ -3987,7 +3987,7 @@ export const ipv6_vlan: NvramProperty<string> = {
 export const ipv6_wan_addr: NvramProperty<string> = {
   key: "ipv6_wan_addr",
   description: "The static IPv6 address for the WAN interface.",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "string", // IPv6 address
   defaultValue: "",
   ui: {
@@ -4004,7 +4004,7 @@ export const jffs2_auto_unmount: NvramProperty<boolean> = {
   key: "jffs2_auto_unmount",
   description:
     "Automatically unmounts the JFFS partition during a firmware upgrade to help preserve its contents.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4017,7 +4017,7 @@ export const jffs2_exec: NvramProperty<string> = {
   key: "jffs2_exec",
   description:
     "A command or script to execute when the JFFS partition is mounted.",
-  page: "admin-jffs2.asp.html",
+  page: "admin-jffs2.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -4028,7 +4028,7 @@ export const jffs2_exec: NvramProperty<string> = {
 export const jffs2_on: NvramProperty<boolean> = {
   key: "jffs2_on",
   description: "Enables the JFFS2 (Journaling Flash File System) partition.",
-  page: "admin-jffs2.asp.html",
+  page: "admin-jffs2.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4040,7 +4040,7 @@ export const jffs2_on: NvramProperty<boolean> = {
 export const jumbo_frame_enable: NvramProperty<boolean> = {
   key: "jumbo_frame_enable",
   description: "Enables support for Jumbo Frames on Gigabit Ethernet ports.",
-  page: "advanced-misc.asp.html",
+  page: "advanced-misc.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4052,7 +4052,7 @@ export const jumbo_frame_enable: NvramProperty<boolean> = {
 export const jumbo_frame_size: NvramProperty<number> = {
   key: "jumbo_frame_size",
   description: "The size in bytes for Jumbo Frames.",
-  page: "advanced-misc.asp.html",
+  page: "advanced-misc.asp",
   type: "integer",
   defaultValue: 2000,
   validation: rangeValidator(1, 9720, "Jumbo Frame Size"),
@@ -4078,7 +4078,7 @@ interface LanAccessRule {
 export const lan_access: NvramProperty<LanAccessRule[]> = {
   key: "lan_access",
   description: "List of rules defining access between different LAN bridges.",
-  page: "advanced-access.asp.html",
+  page: "advanced-access.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -4113,7 +4113,7 @@ export const lan_desc: NvramProperty<boolean> = {
   key: "lan_desc",
   description:
     "Show speed information in the Ethernet Ports State section of the Overview page.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -4131,7 +4131,7 @@ export const lan_dhcp: NvramProperty<boolean> = {
   key: "lan_dhcp",
   description:
     "When enabled, the router obtains its LAN IP address from another DHCP server on the network (disabling its own).",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4144,7 +4144,7 @@ export const lan_gateway: NvramProperty<string> = {
   key: "lan_gateway",
   description:
     "The default gateway address for the LAN when the router is in 'Static' mode (lan_dhcp=0).",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "ip",
   defaultValue: "0.0.0.0",
   ui: {
@@ -4160,7 +4160,7 @@ export const lan_gateway: NvramProperty<string> = {
 export const lan_hwaddr: NvramProperty<string> = {
   key: "lan_hwaddr",
   description: "The hardware MAC address of the primary LAN (br0) interface.",
-  page: "advanced-mac.asp.html",
+  page: "advanced-mac.asp",
   type: "mac",
 };
 
@@ -4181,7 +4181,7 @@ export const lan_ifname: PatternedNvramProperty<LanBridgeParam, string> = {
   },
   description:
     "The interface name for the LAN bridge (e.g., br0, br1). An empty string means the bridge is disabled.",
-  page: "advanced-vlan.asp.html",
+  page: "advanced-vlan.asp",
   type: "string",
 };
 
@@ -4197,7 +4197,7 @@ export const lan_ifnames: PatternedNvramProperty<LanBridgeParam, string> = {
   },
   description:
     "A space-separated list of physical and virtual interfaces assigned to this LAN bridge.",
-  page: "advanced-vlan.asp.html",
+  page: "advanced-vlan.asp",
   type: "string",
 };
 
@@ -4205,7 +4205,7 @@ export const lan_invert: NvramProperty<boolean> = {
   key: "lan_invert",
   description:
     "Inverts the display order of ports in the Ethernet Ports State section of the Overview page.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4230,7 +4230,7 @@ export const lan_ipaddr: PatternedNvramProperty<LanBridgeParam, string> = {
     },
   },
   description: "The IP address for the specified LAN bridge.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "ip",
 };
 
@@ -4245,7 +4245,7 @@ export const lan_netmask: PatternedNvramProperty<LanBridgeParam, string> = {
     },
   },
   description: "The subnet mask for the specified LAN bridge.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "netmask",
 };
 
@@ -4264,14 +4264,14 @@ export const lan_proto: PatternedNvramProperty<
   },
   description:
     "Determines if the LAN bridge has DHCP server enabled ('dhcp') or not ('static').",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
 };
 
 export const lan_state: NvramProperty<boolean> = {
   key: "lan_state",
   description: "Enables the Ethernet Ports State section on the Overview page.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -4292,7 +4292,7 @@ export const lan_stp: PatternedNvramProperty<LanBridgeParam, boolean> = {
   },
   description:
     "Enables Spanning Tree Protocol (STP) on the specified LAN bridge to prevent network loops.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   transform: booleanTransformer,
   ui: {
@@ -4303,7 +4303,7 @@ export const lan_stp: PatternedNvramProperty<LanBridgeParam, boolean> = {
 export const log_dropdups: NvramProperty<boolean> = {
   key: "log_dropdups",
   description: "If enabled, syslog will drop duplicate log messages.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4316,7 +4316,7 @@ export const log_events: NvramProperty<string[]> = {
   key: "log_events",
   description:
     "A comma-separated list of specific system events to log (e.g., 'acre', 'crond').",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "list",
   defaultValue: [],
   transform: {
@@ -4331,7 +4331,7 @@ export const log_events: NvramProperty<string[]> = {
 export const log_file: NvramProperty<boolean> = {
   key: "log_file",
   description: "Enables logging to an internal buffer or file.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -4343,7 +4343,7 @@ export const log_file: NvramProperty<boolean> = {
 export const log_file_custom: NvramProperty<boolean> = {
   key: "log_file_custom",
   description: "Enables the use of a custom path for the log file.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4355,7 +4355,7 @@ export const log_file_custom: NvramProperty<boolean> = {
 export const log_file_keep: NvramProperty<number> = {
   key: "log_file_keep",
   description: "The number of rotated log files to keep.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "integer",
   defaultValue: 1,
   validation: rangeValidator(0, 99),
@@ -4367,7 +4367,7 @@ export const log_file_keep: NvramProperty<number> = {
 export const log_file_path: NvramProperty<string> = {
   key: "log_file_path",
   description: "The custom path and filename for the log file.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "string",
   defaultValue: "/var/log/messages",
 };
@@ -4375,7 +4375,7 @@ export const log_file_path: NvramProperty<string> = {
 export const log_file_size: NvramProperty<number> = {
   key: "log_file_size",
   description: "The maximum size in KB before the log file is rotated.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "integer",
   defaultValue: 50,
   validation: rangeValidator(0, 99999),
@@ -4387,7 +4387,7 @@ export const log_file_size: NvramProperty<number> = {
 export const log_ftp: NvramProperty<boolean> = {
   key: "log_ftp",
   description: "Enables logging of FTP server requests and responses.",
-  page: "nas-ftp.asp.html",
+  page: "nas-ftp.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4399,7 +4399,7 @@ export const log_ftp: NvramProperty<boolean> = {
 export const log_in: NvramProperty<"0" | "1" | "2" | "3"> = {
   key: "log_in",
   description: "Controls logging of inbound connections.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -4417,7 +4417,7 @@ export const log_limit: NvramProperty<number> = {
   key: "log_limit",
   description:
     "The maximum number of connection log messages per minute. 0 for unlimited.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "integer",
   defaultValue: 60,
   validation: rangeValidator(0, 2400, "messages per minute"),
@@ -4430,7 +4430,7 @@ export const log_mark: NvramProperty<string> = {
   key: "log_mark",
   description:
     "Interval in minutes for generating a '-- MARK --' entry in the log.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "enum",
   defaultValue: "60",
   ui: {
@@ -4451,7 +4451,7 @@ export const log_mark: NvramProperty<string> = {
 export const log_min_level: NvramProperty<string> = {
   key: "log_min_level",
   description: "Sets the minimum severity level for messages to be logged.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "enum",
   defaultValue: "8",
   ui: {
@@ -4472,7 +4472,7 @@ export const log_min_level: NvramProperty<string> = {
 export const log_out: NvramProperty<"0" | "1" | "2" | "3"> = {
   key: "log_out",
   description: "Controls logging of outbound connections.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -4489,7 +4489,7 @@ export const log_out: NvramProperty<"0" | "1" | "2" | "3"> = {
 export const log_remote: NvramProperty<boolean> = {
   key: "log_remote",
   description: "Enables sending log messages to a remote syslog server.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4501,7 +4501,7 @@ export const log_remote: NvramProperty<boolean> = {
 export const log_remoteip: NvramProperty<string> = {
   key: "log_remoteip",
   description: "The IP address or hostname of the remote syslog server.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -4512,7 +4512,7 @@ export const log_remoteip: NvramProperty<string> = {
 export const log_remoteport: NvramProperty<number> = {
   key: "log_remoteport",
   description: "The port of the remote syslog server.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "integer",
   defaultValue: 514,
   validation: portValidator,
@@ -4522,7 +4522,7 @@ export const log_wm: NvramProperty<boolean> = {
   key: "log_wm",
   description:
     "Enables the Web Monitor feature to log visited domains and web searches.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4534,7 +4534,7 @@ export const log_wm: NvramProperty<boolean> = {
 export const log_wmdmax: NvramProperty<number> = {
   key: "log_wmdmax",
   description: "The maximum number of visited domain entries to remember.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "integer",
   defaultValue: 2000,
   validation: rangeValidator(0, 9999),
@@ -4552,7 +4552,7 @@ export const log_wmip: NvramProperty<string> = {
   key: "log_wmip",
   description:
     "A comma-separated list of IP addresses or ranges to either include in or exclude from web monitoring, based on 'log_wmtype'.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -4570,7 +4570,7 @@ export const log_wmip: NvramProperty<string> = {
 export const log_wmsmax: NvramProperty<number> = {
   key: "log_wmsmax",
   description: "The maximum number of web search entries to remember.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "integer",
   defaultValue: 2000,
   validation: rangeValidator(0, 9999),
@@ -4587,7 +4587,7 @@ export const log_wmsmax: NvramProperty<number> = {
 export const log_wmtype: NvramProperty<"0" | "1" | "2"> = {
   key: "log_wmtype",
   description: "Determines which clients are monitored by the Web Monitor.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -4609,7 +4609,7 @@ export const macnames: NvramProperty<string> = {
   key: "macnames",
   description:
     "A list of MAC-to-hostname mappings, used by the Wireless Filter page. Format: 'MAC1<Name1>MAC2<Name2>...'",
-  page: "basic-wfilter.asp.html",
+  page: "basic-wfilter.asp",
   type: "string",
   defaultValue: "",
 };
@@ -4618,7 +4618,7 @@ export const manual_boot_nv: NvramProperty<boolean> = {
   key: "manual_boot_nv",
   description:
     "A flag used internally by the VLAN page to indicate that NVRAM settings have been manually modified and a reboot is required.",
-  page: "advanced-vlan.asp.html",
+  page: "advanced-vlan.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4628,7 +4628,7 @@ export const mdns_enable: NvramProperty<boolean> = {
   key: "mdns_enable",
   description:
     "Enables the Avahi mDNS (multicast DNS) daemon for zero-configuration networking.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4641,7 +4641,7 @@ export const mdns_reflector: NvramProperty<boolean> = {
   key: "mdns_reflector",
   description:
     "Enables the mDNS reflector, which forwards mDNS packets between different subnets (LAN bridges).",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -4658,7 +4658,7 @@ export const mdns_reflector: NvramProperty<boolean> = {
 export const model: NvramProperty<string> = {
   key: "model",
   description: "The router's model identifier string.",
-  page: "advanced-vlan.asp.html",
+  page: "advanced-vlan.asp",
   type: "string",
 };
 
@@ -4666,7 +4666,7 @@ export const ms_autoscan: NvramProperty<boolean> = {
   key: "ms_autoscan",
   description:
     "Enables automatic scanning of media directories at a 10-minute interval.",
-  page: "nas-media.asp.html",
+  page: "nas-media.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -4684,7 +4684,7 @@ export const ms_autoscan: NvramProperty<boolean> = {
 export const ms_custom: NvramProperty<string> = {
   key: "ms_custom",
   description: "Custom configuration options for the MiniDLNA media server.",
-  page: "nas-media.asp.html",
+  page: "nas-media.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -4698,7 +4698,7 @@ export const ms_dbdir: NvramProperty<string> = {
   key: "ms_dbdir",
   description:
     "Specifies the directory to store the MiniDLNA media database. Can be in RAM, JFFS, or a custom path.",
-  page: "nas-media.asp.html",
+  page: "nas-media.asp",
   type: "string",
   defaultValue: "",
   validation: (value, allValues) => {
@@ -4723,7 +4723,7 @@ export const ms_dirs: NvramProperty<MediaDir[]> = {
   key: "ms_dirs",
   description:
     "A list of directories and content filters for the MiniDLNA media server.",
-  page: "nas-media.asp.html",
+  page: "nas-media.asp",
   type: "structured-string",
   defaultValue: [{ directory: "/mnt", filter: "" }],
   transform: {
@@ -4748,7 +4748,7 @@ export const ms_dirs: NvramProperty<MediaDir[]> = {
 export const ms_enable: NvramProperty<boolean> = {
   key: "ms_enable",
   description: "Enables the MiniDLNA media server on startup.",
-  page: "nas-media.asp.html",
+  page: "nas-media.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4761,7 +4761,7 @@ export const ms_ifname: NvramProperty<string> = {
   key: "ms_ifname",
   description:
     "A comma-separated list of LAN bridge interfaces (e.g., 'br0,br1') on which the media server will be available.",
-  page: "nas-media.asp.html",
+  page: "nas-media.asp",
   type: "list",
   defaultValue: "br0",
   ui: {
@@ -4773,7 +4773,7 @@ export const ms_port: NvramProperty<number> = {
   key: "ms_port",
   description:
     "The port number for the MiniDLNA server. Set to 0 for a random port.",
-  page: "nas-media.asp.html",
+  page: "nas-media.asp",
   type: "integer",
   defaultValue: 0,
   validation: rangeValidator(0, 65535, "port"),
@@ -4786,7 +4786,7 @@ export const ms_sas: NvramProperty<boolean> = {
   key: "ms_sas",
   description:
     "Scan media directories at startup. Only available when the database location is not temporary RAM.",
-  page: "nas-media.asp.html",
+  page: "nas-media.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4803,7 +4803,7 @@ export const ms_stdlna: NvramProperty<boolean> = {
   key: "ms_stdlna",
   description:
     "Enforces strict adherence to DLNA standards, which may improve compatibility with some devices but break functionality with others.",
-  page: "nas-media.asp.html",
+  page: "nas-media.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4815,7 +4815,7 @@ export const ms_stdlna: NvramProperty<boolean> = {
 export const ms_tivo: NvramProperty<boolean> = {
   key: "ms_tivo",
   description: "Enables specific workarounds for TiVo devices.",
-  page: "nas-media.asp.html",
+  page: "nas-media.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4828,7 +4828,7 @@ export const multicast_custom: NvramProperty<string> = {
   key: "multicast_custom",
   description:
     "Custom configuration for the IGMP proxy service. This is used when none of the standard LAN bridge options are selected.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -4843,7 +4843,7 @@ const multicastLanProperty = (
 ): NvramProperty<boolean> => ({
   key: `multicast_lan${lanIndex === 0 ? "" : lanIndex}`,
   description: `Enables the IGMP proxy on the LAN${lanIndex} (br${lanIndex}) interface.`,
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4873,7 +4873,7 @@ export const multicast_pass: NvramProperty<boolean> = {
   key: "multicast_pass",
   description:
     "Globally enables or disables the IGMP proxy service, which allows multicast traffic to pass between WAN and LAN.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4886,7 +4886,7 @@ export const multicast_quickleave: NvramProperty<boolean> = {
   key: "multicast_quickleave",
   description:
     "Enables the IGMP proxy's quickleave feature, which sends a Leave message upstream as soon as a Leave is received from a downstream client.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -4899,7 +4899,7 @@ export const mwan_ckdst: NvramProperty<[string, string]> = {
   key: "mwan_ckdst",
   description:
     "A comma-separated list of up to two IP addresses or domain names to use as targets for the MultiWAN connection check (watchdog).",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "list",
   defaultValue: ["1.1.1.1", "google.com"],
   transform: {
@@ -4917,7 +4917,7 @@ export const mwan_cktime: NvramProperty<
   key: "mwan_cktime",
   description:
     "The interval in seconds for the MultiWAN connection check (watchdog). 0 disables the check.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: 0,
   ui: {
@@ -4939,7 +4939,7 @@ export const mwan_cktime: NvramProperty<
 export const mwan_num: NvramProperty<1 | 2 | 3 | 4> = {
   key: "mwan_num",
   description: "The number of logical WAN interfaces to enable.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: 1,
   ui: {
@@ -4957,7 +4957,7 @@ export const mwan_tune_gc: NvramProperty<boolean> = {
   key: "mwan_tune_gc",
   description:
     "Tunes the route cache garbage collection for multi-WAN in load balancing mode.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4975,7 +4975,7 @@ export const mysql_allow_anyhost: NvramProperty<boolean> = {
   key: "mysql_allow_anyhost",
   description:
     "Allows any host to connect to the MySQL database server. If disabled, only localhost connections are allowed.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -4987,7 +4987,7 @@ export const mysql_allow_anyhost: NvramProperty<boolean> = {
 export const mysql_binary: NvramProperty<"internal" | "optware" | "custom"> = {
   key: "mysql_binary",
   description: "Specifies the location of the MySQL server binaries.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "enum",
   defaultValue: "internal",
   ui: {
@@ -5004,7 +5004,7 @@ export const mysql_binary_custom: NvramProperty<string> = {
   key: "mysql_binary_custom",
   description:
     "The custom path to the MySQL binaries, used when 'mysql_binary' is set to 'custom'.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "string",
   defaultValue: "/mnt/sda1/mysql/bin",
   ui: {
@@ -5020,7 +5020,7 @@ export const mysql_check_time: NvramProperty<number> = {
   key: "mysql_check_time",
   description:
     "The interval in minutes for the keep-alive check to ensure the MySQL daemon is running. 0 disables the check.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 5,
   validation: rangeValidator(0, 55, "minutes"),
@@ -5033,7 +5033,7 @@ export const mysql_datadir: NvramProperty<string> = {
   key: "mysql_datadir",
   description:
     "The subdirectory under the mounted USB partition to use for MySQL data files.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "string",
   defaultValue: "data",
   ui: {
@@ -5045,7 +5045,7 @@ export const mysql_dlroot: NvramProperty<string> = {
   key: "mysql_dlroot",
   description:
     "The mount point of the USB partition to use for the MySQL server.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -5061,7 +5061,7 @@ export const mysql_enable: NvramProperty<boolean> = {
   key: "mysql_enable",
   description:
     "Enables the MySQL server to start automatically on router boot.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5074,7 +5074,7 @@ export const mysql_init_priv: NvramProperty<boolean> = {
   key: "mysql_init_priv",
   description:
     "Forces a re-initialization of the MySQL privilege tables on the next start.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5087,7 +5087,7 @@ export const mysql_init_rootpass: NvramProperty<boolean> = {
   key: "mysql_init_rootpass",
   description:
     "Forces a re-initialization of the MySQL root user's password on the next start.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5099,7 +5099,7 @@ export const mysql_init_rootpass: NvramProperty<boolean> = {
 export const mysql_key_buffer: NvramProperty<number> = {
   key: "mysql_key_buffer",
   description: "Size of the buffer used for index blocks, in MB.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 16,
   validation: rangeValidator(1, 1024),
@@ -5112,7 +5112,7 @@ export const mysql_max_allowed_packet: NvramProperty<number> = {
   key: "mysql_max_allowed_packet",
   description:
     "The maximum size of one packet or any generated/intermediate string, in MB.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 4,
   validation: rangeValidator(1, 1024000),
@@ -5124,7 +5124,7 @@ export const mysql_max_allowed_packet: NvramProperty<number> = {
 export const mysql_max_connections: NvramProperty<number> = {
   key: "mysql_max_connections",
   description: "The maximum number of simultaneous client connections.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 100,
   validation: rangeValidator(1, 999999),
@@ -5136,7 +5136,7 @@ export const mysql_max_connections: NvramProperty<number> = {
 export const mysql_passwd: NvramProperty<string> = {
   key: "mysql_passwd",
   description: "The password for the MySQL root user.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "string",
   defaultValue: "admin",
   validation: (value) => value.trim() !== "" || "Password cannot be empty.",
@@ -5154,7 +5154,7 @@ export const mysql_port: NvramProperty<number> = {
   key: "mysql_port",
   description:
     "The TCP port on which the MySQL server listens for connections.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 3306,
   validation: portValidator,
@@ -5167,7 +5167,7 @@ export const mysql_query_cache_size: NvramProperty<number> = {
   key: "mysql_query_cache_size",
   description:
     "The amount of memory allocated for caching query results, in MB.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 16,
   validation: rangeValidator(1, 1024),
@@ -5180,7 +5180,7 @@ export const mysql_read_buffer_size: NvramProperty<number> = {
   key: "mysql_read_buffer_size",
   description:
     "The size of the buffer used for sequential scans of MyISAM tables, in KB.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 128,
   validation: rangeValidator(1, 1024000),
@@ -5193,7 +5193,7 @@ export const mysql_read_rnd_buffer_size: NvramProperty<number> = {
   key: "mysql_read_rnd_buffer_size",
   description:
     "The size of the buffer used for reading rows in sorted order, in KB.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 256,
   validation: rangeValidator(1, 1024000),
@@ -5205,7 +5205,7 @@ export const mysql_read_rnd_buffer_size: NvramProperty<number> = {
 export const mysql_server_custom: NvramProperty<string> = {
   key: "mysql_server_custom",
   description: "Custom configuration parameters for the MySQL server.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -5216,7 +5216,7 @@ export const mysql_server_custom: NvramProperty<string> = {
 export const mysql_sleep: NvramProperty<number> = {
   key: "mysql_sleep",
   description: "Delay in seconds before starting the MySQL daemon at boot.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 2,
   validation: rangeValidator(1, 60),
@@ -5229,7 +5229,7 @@ export const mysql_sort_buffer_size: NvramProperty<number> = {
   key: "mysql_sort_buffer_size",
   description:
     "The size of the buffer allocated for each session that needs to perform a sort, in KB.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 128,
   validation: rangeValidator(1, 1024000),
@@ -5241,7 +5241,7 @@ export const mysql_sort_buffer_size: NvramProperty<number> = {
 export const mysql_table_open_cache: NvramProperty<number> = {
   key: "mysql_table_open_cache",
   description: "The number of open tables for all threads.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 4,
   validation: rangeValidator(1, 999999),
@@ -5253,7 +5253,7 @@ export const mysql_table_open_cache: NvramProperty<number> = {
 export const mysql_thread_cache_size: NvramProperty<number> = {
   key: "mysql_thread_cache_size",
   description: "How many threads the server should cache for reuse.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 8,
   validation: rangeValidator(1, 999999),
@@ -5265,7 +5265,7 @@ export const mysql_thread_cache_size: NvramProperty<number> = {
 export const mysql_thread_stack: NvramProperty<number> = {
   key: "mysql_thread_stack",
   description: "The stack size for each thread, in KB.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "integer",
   defaultValue: 128,
   validation: rangeValidator(1, 1024000),
@@ -5278,7 +5278,7 @@ export const mysql_tmpdir: NvramProperty<string> = {
   key: "mysql_tmpdir",
   description:
     "The subdirectory under the mounted USB partition to use for MySQL temporary files.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "string",
   defaultValue: "tmp",
   ui: {
@@ -5289,7 +5289,7 @@ export const mysql_tmpdir: NvramProperty<string> = {
 export const mysql_usb_enable: NvramProperty<boolean> = {
   key: "mysql_usb_enable",
   description: "Enables the use of a USB partition for storing MySQL data.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -5302,7 +5302,7 @@ export const mysql_username: NvramProperty<string> = {
   key: "mysql_username",
   description:
     "The username for the MySQL root account. This is typically 'root' and not user-configurable from the UI.",
-  page: "web-mysql.asp.html",
+  page: "web-mysql.asp",
   type: "string",
   defaultValue: "root",
   ui: {
@@ -5314,7 +5314,7 @@ export const NC_AllowedWebHosts: NvramProperty<string> = {
   key: "NC_AllowedWebHosts",
   description:
     "A space-separated list of URLs that are excluded from the Captive Portal, allowing direct access.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -5326,7 +5326,7 @@ export const NC_BridgeLAN: NvramProperty<"br0" | "br1" | "br2" | "br3"> = {
   key: "NC_BridgeLAN",
   description:
     "The LAN bridge interface on which the Captive Portal will be active.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "enum",
   defaultValue: "br0",
   ui: {
@@ -5344,7 +5344,7 @@ export const NC_DocumentRoot: NvramProperty<string> = {
   key: "NC_DocumentRoot",
   description:
     "The path to the directory containing the splash.html welcome page for the Captive Portal.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "string",
   defaultValue: "/tmp/splashd",
   ui: {
@@ -5355,7 +5355,7 @@ export const NC_DocumentRoot: NvramProperty<string> = {
 export const NC_enable: NvramProperty<boolean> = {
   key: "NC_enable",
   description: "Enables the Captive Portal (NoCatSplash) feature.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5368,7 +5368,7 @@ export const NC_ExcludePorts: NvramProperty<string> = {
   key: "NC_ExcludePorts",
   description:
     "A space-separated list of TCP/UDP ports to exclude from Captive Portal redirection.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "string",
   defaultValue: "1863",
   ui: {
@@ -5380,7 +5380,7 @@ export const NC_ForcedRedirect: NvramProperty<boolean> = {
   key: "NC_ForcedRedirect",
   description:
     "If enabled, users will be redirected to the specified 'Home Page' after accepting the splash page.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5393,7 +5393,7 @@ export const NC_GatewayName: NvramProperty<string> = {
   key: "NC_GatewayName",
   description:
     "The name of the gateway that appears on the Captive Portal splash page.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "string",
   defaultValue: "FreshTomato Captive Portal",
   validation: (value) =>
@@ -5406,7 +5406,7 @@ export const NC_GatewayName: NvramProperty<string> = {
 export const NC_GatewayPort: NvramProperty<number> = {
   key: "NC_GatewayPort",
   description: "The TCP port used by the Captive Portal for page redirection.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "integer",
   defaultValue: 5280,
   validation: portValidator,
@@ -5419,7 +5419,7 @@ export const NC_HomePage: NvramProperty<string> = {
   key: "NC_HomePage",
   description:
     "The URL to which users are redirected after accepting the splash page, if 'Forced Redirect' is enabled.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "string",
   defaultValue: "https://startpage.com",
   validation: (value, allValues) => {
@@ -5442,7 +5442,7 @@ export const NC_IdleTimeout: NvramProperty<number> = {
   key: "NC_IdleTimeout",
   description:
     "The time in seconds after which an idle user's session will expire. 0 means unlimited.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "integer",
   defaultValue: 0,
   validation: (value) =>
@@ -5456,7 +5456,7 @@ export const NC_IncludePorts: NvramProperty<string> = {
   key: "NC_IncludePorts",
   description:
     "A space-separated list of TCP/UDP ports to explicitly include in Captive Portal redirection.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -5468,7 +5468,7 @@ export const NC_LoginTimeout: NvramProperty<string> = {
   key: "NC_LoginTimeout",
   description:
     "The duration in seconds for which a user's session remains active after they accept the splash page.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "string", // Stored as string, but behaves like integer
   defaultValue: "3600",
   ui: {
@@ -5480,7 +5480,7 @@ export const NC_MACWhiteList: NvramProperty<string> = {
   key: "NC_MACWhiteList",
   description:
     "A space-separated list of MAC addresses that are exempt from the Captive Portal.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -5492,7 +5492,7 @@ export const NC_MaxMissedARP: NvramProperty<string> = {
   key: "NC_MaxMissedARP",
   description:
     "The number of missed ARP requests before a client is considered to have disconnected.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "string", // Stored as string, but behaves like integer
   defaultValue: "5",
   ui: {
@@ -5503,7 +5503,7 @@ export const NC_MaxMissedARP: NvramProperty<string> = {
 export const NC_Verbosity: NvramProperty<string> = {
   key: "NC_Verbosity",
   description: "The logging level for the Captive Portal service.",
-  page: "splashd.asp.html",
+  page: "splashd.asp",
   type: "string", // Stored as string, but behaves like integer
   defaultValue: "2",
   ui: {
@@ -5520,7 +5520,7 @@ export const ne_shlimit: NvramProperty<Shlimit> = {
   key: "ne_shlimit",
   description:
     "Configures rate limiting for SSH and Telnet connection attempts to prevent brute-force attacks.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "structured-string",
   defaultValue: { mode: 1, hits: 3, seconds: 60 },
   transform: {
@@ -5543,7 +5543,7 @@ export const ne_snat: NvramProperty<"0" | "1"> = {
   key: "ne_snat",
   description:
     "Selects the NAT target to use. MASQUERADE is more flexible but may have a performance overhead compared to SNAT.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -5558,7 +5558,7 @@ export const ne_snat: NvramProperty<"0" | "1"> = {
 export const ne_syncookies: NvramProperty<boolean> = {
   key: "ne_syncookies",
   description: "Enables TCP SYN cookies to mitigate SYN flood attacks.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5571,7 +5571,7 @@ export const ne_valpha: NvramProperty<string> = {
   key: "ne_valpha",
   description:
     "Alpha parameter for the TCP Vegas congestion control algorithm.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "string",
   defaultValue: "2",
   validation: (value) => rangeValidator(0, 65535)(parseInt(value, 10)),
@@ -5583,7 +5583,7 @@ export const ne_valpha: NvramProperty<string> = {
 export const ne_vbeta: NvramProperty<string> = {
   key: "ne_vbeta",
   description: "Beta parameter for the TCP Vegas congestion control algorithm.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "string",
   defaultValue: "6",
   validation: (value) => rangeValidator(0, 65535)(parseInt(value, 10)),
@@ -5596,7 +5596,7 @@ export const ne_vegas: NvramProperty<boolean> = {
   key: "ne_vegas",
   description:
     "Enables the TCP Vegas congestion control algorithm for router-generated traffic, which prioritizes latency over throughput.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5609,7 +5609,7 @@ export const ne_vgamma: NvramProperty<string> = {
   key: "ne_vgamma",
   description:
     "Gamma parameter for the TCP Vegas congestion control algorithm.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "string",
   defaultValue: "2",
   validation: (value) => rangeValidator(0, 65535)(parseInt(value, 10)),
@@ -5621,7 +5621,7 @@ export const ne_vgamma: NvramProperty<string> = {
 export const nf_ftp: NvramProperty<boolean> = {
   key: "nf_ftp",
   description: "Enables the connection tracking helper for the FTP protocol.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -5634,7 +5634,7 @@ export const nf_h323: NvramProperty<boolean> = {
   key: "nf_h323",
   description:
     "Enables the connection tracking helper for the H.323 VoIP protocol.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -5646,7 +5646,7 @@ export const nf_h323: NvramProperty<boolean> = {
 export const nf_l7in: NvramProperty<boolean> = {
   key: "nf_l7in",
   description: "Enables Layer 7 protocol matching for inbound traffic.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -5658,7 +5658,7 @@ export const nf_l7in: NvramProperty<boolean> = {
 export const nf_loopback: NvramProperty<"0" | "1" | "2"> = {
   key: "nf_loopback",
   description: "Controls NAT loopback (hairpin NAT) functionality.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "enum",
   defaultValue: "1",
   ui: {
@@ -5675,7 +5675,7 @@ export const nf_pptp: NvramProperty<boolean> = {
   key: "nf_pptp",
   description:
     "Enables the connection tracking helper for the GRE/PPTP protocol.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -5687,7 +5687,7 @@ export const nf_pptp: NvramProperty<boolean> = {
 export const nf_rtsp: NvramProperty<boolean> = {
   key: "nf_rtsp",
   description: "Enables the connection tracking helper for the RTSP protocol.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5700,7 +5700,7 @@ export const nf_sip: NvramProperty<boolean> = {
   key: "nf_sip",
   description:
     "Enables the connection tracking helper for the SIP VoIP protocol.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5713,7 +5713,7 @@ export const nf_ttl: NvramProperty<string> = {
   key: "nf_ttl",
   description:
     "Adjusts the Time-To-Live (TTL) value of packets passing through the router. Can be a fixed increment/decrement or a custom value.",
-  page: "advanced-ctnf.asp.html",
+  page: "advanced-ctnf.asp",
   type: "string",
   defaultValue: "0",
   ui: {
@@ -5724,7 +5724,7 @@ export const nf_ttl: NvramProperty<string> = {
 export const nfs_enable: NvramProperty<boolean> = {
   key: "nfs_enable",
   description: "Enables the NFS server.",
-  page: "admin-nfs.asp.html",
+  page: "admin-nfs.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5736,7 +5736,7 @@ export const nfs_enable: NvramProperty<boolean> = {
 export const nfs_enable_v2: NvramProperty<boolean> = {
   key: "nfs_enable_v2",
   description: "Enables support for the legacy NFSv2 protocol.",
-  page: "admin-nfs.asp.html",
+  page: "admin-nfs.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5757,7 +5757,7 @@ export const nfs_exports: NvramProperty<NfsExportEntry[]> = {
   key: "nfs_exports",
   description:
     "A list of directories to be shared via NFS, along with their access permissions and options.",
-  page: "admin-nfs.asp.html",
+  page: "admin-nfs.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -5795,7 +5795,7 @@ export const nginx_custom: NvramProperty<string> = {
   key: "nginx_custom",
   description:
     "Custom configuration directives to be added to the main nginx.conf file.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -5808,7 +5808,7 @@ export const nginx_custom: NvramProperty<string> = {
 export const nginx_docroot: NvramProperty<string> = {
   key: "nginx_docroot",
   description: "The root directory for the Nginx web server's content.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "string",
   defaultValue: "/www",
   validation: pathValidator,
@@ -5820,7 +5820,7 @@ export const nginx_docroot: NvramProperty<string> = {
 export const nginx_enable: NvramProperty<boolean> = {
   key: "nginx_enable",
   description: "Enables the Nginx web server to start on boot.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5833,7 +5833,7 @@ export const nginx_fqdn: NvramProperty<string> = {
   key: "nginx_fqdn",
   description:
     "The server name (fully qualified domain name) for the Nginx web server.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "string",
   defaultValue: "FreshTomato",
   ui: {
@@ -5845,7 +5845,7 @@ export const nginx_h5aisupport: NvramProperty<boolean> = {
   key: "nginx_h5aisupport",
   description:
     "Enables support for h5ai, a modern file indexer for web servers.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5858,7 +5858,7 @@ export const nginx_httpcustom: NvramProperty<string> = {
   key: "nginx_httpcustom",
   description:
     "Custom configuration directives to be added within the 'http' block of nginx.conf.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -5872,7 +5872,7 @@ export const nginx_keepconf: NvramProperty<boolean> = {
   key: "nginx_keepconf",
   description:
     "If enabled, manually edited Nginx configuration files will not be overwritten by the GUI.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5885,7 +5885,7 @@ export const nginx_override: NvramProperty<boolean> = {
   key: "nginx_override",
   description:
     "If enabled, a user-provided nginx.conf file will be used instead of the GUI-generated one.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5898,7 +5898,7 @@ export const nginx_overridefile: NvramProperty<string> = {
   key: "nginx_overridefile",
   description:
     "The path to the custom nginx.conf file to use when 'nginx_override' is enabled.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "string",
   defaultValue: "/path/to/nginx.conf",
   validation: pathValidator,
@@ -5910,7 +5910,7 @@ export const nginx_overridefile: NvramProperty<string> = {
 export const nginx_php: NvramProperty<boolean> = {
   key: "nginx_php",
   description: "Enables PHP support for the Nginx web server via php-fpm.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5922,7 +5922,7 @@ export const nginx_php: NvramProperty<boolean> = {
 export const nginx_phpconf: NvramProperty<string> = {
   key: "nginx_phpconf",
   description: "Custom configuration directives for the php.ini file.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -5935,7 +5935,7 @@ export const nginx_phpconf: NvramProperty<string> = {
 export const nginx_phpfpmconf: NvramProperty<string> = {
   key: "nginx_phpfpmconf",
   description: "Custom configuration directives for the php-fpm.conf file.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -5949,7 +5949,7 @@ export const nginx_port: NvramProperty<number> = {
   key: "nginx_port",
   description:
     "The TCP port on which the Nginx web server listens. Also used by MySQL admin interface.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "integer",
   defaultValue: 85,
   validation: portValidator,
@@ -5962,7 +5962,7 @@ export const nginx_priority: NvramProperty<number> = {
   key: "nginx_priority",
   description:
     "The scheduling priority (nice value) for the Nginx process. Ranges from -20 (highest) to 19 (lowest).",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "integer",
   defaultValue: 10,
   validation: rangeValidator(-20, 19),
@@ -5975,7 +5975,7 @@ export const nginx_remote: NvramProperty<boolean> = {
   key: "nginx_remote",
   description:
     "Allows the Nginx web server to be accessed from the WAN interface.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -5988,7 +5988,7 @@ export const nginx_upload: NvramProperty<number> = {
   key: "nginx_upload",
   description:
     "The maximum allowed size for file uploads via the Nginx server, in MB.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "integer",
   defaultValue: 100,
   validation: rangeValidator(0, 512),
@@ -6001,7 +6001,7 @@ export const nginx_user: NvramProperty<"root" | "nobody"> = {
   key: "nginx_user",
   description:
     "The user account under which the Nginx and PHP-FPM processes will run.",
-  page: "web-nginx.asp.html",
+  page: "web-nginx.asp",
   type: "enum",
   defaultValue: "root",
   ui: {
@@ -6017,7 +6017,7 @@ export const ntp_server: NvramProperty<string> = {
   key: "ntp_server",
   description:
     "A space-separated list of NTP servers to use for time synchronization.",
-  page: "basic-time.asp.html",
+  page: "basic-time.asp",
   type: "string",
   defaultValue:
     "0.north-america.pool.ntp.org 1.north-america.pool.ntp.org 2.north-america.pool.ntp.org",
@@ -6029,7 +6029,7 @@ export const ntp_server: NvramProperty<string> = {
 export const ntp_updates: NvramProperty<"-1" | "0" | "1"> = {
   key: "ntp_updates",
   description: "Controls the NTP client's behavior for time synchronization.",
-  page: "basic-time.asp.html",
+  page: "basic-time.asp",
   type: "enum",
   defaultValue: "1",
   ui: {
@@ -6046,7 +6046,7 @@ export const ntpd_enable: NvramProperty<"0" | "1" | "2"> = {
   key: "ntpd_enable",
   description:
     "Enables the built-in NTP server to provide time to LAN and/or WAN clients.",
-  page: "basic-time.asp.html",
+  page: "basic-time.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -6063,7 +6063,7 @@ export const ntpd_server_redir: NvramProperty<boolean> = {
   key: "ntpd_server_redir",
   description:
     "If enabled, all NTP requests from LAN clients will be intercepted and redirected to the router's local NTP server.",
-  page: "basic-time.asp.html",
+  page: "basic-time.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6088,7 +6088,7 @@ export const pbr_rules: NvramProperty<PbrRule[]> = {
   key: "pbr_rules",
   description:
     "A list of Policy-Based Routing rules to direct specific traffic through a designated WAN interface.",
-  page: "advanced-pbr.asp.html",
+  page: "advanced-pbr.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -6151,7 +6151,7 @@ export const pci_wl_country_code: PatternedNvramProperty<
   },
   description:
     "PCI-specific wireless country code. This is a lower-level setting often mirrored by `wlX_country_code`.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
 };
 
@@ -6169,7 +6169,7 @@ export const pci_wl_country_rev: PatternedNvramProperty<
     },
   },
   description: "PCI-specific wireless country revision number.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "integer",
   validation: (value) => (value >= 0 && value <= 999) || "Valid range: 0 - 999",
 };
@@ -6186,7 +6186,7 @@ interface PortForwardRule {
 export const portforward: NvramProperty<PortForwardRule[]> = {
   key: "portforward",
   description: "A list of port forwarding rules.",
-  page: "forward-basic.asp.html",
+  page: "forward-basic.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -6231,7 +6231,7 @@ export const portforward: NvramProperty<PortForwardRule[]> = {
 export const pptp_client_crypt: NvramProperty<"0" | "1" | "2" | "3"> = {
   key: "pptp_client_crypt",
   description: "Specifies the encryption level for the PPTP client connection.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -6248,7 +6248,7 @@ export const pptp_client_crypt: NvramProperty<"0" | "1" | "2" | "3"> = {
 export const pptp_client_custom: NvramProperty<string> = {
   key: "pptp_client_custom",
   description: "Custom options for the PPTP client.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -6260,7 +6260,7 @@ export const pptp_client_dfltroute: NvramProperty<boolean> = {
   key: "pptp_client_dfltroute",
   description:
     "If enabled, redirects all internet traffic through the PPTP tunnel.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6272,7 +6272,7 @@ export const pptp_client_dfltroute: NvramProperty<boolean> = {
 export const pptp_client_eas: NvramProperty<boolean> = {
   key: "pptp_client_eas",
   description: "Enables the PPTP client to start on boot.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6285,7 +6285,7 @@ export const pptp_client_mppeopt: NvramProperty<string> = {
   key: "pptp_client_mppeopt",
   description:
     "Microsoft Point-to-Point Encryption (MPPE) options for the PPTP client. (Note: Not directly configurable in the UI shown, but is part of PPTP).",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "string",
   defaultValue: "",
 };
@@ -6293,7 +6293,7 @@ export const pptp_client_mppeopt: NvramProperty<string> = {
 export const pptp_client_mru: NvramProperty<string> = {
   key: "pptp_client_mru",
   description: "Maximum Receive Unit for the PPTP client connection.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "string",
   defaultValue: "1400",
   validation: (value) => rangeValidator(576, 1500)(parseInt(value, 10)),
@@ -6306,7 +6306,7 @@ export const pptp_client_mruenable: NvramProperty<"0" | "1"> = {
   key: "pptp_client_mruenable",
   description:
     "Enables manual configuration of the Maximum Receive Unit (MRU).",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -6321,7 +6321,7 @@ export const pptp_client_mruenable: NvramProperty<"0" | "1"> = {
 export const pptp_client_mtu: NvramProperty<string> = {
   key: "pptp_client_mtu",
   description: "Maximum Transmission Unit for the PPTP client connection.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "string",
   defaultValue: "1400",
   validation: (value) => rangeValidator(576, 1500)(parseInt(value, 10)),
@@ -6334,7 +6334,7 @@ export const pptp_client_mtuenable: NvramProperty<"0" | "1"> = {
   key: "pptp_client_mtuenable",
   description:
     "Enables manual configuration of the Maximum Transmission Unit (MTU).",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -6350,7 +6350,7 @@ export const pptp_client_nat: NvramProperty<boolean> = {
   key: "pptp_client_nat",
   description:
     "Creates NAT on the PPTP tunnel, allowing LAN clients to access the internet through the VPN.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6362,7 +6362,7 @@ export const pptp_client_nat: NvramProperty<boolean> = {
 export const pptp_client_passwd: NvramProperty<string> = {
   key: "pptp_client_passwd",
   description: "The password for the PPTP client connection.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -6373,7 +6373,7 @@ export const pptp_client_passwd: NvramProperty<string> = {
 export const pptp_client_peerdns: NvramProperty<"0" | "1" | "2"> = {
   key: "pptp_client_peerdns",
   description: "Controls how DNS servers provided by the PPTP server are used.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -6389,7 +6389,7 @@ export const pptp_client_peerdns: NvramProperty<"0" | "1" | "2"> = {
 export const pptp_client_srvip: NvramProperty<string> = {
   key: "pptp_client_srvip",
   description: "The IP address or domain name of the remote PPTP server.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "string",
   defaultValue: "",
   validation: (value) => {
@@ -6413,7 +6413,7 @@ export const pptp_client_srvsub: NvramProperty<string> = {
   key: "pptp_client_srvsub",
   description:
     "The network address of the remote subnet to be routed through the PPTP tunnel.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "ip",
   defaultValue: "10.0.0.0",
   ui: {
@@ -6424,7 +6424,7 @@ export const pptp_client_srvsub: NvramProperty<string> = {
 export const pptp_client_srvsubmsk: NvramProperty<string> = {
   key: "pptp_client_srvsubmsk",
   description: "The netmask of the remote subnet.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "netmask",
   defaultValue: "255.0.0.0",
 };
@@ -6432,7 +6432,7 @@ export const pptp_client_srvsubmsk: NvramProperty<string> = {
 export const pptp_client_stateless: NvramProperty<boolean> = {
   key: "pptp_client_stateless",
   description: "Enables stateless MPPE connection mode.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -6444,7 +6444,7 @@ export const pptp_client_stateless: NvramProperty<boolean> = {
 export const pptp_client_username: NvramProperty<string> = {
   key: "pptp_client_username",
   description: "The username for the PPTP client connection.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -6457,7 +6457,7 @@ export const pptp_client_usewan: NvramProperty<
 > = {
   key: "pptp_client_usewan",
   description: "Binds the PPTP client to a specific WAN interface.",
-  page: "vpn-pptp.asp.html",
+  page: "vpn-pptp.asp",
   type: "enum",
   defaultValue: "none",
   ui: {
@@ -6478,7 +6478,7 @@ export const pptpd_broadcast: NvramProperty<
   key: "pptpd_broadcast",
   description:
     "Controls broadcast relay mode between the LAN and connected VPN clients.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "enum",
   defaultValue: "disable",
   ui: {
@@ -6496,7 +6496,7 @@ export const pptpd_chap: NvramProperty<"0" | "1" | "2"> = {
   key: "pptpd_chap",
   description:
     "Specifies the required CHAP authentication method for the PPTP server.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -6513,7 +6513,7 @@ export const pptpd_custom: NvramProperty<string> = {
   key: "pptpd_custom",
   description:
     "Custom configuration options for the PoPToP (PPTP server) daemon.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -6524,7 +6524,7 @@ export const pptpd_custom: NvramProperty<string> = {
 export const pptpd_dns1: NvramProperty<string> = {
   key: "pptpd_dns1",
   description: "Primary DNS server IP to be assigned to PPTP clients.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "ip",
   defaultValue: "",
   ui: {
@@ -6535,7 +6535,7 @@ export const pptpd_dns1: NvramProperty<string> = {
 export const pptpd_dns2: NvramProperty<string> = {
   key: "pptpd_dns2",
   description: "Secondary DNS server IP to be assigned to PPTP clients.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "ip",
   defaultValue: "",
 };
@@ -6543,7 +6543,7 @@ export const pptpd_dns2: NvramProperty<string> = {
 export const pptpd_enable: NvramProperty<boolean> = {
   key: "pptpd_enable",
   description: "Enables the PPTP server to start on boot.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6556,7 +6556,7 @@ export const pptpd_forcemppe: NvramProperty<"0" | "1"> = {
   key: "pptpd_forcemppe",
   description:
     "Specifies the required MPPE encryption level for the PPTP server.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "enum",
   defaultValue: "1",
   ui: {
@@ -6571,7 +6571,7 @@ export const pptpd_forcemppe: NvramProperty<"0" | "1"> = {
 export const pptpd_mru: NvramProperty<string> = {
   key: "pptpd_mru",
   description: "Maximum Receive Unit for the PPTP server connections.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "string",
   defaultValue: "1400",
   validation: (value) => rangeValidator(576, 1500)(parseInt(value, 10)),
@@ -6583,7 +6583,7 @@ export const pptpd_mru: NvramProperty<string> = {
 export const pptpd_mtu: NvramProperty<string> = {
   key: "pptpd_mtu",
   description: "Maximum Transmission Unit for the PPTP server connections.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "string",
   defaultValue: "1400",
   validation: (value) => rangeValidator(576, 1500)(parseInt(value, 10)),
@@ -6596,7 +6596,7 @@ export const pptpd_remoteip: NvramProperty<string> = {
   key: "pptpd_remoteip",
   description:
     "The range of IP addresses to assign to connecting PPTP clients, in the format 'start_ip-end_octet'.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "string",
   defaultValue: "172.19.0.1-6",
   ui: {
@@ -6612,7 +6612,7 @@ export const pptpd_users: NvramProperty<PptpdUser[]> = {
   key: "pptpd_users",
   description:
     "A list of username/password pairs for PPTP server authentication.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -6635,7 +6635,7 @@ export const pptpd_users: NvramProperty<PptpdUser[]> = {
 export const pptpd_wins1: NvramProperty<string> = {
   key: "pptpd_wins1",
   description: "Primary WINS server IP to be assigned to PPTP clients.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "ip",
   defaultValue: "",
   ui: {
@@ -6646,7 +6646,7 @@ export const pptpd_wins1: NvramProperty<string> = {
 export const pptpd_wins2: NvramProperty<string> = {
   key: "pptpd_wins2",
   description: "Secondary WINS server IP to be assigned to PPTP clients.",
-  page: "vpn-pptp-server.asp.html",
+  page: "vpn-pptp-server.asp",
   type: "ip",
   defaultValue: "",
 };
@@ -6654,7 +6654,7 @@ export const pptpd_wins2: NvramProperty<string> = {
 export const qos_ack: NvramProperty<boolean> = {
   key: "qos_ack",
   description: "Prioritizes small TCP ACK packets to improve download speeds.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6666,7 +6666,7 @@ export const qos_ack: NvramProperty<boolean> = {
 export const qos_cake_prio_mode: NvramProperty<"0" | "1" | "2" | "3" | "4"> = {
   key: "qos_cake_prio_mode",
   description: "Sets the priority queue mode for the CAKE AQM scheduler.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -6691,7 +6691,7 @@ export const qos_cake_wash: NvramProperty<boolean> = {
   key: "qos_cake_wash",
   description:
     "When using CAKE, forces the clearing of DSCP markings from inbound packets.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6704,7 +6704,7 @@ export const qos_classify: NvramProperty<boolean> = {
   key: "qos_classify",
   description:
     "Enables traffic classification based on rules defined on the QoS Classification page.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -6716,7 +6716,7 @@ export const qos_classify: NvramProperty<boolean> = {
 export const qos_classnames: NvramProperty<string> = {
   key: "qos_classnames",
   description: "A space-separated list of names for the 10 QoS classes.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "string",
   defaultValue:
     "Service VOIP/Game Remote WWW Media HTTPS/Msgr Mail FileXfer P2P/Bulk Crawl",
@@ -6729,7 +6729,7 @@ export const qos_default: NvramProperty<string> = {
   key: "qos_default",
   description:
     "The default QoS class (0-9) to assign to traffic that does not match any classification rule.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "enum",
   defaultValue: "8",
   // Note: Options are dynamically generated from `qos_classnames`.
@@ -6742,7 +6742,7 @@ export const qos_enable: NvramProperty<boolean> = {
   key: "qos_enable",
   description:
     "Globally enables or disables the Quality of Service (QoS) engine.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6754,7 +6754,7 @@ export const qos_enable: NvramProperty<boolean> = {
 export const qos_fin: NvramProperty<boolean> = {
   key: "qos_fin",
   description: "Prioritizes small TCP FIN packets.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -6767,7 +6767,7 @@ export const qos_icmp: NvramProperty<boolean> = {
   key: "qos_icmp",
   description:
     "Prioritizes ICMP packets, which can improve ping times and network diagnostics.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -6780,7 +6780,7 @@ export const qos_irates: NvramProperty<string> = {
   key: "qos_irates",
   description:
     "A comma-separated list of 'rate-ceiling' percentage pairs for each of the 10 inbound QoS classes.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "string",
   defaultValue: "5-100,2-20,5-100,10-90,20-90,5-90,5-70,5-100,5-30,1-1",
   ui: {
@@ -6792,7 +6792,7 @@ export const qos_mode: NvramProperty<"1" | "2"> = {
   key: "qos_mode",
   description:
     "Selects the QoS engine: HTB for traditional shaping or CAKE for modern AQM.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "enum",
   defaultValue: "1",
   ui: {
@@ -6808,7 +6808,7 @@ export const qos_orates: NvramProperty<string> = {
   key: "qos_orates",
   description:
     "A comma-separated list of 'rate-ceiling' percentage pairs for each of the 10 outbound QoS classes.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "string",
   defaultValue: "5-100,5-30,5-100,5-70,5-70,5-70,5-70,5-100,5-30,1-1",
   ui: {
@@ -6835,7 +6835,7 @@ export const qos_orules: NvramProperty<QosRule[]> = {
   key: "qos_orules",
   description:
     "A list of rules used to classify traffic into different QoS classes.",
-  page: "qos-classify.asp.html",
+  page: "qos-classify.asp",
   type: "structured-string",
   defaultValue: [
     {
@@ -6907,7 +6907,7 @@ export const qos_orules: NvramProperty<QosRule[]> = {
 export const qos_pfifo: NvramProperty<"0" | "1" | "2" | "3"> = {
   key: "qos_pfifo",
   description: "Selects the queuing discipline scheduler to use with HTB QoS.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "enum",
   defaultValue: "3",
   ui: {
@@ -6925,7 +6925,7 @@ export const qos_reset: NvramProperty<boolean> = {
   key: "qos_reset",
   description:
     "If enabled, QoS classes and rules will be reset when settings are changed.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -6937,7 +6937,7 @@ export const qos_reset: NvramProperty<boolean> = {
 export const qos_rst: NvramProperty<boolean> = {
   key: "qos_rst",
   description: "Prioritizes small TCP RST packets.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -6950,7 +6950,7 @@ export const qos_syn: NvramProperty<boolean> = {
   key: "qos_syn",
   description:
     "Prioritizes small TCP SYN packets to improve connection establishment times.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -6963,7 +6963,7 @@ export const qos_udp: NvramProperty<boolean> = {
   key: "qos_udp",
   description:
     "If enabled, inbound UDP traffic will not be processed by the QoS engine.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6976,7 +6976,7 @@ export const remote_management: NvramProperty<boolean> = {
   key: "remote_management",
   description:
     "Globally enables or disables remote access to the router's web interface from the WAN. The UI combines this with `remote_mgt_https`.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6986,7 +6986,7 @@ export const remote_mgt_https: NvramProperty<boolean> = {
   key: "remote_mgt_https",
   description:
     "If remote management is enabled, this setting specifies whether to use HTTPS (1) or HTTP (0).",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -6996,7 +6996,7 @@ export const remote_upgrade: NvramProperty<boolean> = {
   key: "remote_upgrade",
   description:
     "Allows firmware upgrades to be performed via the remote web interface. Disabling this reduces the memory footprint during an upgrade.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -7009,7 +7009,7 @@ export const rmgt_sip: NvramProperty<string> = {
   key: "rmgt_sip",
   description:
     "A comma-separated list of source IP addresses or ranges that are allowed to access the remote management interface.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -7021,7 +7021,7 @@ export const router_name: NvramProperty<string> = {
   key: "router_name",
   description:
     "A user-defined name for the router, used for local identification purposes in the web UI.",
-  page: "basic-ident.asp.html",
+  page: "basic-ident.asp",
   type: "string",
   defaultValue: "FreshTomato",
   validation: (value) =>
@@ -7043,7 +7043,7 @@ interface StaticRoute {
 export const routes_static: NvramProperty<StaticRoute[]> = {
   key: "routes_static",
   description: "A list of user-defined static routes.",
-  page: "advanced-routing.asp.html",
+  page: "advanced-routing.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -7081,7 +7081,7 @@ export const rstats_bak: NvramProperty<boolean> = {
   key: "rstats_bak",
   description:
     "If enabled, creates backups of the bandwidth monitoring data file.",
-  page: "admin-bwm.asp.html",
+  page: "admin-bwm.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -7093,7 +7093,7 @@ export const rstats_bak: NvramProperty<boolean> = {
 export const rstats_enable: NvramProperty<boolean> = {
   key: "rstats_enable",
   description: "Enables the bandwidth monitoring feature (rstats).",
-  page: "admin-bwm.asp.html",
+  page: "admin-bwm.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -7106,7 +7106,7 @@ export const rstats_exclude: NvramProperty<string[]> = {
   key: "rstats_exclude",
   description:
     "A comma-separated list of network interfaces to exclude from bandwidth monitoring.",
-  page: "admin-bwm.asp.html",
+  page: "admin-bwm.asp",
   type: "list",
   defaultValue: [],
   transform: {
@@ -7122,7 +7122,7 @@ export const rstats_offset: NvramProperty<number> = {
   key: "rstats_offset",
   description:
     "The day of the month (1-31) to consider as the start of the monthly billing cycle for bandwidth monitoring.",
-  page: "admin-bwm.asp.html",
+  page: "admin-bwm.asp",
   type: "integer",
   defaultValue: 1,
   validation: rangeValidator(1, 31),
@@ -7135,7 +7135,7 @@ export const rstats_path: NvramProperty<string> = {
   key: "rstats_path",
   description:
     "The location to save the bandwidth monitoring history file. Can be RAM, NVRAM, JFFS, CIFS, or a custom path.",
-  page: "admin-bwm.asp.html",
+  page: "admin-bwm.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -7147,7 +7147,7 @@ export const rstats_sshut: NvramProperty<boolean> = {
   key: "rstats_sshut",
   description:
     "If enabled, saves the current bandwidth monitoring data to the storage location upon router shutdown or reboot.",
-  page: "admin-bwm.asp.html",
+  page: "admin-bwm.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -7160,7 +7160,7 @@ export const rstats_stime: NvramProperty<number> = {
   key: "rstats_stime",
   description:
     "The frequency in hours at which bandwidth monitoring data is saved to permanent storage.",
-  page: "admin-bwm.asp.html",
+  page: "admin-bwm.asp",
   type: "enum",
   defaultValue: 48,
   ui: {
@@ -7219,77 +7219,77 @@ const scheduleProperty = (
 
 export const sch_c1 = scheduleProperty(
   "sch_c1",
-  "admin-sched.asp.html",
+  "admin-sched.asp",
   "Schedule for Custom Script 1.",
 );
 export const sch_c1_cmd: NvramProperty<string> = {
   key: "sch_c1_cmd",
   description: "Command for Custom Script 1.",
-  page: "admin-sched.asp.html",
+  page: "admin-sched.asp",
   type: "string",
 };
 export const sch_c2 = scheduleProperty(
   "sch_c2",
-  "admin-sched.asp.html",
+  "admin-sched.asp",
   "Schedule for Custom Script 2.",
 );
 export const sch_c2_cmd: NvramProperty<string> = {
   key: "sch_c2_cmd",
   description: "Command for Custom Script 2.",
-  page: "admin-sched.asp.html",
+  page: "admin-sched.asp",
   type: "string",
 };
 export const sch_c3 = scheduleProperty(
   "sch_c3",
-  "admin-sched.asp.html",
+  "admin-sched.asp",
   "Schedule for Custom Script 3.",
 );
 export const sch_c3_cmd: NvramProperty<string> = {
   key: "sch_c3_cmd",
   description: "Command for Custom Script 3.",
-  page: "admin-sched.asp.html",
+  page: "admin-sched.asp",
   type: "string",
 };
 export const sch_c4 = scheduleProperty(
   "sch_c4",
-  "admin-sched.asp.html",
+  "admin-sched.asp",
   "Schedule for Custom Script 4.",
 );
 export const sch_c4_cmd: NvramProperty<string> = {
   key: "sch_c4_cmd",
   description: "Command for Custom Script 4.",
-  page: "admin-sched.asp.html",
+  page: "admin-sched.asp",
   type: "string",
 };
 export const sch_c5 = scheduleProperty(
   "sch_c5",
-  "admin-sched.asp.html",
+  "admin-sched.asp",
   "Schedule for Custom Script 5.",
 );
 export const sch_c5_cmd: NvramProperty<string> = {
   key: "sch_c5_cmd",
   description: "Command for Custom Script 5.",
-  page: "admin-sched.asp.html",
+  page: "admin-sched.asp",
   type: "string",
 };
 export const sch_rboot = scheduleProperty(
   "sch_rboot",
-  "admin-sched.asp.html",
+  "admin-sched.asp",
   "Schedule for automatic reboots.",
 );
 export const sch_rcon = scheduleProperty(
   "sch_rcon",
-  "admin-sched.asp.html",
+  "admin-sched.asp",
   "Schedule for automatic WAN reconnections.",
 );
 
-// --- from admin-scripts.asp.html ---
+// --- from admin-scripts.asp ---
 
 export const script_init: NvramProperty<string> = {
   key: "script_init",
   description:
     "A shell script that runs once after the router has finished booting and all services are started.",
-  page: "admin-scripts.asp.html",
+  page: "admin-scripts.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -7304,7 +7304,7 @@ export const script_shut: NvramProperty<string> = {
   key: "script_shut",
   description:
     "A shell script that runs just before the router shuts down or reboots.",
-  page: "admin-scripts.asp.html",
+  page: "admin-scripts.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -7318,7 +7318,7 @@ export const script_shut: NvramProperty<string> = {
 export const script_usbhotplug: NvramProperty<string> = {
   key: "script_usbhotplug",
   description: "A script that runs when any USB device is attached or removed.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -7333,7 +7333,7 @@ export const script_usbmount: NvramProperty<string> = {
   key: "script_usbmount",
   description:
     "A script that runs after a USB storage device is successfully mounted.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -7348,7 +7348,7 @@ export const script_usbumount: NvramProperty<string> = {
   key: "script_usbumount",
   description:
     "A script that runs just before a USB storage device is unmounted.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -7363,7 +7363,7 @@ export const script_fire: NvramProperty<string> = {
   key: "script_fire",
   description:
     "A shell script that is executed when the firewall is started or restarted.",
-  page: "admin-scripts.asp.html",
+  page: "admin-scripts.asp",
   type: "string",
   defaultValue: "",
   validation: (value) => v_length(value, 0, 8192),
@@ -7377,7 +7377,7 @@ export const script_wanup: NvramProperty<string> = {
   key: "script_wanup",
   description:
     "A shell script that is executed after the main WAN interface (WAN0) comes up.",
-  page: "admin-scripts.asp.html",
+  page: "admin-scripts.asp",
   type: "string",
   defaultValue: "",
   validation: (value) => v_length(value, 0, 4096),
@@ -7401,7 +7401,7 @@ const buttonActionOptions: ReadonlyArray<
 export const sesx_b0: NvramProperty<"0" | "1" | "2" | "3" | "4" | "5"> = {
   key: "sesx_b0",
   description: "Action for a 1-2 second press of the SES/WPS/AOSS button.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "enum",
   defaultValue: "1",
   validation: buttonActionValidator,
@@ -7414,7 +7414,7 @@ export const sesx_b0: NvramProperty<"0" | "1" | "2" | "3" | "4" | "5"> = {
 export const sesx_b1: NvramProperty<"0" | "1" | "2" | "3" | "4" | "5"> = {
   key: "sesx_b1",
   description: "Action for a 4-6 second press of the SES/WPS/AOSS button.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "enum",
   defaultValue: "4",
   validation: buttonActionValidator,
@@ -7427,7 +7427,7 @@ export const sesx_b1: NvramProperty<"0" | "1" | "2" | "3" | "4" | "5"> = {
 export const sesx_b2: NvramProperty<"0" | "1" | "2" | "3" | "4" | "5"> = {
   key: "sesx_b2",
   description: "Action for an 8-10 second press of the SES/WPS/AOSS button.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "enum",
   defaultValue: "4",
   validation: buttonActionValidator,
@@ -7440,7 +7440,7 @@ export const sesx_b2: NvramProperty<"0" | "1" | "2" | "3" | "4" | "5"> = {
 export const sesx_b3: NvramProperty<"0" | "1" | "2" | "3" | "4" | "5"> = {
   key: "sesx_b3",
   description: "Action for a 12+ second press of the SES/WPS/AOSS button.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "enum",
   defaultValue: "4",
   validation: buttonActionValidator,
@@ -7454,7 +7454,7 @@ export const sesx_led: NvramProperty<number> = {
   key: "sesx_led",
   description:
     "A bitmask controlling which LEDs are enabled at startup. 1=Amber, 2=White, 4=AOSS, 8=Bridge.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "integer",
   defaultValue: 12,
   ui: {
@@ -7466,7 +7466,7 @@ export const sesx_script: NvramProperty<string> = {
   key: "sesx_script",
   description:
     "The custom script to be executed when a button press action is set to 'Run Custom Script'.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "string",
   defaultValue: "[ $1 -ge 20 ] && telnetd -p 233 -l /bin/sh\x0a",
   ui: {
@@ -7478,7 +7478,7 @@ export const smart_connect_x: NvramProperty<boolean> = {
   key: "smart_connect_x",
   description:
     "Enables Wireless Band Steering, where the router attempts to steer dual-band clients to the 5GHz band.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -7490,7 +7490,7 @@ export const smart_connect_x: NvramProperty<boolean> = {
 export const smbd_autoshare: NvramProperty<"0" | "1" | "2" | "3"> = {
   key: "smbd_autoshare",
   description: "Automatically shares all attached USB partitions via Samba.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "enum",
   defaultValue: "2",
   ui: {
@@ -7508,7 +7508,7 @@ export const smbd_cpage: NvramProperty<string> = {
   key: "smbd_cpage",
   description:
     "Specifies the client codepage for Samba to handle character encoding correctly.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "enum",
   defaultValue: "",
   ui: {
@@ -7530,7 +7530,7 @@ export const smbd_cpage: NvramProperty<string> = {
 export const smbd_custom: NvramProperty<string> = {
   key: "smbd_custom",
   description: "Custom configuration options to be added to the smb.conf file.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -7544,7 +7544,7 @@ export const smbd_enable: NvramProperty<"0" | "1" | "2"> = {
   key: "smbd_enable",
   description:
     "Controls the Samba file sharing service and its authentication mode.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -7561,7 +7561,7 @@ export const smbd_ifnames: NvramProperty<string> = {
   key: "smbd_ifnames",
   description:
     "A space-separated list of LAN bridge interfaces on which the Samba server will listen.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "list",
   defaultValue: "br0",
   ui: {
@@ -7572,7 +7572,7 @@ export const smbd_ifnames: NvramProperty<string> = {
 export const smbd_master: NvramProperty<boolean> = {
   key: "smbd_master",
   description: "Enables the router to act as a Master Browser on the network.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -7584,7 +7584,7 @@ export const smbd_master: NvramProperty<boolean> = {
 export const smbd_passwd: NvramProperty<string> = {
   key: "smbd_passwd",
   description: "The password for the authenticated Samba user.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "string",
   defaultValue: "",
   validation: (value) => value.length >= 1 || "Password is required.",
@@ -7596,7 +7596,7 @@ export const smbd_passwd: NvramProperty<string> = {
 export const smbd_protocol: NvramProperty<"0" | "1" | "2"> = {
   key: "smbd_protocol",
   description: "Specifies the SMB protocol version to be used.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "enum",
   defaultValue: "2",
   ui: {
@@ -7619,7 +7619,7 @@ interface SambaShare {
 export const smbd_shares: NvramProperty<SambaShare[]> = {
   key: "smbd_shares",
   description: "A list of custom Samba shares.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -7655,7 +7655,7 @@ export const smbd_shares: NvramProperty<SambaShare[]> = {
 export const smbd_user: NvramProperty<string> = {
   key: "smbd_user",
   description: "The username for authenticated Samba access.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "string",
   defaultValue: "nas",
   validation: (value) =>
@@ -7669,7 +7669,7 @@ export const smbd_user: NvramProperty<string> = {
 export const smbd_wgroup: NvramProperty<string> = {
   key: "smbd_wgroup",
   description: "The workgroup name for the Samba server.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "string",
   defaultValue: "WORKGROUP",
   ui: {
@@ -7680,7 +7680,7 @@ export const smbd_wgroup: NvramProperty<string> = {
 export const smbd_wins: NvramProperty<boolean> = {
   key: "smbd_wins",
   description: "Enables the router to act as a WINS server on the network.",
-  page: "nas-samba.asp.html",
+  page: "nas-samba.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -7699,7 +7699,7 @@ export const smbd_wins: NvramProperty<boolean> = {
 export const snmp_contact: NvramProperty<string> = {
   key: "snmp_contact",
   description: "The contact information for the device, as reported by SNMP.",
-  page: "admin-snmp.asp.html",
+  page: "admin-snmp.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -7710,7 +7710,7 @@ export const snmp_contact: NvramProperty<string> = {
 export const snmp_enable: NvramProperty<boolean> = {
   key: "snmp_enable",
   description: "Enables the SNMP agent.",
-  page: "admin-snmp.asp.html",
+  page: "admin-snmp.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -7722,7 +7722,7 @@ export const snmp_enable: NvramProperty<boolean> = {
 export const snmp_location: NvramProperty<string> = {
   key: "snmp_location",
   description: "The physical location of the device, as reported by SNMP.",
-  page: "admin-snmp.asp.html",
+  page: "admin-snmp.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -7733,7 +7733,7 @@ export const snmp_location: NvramProperty<string> = {
 export const snmp_port: NvramProperty<number> = {
   key: "snmp_port",
   description: "The UDP port for the SNMP agent.",
-  page: "admin-snmp.asp.html",
+  page: "admin-snmp.asp",
   type: "integer",
   defaultValue: 161,
   validation: portValidator,
@@ -7745,7 +7745,7 @@ export const snmp_port: NvramProperty<number> = {
 export const snmp_remote: NvramProperty<boolean> = {
   key: "snmp_remote",
   description: "Allows SNMP queries from the WAN interface.",
-  page: "admin-snmp.asp.html",
+  page: "admin-snmp.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -7758,7 +7758,7 @@ export const snmp_remote_sip: NvramProperty<string> = {
   key: "snmp_remote_sip",
   description:
     "A list of allowed remote source IP addresses/ranges for SNMP access.",
-  page: "admin-snmp.asp.html",
+  page: "admin-snmp.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -7769,7 +7769,7 @@ export const snmp_remote_sip: NvramProperty<string> = {
 export const snmp_ro: NvramProperty<string> = {
   key: "snmp_ro",
   description: "The read-only community string for SNMP access.",
-  page: "admin-snmp.asp.html",
+  page: "admin-snmp.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -7780,7 +7780,7 @@ export const snmp_ro: NvramProperty<string> = {
 export const sshd_authkeys: NvramProperty<string> = {
   key: "sshd_authkeys",
   description: "A list of public keys authorized for SSH access, one per line.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -7793,7 +7793,7 @@ export const sshd_authkeys: NvramProperty<string> = {
 export const sshd_eas: NvramProperty<boolean> = {
   key: "sshd_eas",
   description: "Enables the SSH server to start on boot.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -7806,7 +7806,7 @@ export const sshd_forwarding: NvramProperty<boolean> = {
   key: "sshd_forwarding",
   description:
     "Allows TCP port forwarding (tunnelling) through the SSH server.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -7819,7 +7819,7 @@ export const sshd_motd: NvramProperty<boolean> = {
   key: "sshd_motd",
   description:
     "Enables the display of an extended Message of the Day upon SSH login.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -7832,7 +7832,7 @@ export const sshd_pass: NvramProperty<boolean> = {
   key: "sshd_pass",
   description:
     "Allows password-based authentication for SSH. If disabled, only key-based authentication is allowed.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -7844,7 +7844,7 @@ export const sshd_pass: NvramProperty<boolean> = {
 export const sshd_port: NvramProperty<number> = {
   key: "sshd_port",
   description: "The TCP port for the SSH server on the LAN.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "integer",
   defaultValue: 22,
   validation: portValidator,
@@ -7856,7 +7856,7 @@ export const sshd_port: NvramProperty<number> = {
 export const sshd_remote: NvramProperty<boolean> = {
   key: "sshd_remote",
   description: "Allows the SSH server to be accessed from the WAN.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -7868,7 +7868,7 @@ export const sshd_remote: NvramProperty<boolean> = {
 export const sshd_rport: NvramProperty<number> = {
   key: "sshd_rport",
   description: "The TCP port for the SSH server on the WAN.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "integer",
   defaultValue: 22,
   validation: portValidator,
@@ -7886,7 +7886,7 @@ export const stealth_iled: NvramProperty<boolean> = {
   key: "stealth_iled",
   description:
     "If Stealth Mode is enabled, this setting excludes the INTERNET LED from being turned off.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -7904,7 +7904,7 @@ export const stealth_mode: NvramProperty<boolean> = {
   key: "stealth_mode",
   description:
     "Enables Stealth Mode, which turns off all router LEDs after booting. Requires a reboot.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -7916,7 +7916,7 @@ export const stealth_mode: NvramProperty<boolean> = {
 export const stubby_force_tls13: NvramProperty<boolean> = {
   key: "stubby_force_tls13",
   description: "Forces Stubby to use TLS 1.3 for DNS-over-TLS connections.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -7928,7 +7928,7 @@ export const stubby_force_tls13: NvramProperty<boolean> = {
 export const stubby_log: NvramProperty<string> = {
   key: "stubby_log",
   description: "Sets the logging verbosity level for the Stubby daemon.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "enum",
   defaultValue: "5",
   ui: {
@@ -7950,7 +7950,7 @@ export const stubby_port: NvramProperty<number> = {
   key: "stubby_port",
   description:
     "The local TCP port on which Stubby listens for DNS queries from dnsmasq.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "integer",
   defaultValue: 5453,
   validation: portValidator,
@@ -7963,7 +7963,7 @@ export const stubby_priority: NvramProperty<"2" | "1" | "0"> = {
   key: "stubby_priority",
   description:
     "Controls how dnsmasq uses the Stubby resolver relative to other DNS servers.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "enum",
   defaultValue: "2",
   ui: {
@@ -7979,7 +7979,7 @@ export const stubby_priority: NvramProperty<"2" | "1" | "0"> = {
 export const stubby_proxy: NvramProperty<boolean> = {
   key: "stubby_proxy",
   description: "Enables the Stubby DNS-over-TLS proxy.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -7992,7 +7992,7 @@ export const t_cafree: NvramProperty<boolean> = {
   key: "t_cafree",
   description:
     "If enabled, treats cache, buffers, and reclaimable slab memory as 'free' when calculating available memory.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -8006,7 +8006,7 @@ export const t_features: NvramProperty<string> = {
   key: "t_features",
   description:
     "A read-only hexadecimal bitmask representing the firmware's compiled features.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "hex",
 };
 
@@ -8014,7 +8014,7 @@ export const t_hidelr: NvramProperty<boolean> = {
   key: "t_hidelr",
   description:
     "If enabled, connections between LAN clients and the router itself are not displayed in the connection tracking table.",
-  page: "admin-debug.asp.html",
+  page: "admin-debug.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8026,7 +8026,7 @@ export const t_hidelr: NvramProperty<boolean> = {
 export const t_model: NvramProperty<string> = {
   key: "t_model",
   description: "A read-only identifier for the router model.",
-  page: "admin-buttons.asp.html",
+  page: "admin-buttons.asp",
   type: "string",
 };
 
@@ -8034,14 +8034,14 @@ export const t_model_name: NvramProperty<string> = {
   key: "t_model_name",
   description:
     "A read-only string representing the human-readable router model name.",
-  page: "admin-bwm.asp.html",
+  page: "admin-bwm.asp",
   type: "string",
 };
 
 export const telnetd_eas: NvramProperty<boolean> = {
   key: "telnetd_eas",
   description: "Enables the Telnet server to start on boot.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -8053,7 +8053,7 @@ export const telnetd_eas: NvramProperty<boolean> = {
 export const telnetd_port: NvramProperty<number> = {
   key: "telnetd_port",
   description: "The TCP port for the Telnet server.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "integer",
   defaultValue: 23,
   validation: portValidator,
@@ -8065,7 +8065,7 @@ export const telnetd_port: NvramProperty<number> = {
 export const tinc_custom: NvramProperty<string> = {
   key: "tinc_custom",
   description: "Custom configuration directives for the Tinc daemon.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8076,7 +8076,7 @@ export const tinc_custom: NvramProperty<string> = {
 export const tinc_devicetype: NvramProperty<"tun" | "tap"> = {
   key: "tinc_devicetype",
   description: "The type of virtual network interface to use for the Tinc VPN.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "enum",
   defaultValue: "tun",
   ui: {
@@ -8091,7 +8091,7 @@ export const tinc_devicetype: NvramProperty<"tun" | "tap"> = {
 export const tinc_enable: NvramProperty<boolean> = {
   key: "tinc_enable",
   description: "Enables the Tinc VPN to start on boot.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8104,7 +8104,7 @@ export const tinc_firewall: NvramProperty<string> = {
   key: "tinc_firewall",
   description:
     "Custom firewall rules to be applied when the Tinc interface comes up.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8116,7 +8116,7 @@ export const tinc_host_down: NvramProperty<string> = {
   key: "tinc_host_down",
   description:
     "A script that is executed when a remote host becomes unreachable.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8128,7 +8128,7 @@ export const tinc_host_up: NvramProperty<string> = {
   key: "tinc_host_up",
   description:
     "A script that is executed when a remote host becomes reachable.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8150,7 +8150,7 @@ interface TincHost {
 export const tinc_hosts: NvramProperty<TincHost[]> = {
   key: "tinc_hosts",
   description: "A list of remote hosts (peers) for the Tinc mesh VPN.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -8194,7 +8194,7 @@ export const tinc_hosts: NvramProperty<TincHost[]> = {
 export const tinc_manual_firewall: NvramProperty<"0" | "1" | "2"> = {
   key: "tinc_manual_firewall",
   description: "Controls how firewall rules for Tinc are managed.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -8211,7 +8211,7 @@ export const tinc_manual_tinc_up: NvramProperty<"0" | "1"> = {
   key: "tinc_manual_tinc_up",
   description:
     "Controls whether the 'tinc-up' script is automatically generated or manually specified.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -8226,7 +8226,7 @@ export const tinc_manual_tinc_up: NvramProperty<"0" | "1"> = {
 export const tinc_mode: NvramProperty<"switch" | "hub"> = {
   key: "tinc_mode",
   description: "Sets the operational mode for a TAP-style Tinc VPN.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "enum",
   defaultValue: "switch",
   ui: {
@@ -8241,7 +8241,7 @@ export const tinc_mode: NvramProperty<"switch" | "hub"> = {
 export const tinc_name: NvramProperty<string> = {
   key: "tinc_name",
   description: "The name of this local node in the Tinc VPN mesh.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8253,7 +8253,7 @@ export const tinc_poll: NvramProperty<number> = {
   key: "tinc_poll",
   description:
     "The interval in minutes for the keep-alive check to ensure the Tinc daemon is running. 0 disables the check.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "integer",
   defaultValue: 0,
   validation: rangeValidator(0, 1440),
@@ -8265,7 +8265,7 @@ export const tinc_poll: NvramProperty<number> = {
 export const tinc_private_ed25519: NvramProperty<string> = {
   key: "tinc_private_ed25519",
   description: "The Ed25519 private key for this Tinc node.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8277,7 +8277,7 @@ export const tinc_private_rsa: NvramProperty<string> = {
   key: "tinc_private_rsa",
   description:
     "The RSA private key for this Tinc node, used for compatibility with older Tinc versions.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8289,7 +8289,7 @@ export const tinc_subnet_down: NvramProperty<string> = {
   key: "tinc_subnet_down",
   description:
     "A script that is executed when a remote subnet becomes unreachable.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8301,7 +8301,7 @@ export const tinc_subnet_up: NvramProperty<string> = {
   key: "tinc_subnet_up",
   description:
     "A script that is executed when a remote subnet becomes reachable.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8312,7 +8312,7 @@ export const tinc_subnet_up: NvramProperty<string> = {
 export const tinc_tinc_down: NvramProperty<string> = {
   key: "tinc_tinc_down",
   description: "A script that is executed when the Tinc daemon is stopped.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8324,7 +8324,7 @@ export const tinc_tinc_up: NvramProperty<string> = {
   key: "tinc_tinc_up",
   description:
     "A script that is executed after the Tinc daemon starts and the interface is configured.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8335,7 +8335,7 @@ export const tinc_tinc_up: NvramProperty<string> = {
 export const tinc_vpn_netmask: NvramProperty<string> = {
   key: "tinc_vpn_netmask",
   description: "The netmask for the entire VPN network, used in TUN mode.",
-  page: "vpn-tinc.asp.html",
+  page: "vpn-tinc.asp",
   type: "netmask",
   defaultValue: "255.255.0.0",
   ui: {
@@ -8347,7 +8347,7 @@ export const tm_dst: NvramProperty<boolean> = {
   key: "tm_dst",
   description:
     "Enables or disables automatic Daylight Saving Time adjustments based on the selected timezone rule.",
-  page: "basic-time.asp.html",
+  page: "basic-time.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -8359,7 +8359,7 @@ export const tm_dst: NvramProperty<boolean> = {
 export const tm_sel: NvramProperty<string> = {
   key: "tm_sel",
   description: "The selected timezone rule from the predefined list.",
-  page: "basic-time.asp.html",
+  page: "basic-time.asp",
   type: "enum",
   defaultValue: "PST8PDT,M3.2.0/2,M11.1.0/2",
   ui: {
@@ -8371,7 +8371,7 @@ export const tm_tz: NvramProperty<string> = {
   key: "tm_tz",
   description:
     "The POSIX-compliant timezone string. This is derived from `tm_sel` and `tm_dst`, or set manually if `tm_sel` is 'custom'.",
-  page: "basic-time.asp.html",
+  page: "basic-time.asp",
   type: "string",
   defaultValue: "PST8PDT,M3.2.0/2,M11.1.0/2",
   ui: {
@@ -8383,7 +8383,7 @@ export const tomatoanon_enable: NvramProperty<boolean> = {
   key: "tomatoanon_enable",
   description:
     "Enables participation in the TomatoAnon project, which sends anonymous usage statistics.",
-  page: "admin-tomatoanon.asp.html",
+  page: "admin-tomatoanon.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8396,7 +8396,7 @@ export const tomatoanon_notify: NvramProperty<boolean> = {
   key: "tomatoanon_notify",
   description:
     "Enables the Update Notification System, which checks for new FreshTomato versions.",
-  page: "admin-tomatoanon.asp.html",
+  page: "admin-tomatoanon.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -8408,7 +8408,7 @@ export const tomatoanon_notify: NvramProperty<boolean> = {
 export const tor_custom: NvramProperty<string> = {
   key: "tor_custom",
   description: "Custom configuration options for the Tor client.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8419,7 +8419,7 @@ export const tor_custom: NvramProperty<string> = {
 export const tor_datadir: NvramProperty<string> = {
   key: "tor_datadir",
   description: "The directory where Tor stores its data.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "string",
   defaultValue: "/tmp/tor",
   validation: pathValidator,
@@ -8431,7 +8431,7 @@ export const tor_datadir: NvramProperty<string> = {
 export const tor_dnsport: NvramProperty<number> = {
   key: "tor_dnsport",
   description: "The local port on which Tor listens for DNS requests.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "integer",
   defaultValue: 9053,
   validation: portValidator,
@@ -8443,7 +8443,7 @@ export const tor_dnsport: NvramProperty<number> = {
 export const tor_enable: NvramProperty<boolean> = {
   key: "tor_enable",
   description: "Enables the Tor client to start on boot.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8458,7 +8458,7 @@ export const tor_iface: NvramProperty<
   key: "tor_iface",
   description:
     "Specifies which LAN interface's traffic should be redirected through Tor.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "enum",
   defaultValue: "br0",
   ui: {
@@ -8470,7 +8470,7 @@ export const tor_ports: NvramProperty<string> = {
   key: "tor_ports",
   description:
     "Specifies which TCP ports to redirect through Tor. Can be a preset or custom.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "enum",
   defaultValue: "80",
   ui: {
@@ -8487,7 +8487,7 @@ export const tor_ports_custom: NvramProperty<string> = {
   key: "tor_ports_custom",
   description:
     "A comma-separated list or range of TCP ports to redirect, used when 'tor_ports' is 'custom'.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "string",
   defaultValue: "80,443,8080:8880",
   ui: {
@@ -8502,7 +8502,7 @@ export const tor_ports_custom: NvramProperty<string> = {
 export const tor_socksport: NvramProperty<number> = {
   key: "tor_socksport",
   description: "The local port on which Tor provides a SOCKS proxy.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "integer",
   defaultValue: 9050,
   validation: portValidator,
@@ -8515,7 +8515,7 @@ export const tor_solve_only: NvramProperty<boolean> = {
   key: "tor_solve_only",
   description:
     "If enabled, Tor is only used to resolve .onion/.exit domains via its DNS port and does not act as a transparent proxy.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8527,7 +8527,7 @@ export const tor_solve_only: NvramProperty<boolean> = {
 export const tor_transport: NvramProperty<number> = {
   key: "tor_transport",
   description: "The local port on which Tor provides a transparent proxy.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "integer",
   defaultValue: 9040,
   validation: portValidator,
@@ -8540,7 +8540,7 @@ export const tor_users: NvramProperty<string> = {
   key: "tor_users",
   description:
     "A comma-separated list of IP addresses or ranges whose traffic should be redirected through Tor, used when 'tor_iface' is 'custom'.",
-  page: "advanced-tor.asp.html",
+  page: "advanced-tor.asp",
   type: "string",
   defaultValue: "192.168.1.0/24",
   ui: {
@@ -8562,7 +8562,7 @@ interface TriggeredForwardRule {
 export const trigforward: NvramProperty<TriggeredForwardRule[]> = {
   key: "trigforward",
   description: "A list of triggered port forwarding rules.",
-  page: "forward-triggered.asp.html",
+  page: "forward-triggered.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -8604,7 +8604,7 @@ export const ttb_css: NvramProperty<string> = {
   key: "ttb_css",
   description:
     "The name of the theme to fetch from TomatoThemeBase when 'web_css' is set to 'online'.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "string",
   defaultValue: "example",
   ui: {
@@ -8621,7 +8621,7 @@ export const ttb_loc: NvramProperty<string> = {
   key: "ttb_loc",
   description:
     "The local folder where the online theme from TomatoThemeBase should be saved. Defaults to /tmp if empty.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8638,7 +8638,7 @@ export const ttb_url: NvramProperty<string> = {
   key: "ttb_url",
   description:
     "A space-separated list of mirror URLs for the TomatoThemeBase service.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "string",
   defaultValue: "http://ttb.mooo.com http://ttb.ath.cx http://ttb.ddnsfree.com",
   ui: {
@@ -8655,7 +8655,7 @@ export const udpxy_clients: NvramProperty<number> = {
   key: "udpxy_clients",
   description:
     "The maximum number of clients that can connect to the Udpxy service.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "integer",
   defaultValue: 3,
   validation: rangeValidator(1, 5000),
@@ -8667,7 +8667,7 @@ export const udpxy_clients: NvramProperty<number> = {
 export const udpxy_enable: NvramProperty<boolean> = {
   key: "udpxy_enable",
   description: "Enables the Udpxy UDP-to-HTTP multicast proxy service.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8679,7 +8679,7 @@ export const udpxy_enable: NvramProperty<boolean> = {
 const udpxyLanProperty = (lanIndex: 0 | 1 | 2 | 3): NvramProperty<boolean> => ({
   key: `udpxy_lan${lanIndex === 0 ? "" : lanIndex}`,
   description: `Makes the Udpxy service available on the LAN${lanIndex} (br${lanIndex}) interface.`,
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8695,7 +8695,7 @@ export const udpxy_lan3 = udpxyLanProperty(3);
 export const udpxy_port: NvramProperty<number> = {
   key: "udpxy_port",
   description: "The TCP port on which the Udpxy service listens.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "integer",
   defaultValue: 4022,
   validation: portValidator,
@@ -8707,7 +8707,7 @@ export const udpxy_port: NvramProperty<number> = {
 export const udpxy_stats: NvramProperty<boolean> = {
   key: "udpxy_stats",
   description: "Enables the Udpxy status page.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8720,7 +8720,7 @@ export const udpxy_wanface: NvramProperty<string> = {
   key: "udpxy_wanface",
   description:
     "The upstream interface for multicast traffic. If empty, the default WAN interface is used.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8731,7 +8731,7 @@ export const udpxy_wanface: NvramProperty<string> = {
 export const upnp_custom: NvramProperty<string> = {
   key: "upnp_custom",
   description: "Custom configuration options for the MiniUPnPd service.",
-  page: "forward-upnp.asp.html",
+  page: "forward-upnp.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -8743,7 +8743,7 @@ export const upnp_enable: NvramProperty<number> = {
   key: "upnp_enable",
   description:
     "A bitmask to enable UPnP services: 1 for UPnP IGD, 2 for PCP/NAT-PMP. 3 enables both.",
-  page: "forward-upnp.asp.html",
+  page: "forward-upnp.asp",
   type: "integer",
   defaultValue: 0,
 };
@@ -8751,7 +8751,7 @@ export const upnp_enable: NvramProperty<number> = {
 const upnpLanProperty = (lanIndex: 0 | 1 | 2 | 3): NvramProperty<boolean> => ({
   key: `upnp_lan${lanIndex === 0 ? "" : lanIndex}`,
   description: `Enables UPnP/PCP services on the LAN${lanIndex} (br${lanIndex}) interface.`,
-  page: "forward-upnp.asp.html",
+  page: "forward-upnp.asp",
   type: "boolean",
   defaultValue: lanIndex === 0 ? false : undefined, // Assuming default is likely for br0 only if any
   transform: booleanTransformer,
@@ -8768,7 +8768,7 @@ export const upnp_secure: NvramProperty<boolean> = {
   key: "upnp_secure",
   description:
     "Enables secure mode for UPnP, preventing clients from creating port forwards for other devices on the network. The UI logic is inverted: checkbox 'Allow third-party forwarding' being checked means this is '0'.",
-  page: "forward-upnp.asp.html",
+  page: "forward-upnp.asp",
   type: "boolean",
   defaultValue: true, // secure by default
   transform: {
@@ -8783,7 +8783,7 @@ export const upnp_secure: NvramProperty<boolean> = {
 export const usb_apcupsd: NvramProperty<boolean> = {
   key: "usb_apcupsd",
   description: "Enables the APCUPSD daemon for monitoring a connected APC UPS.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8796,7 +8796,7 @@ export const usb_apcupsd_custom: NvramProperty<boolean> = {
   key: "usb_apcupsd_custom",
   description:
     "If enabled, uses a custom apcupsd.conf file located at /etc/apcupsd.conf.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8809,7 +8809,7 @@ export const usb_automount: NvramProperty<boolean> = {
   key: "usb_automount",
   description:
     "Automatically mounts all recognized partitions on connected USB storage devices to subdirectories in /mnt.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -8821,7 +8821,7 @@ export const usb_automount: NvramProperty<boolean> = {
 export const usb_enable: NvramProperty<boolean> = {
   key: "usb_enable",
   description: "Globally enables core USB support.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -8833,7 +8833,7 @@ export const usb_enable: NvramProperty<boolean> = {
 export const usb_fs_exfat: NvramProperty<boolean> = {
   key: "usb_fs_exfat",
   description: "Enables kernel support for the exFAT filesystem.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8845,7 +8845,7 @@ export const usb_fs_exfat: NvramProperty<boolean> = {
 export const usb_fs_ext4: NvramProperty<boolean> = {
   key: "usb_fs_ext4",
   description: "Enables kernel support for Ext2/3/4 filesystems.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -8857,7 +8857,7 @@ export const usb_fs_ext4: NvramProperty<boolean> = {
 export const usb_fs_fat: NvramProperty<boolean> = {
   key: "usb_fs_fat",
   description: "Enables kernel support for FAT16/FAT32 filesystems.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -8869,7 +8869,7 @@ export const usb_fs_fat: NvramProperty<boolean> = {
 export const usb_fs_hfs: NvramProperty<boolean> = {
   key: "usb_fs_hfs",
   description: "Enables kernel support for HFS/HFS+ filesystems.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8881,7 +8881,7 @@ export const usb_fs_hfs: NvramProperty<boolean> = {
 export const usb_fs_ntfs: NvramProperty<boolean> = {
   key: "usb_fs_ntfs",
   description: "Enables support for the NTFS filesystem.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -8893,7 +8893,7 @@ export const usb_fs_ntfs: NvramProperty<boolean> = {
 export const usb_fs_zfs: NvramProperty<boolean> = {
   key: "usb_fs_zfs",
   description: "Enables kernel support for the ZFS filesystem.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8905,7 +8905,7 @@ export const usb_fs_zfs: NvramProperty<boolean> = {
 export const usb_fs_zfs_automount: NvramProperty<boolean> = {
   key: "usb_fs_zfs_automount",
   description: "Automatically mount all ZFS partitions.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -8917,7 +8917,7 @@ export const usb_fs_zfs_automount: NvramProperty<boolean> = {
 export const usb_hfs_driver: NvramProperty<"kernel"> = {
   key: "usb_hfs_driver",
   description: "Selects the driver to use for HFS/HFS+ support.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "enum",
   defaultValue: "kernel",
   ui: {
@@ -8930,7 +8930,7 @@ export const usb_mmc: NvramProperty<string> = {
   key: "usb_mmc",
   description:
     "Enables support for MMC/SD card readers. (Value seems to be empty, may just be a flag).",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "string",
   defaultValue: "",
 };
@@ -8938,7 +8938,7 @@ export const usb_mmc: NvramProperty<string> = {
 export const usb_ntfs_driver: NvramProperty<"ntfs3g" | "paragon"> = {
   key: "usb_ntfs_driver",
   description: "Selects the driver to use for NTFS support.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "enum",
   defaultValue: "ntfs3g",
   ui: {
@@ -8954,7 +8954,7 @@ export const usb_ohci: NvramProperty<string> = {
   key: "usb_ohci",
   description:
     "Enables the OHCI controller for USB 1.1 support. A value of -1 indicates the setting is not applicable for the hardware.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "string",
   defaultValue: "0",
   ui: {
@@ -8965,7 +8965,7 @@ export const usb_ohci: NvramProperty<string> = {
 export const usb_printer: NvramProperty<boolean> = {
   key: "usb_printer",
   description: "Enables USB printer support.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8978,7 +8978,7 @@ export const usb_printer_bidirect: NvramProperty<boolean> = {
   key: "usb_printer_bidirect",
   description:
     "Enables bidirectional communication with the connected USB printer.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -8990,7 +8990,7 @@ export const usb_printer_bidirect: NvramProperty<boolean> = {
 export const usb_storage: NvramProperty<boolean> = {
   key: "usb_storage",
   description: "Enables support for USB mass storage devices.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -9003,7 +9003,7 @@ export const usb_uhci: NvramProperty<string> = {
   key: "usb_uhci",
   description:
     "Enables the UHCI controller for USB 1.1 support. A value of -1 indicates the setting is not applicable for the hardware.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "string",
   defaultValue: "-1",
   ui: {
@@ -9014,7 +9014,7 @@ export const usb_uhci: NvramProperty<string> = {
 export const usb_usb2: NvramProperty<boolean> = {
   key: "usb_usb2",
   description: "Enables the EHCI controller for USB 2.0 support.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -9027,7 +9027,7 @@ export const usb_usb3: NvramProperty<boolean> = {
   key: "usb_usb3",
   description:
     "Enables the XHCI controller for USB 3.0 support. A value of -1 indicates the setting is not applicable.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -9084,7 +9084,7 @@ export const vlanHwname: PatternedNvramProperty<{ unit: VlanUnit }, string> = {
   },
   description:
     "The hardware name (e.g., 'et0') associated with a specific VLAN. This is typically set programmatically by the firmware based on the router model and is not user-editable via the UI.",
-  page: "advanced-vlan.asp.html",
+  page: "advanced-vlan.asp",
   type: "string",
 };
 
@@ -9096,7 +9096,7 @@ export const vlanPorts: PatternedNvramProperty<{ unit: VlanUnit }, string> = {
   },
   description:
     "A space-separated string defining which physical ports are members of this VLAN. A 't' suffix indicates a tagged port, and a '*' indicates the default VLAN for untagged traffic.",
-  page: "advanced-vlan.asp.html",
+  page: "advanced-vlan.asp",
   type: "string",
 };
 
@@ -9108,7 +9108,7 @@ export const vlanVid: PatternedNvramProperty<{ unit: VlanUnit }, number> = {
   },
   description:
     "The 802.1Q VLAN ID (VID) for this VLAN interface. An empty value or '0' typically means the VID is the same as the VLAN index.",
-  page: "advanced-vlan.asp.html",
+  page: "advanced-vlan.asp",
   type: "integer",
   validation: (value) =>
     (value >= 0 && value <= 4094) || "Valid VLAN ID range is 0-4094.",
@@ -9118,7 +9118,7 @@ export const vpn_client_eas: NvramProperty<string> = {
   key: "vpn_client_eas",
   description:
     "A comma-separated list of OpenVPN client instance numbers that should be enabled on startup.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   defaultValue: "",
 };
@@ -9138,7 +9138,7 @@ export const vpn_client_addr: PatternedNvramProperty<
   },
   description:
     "The remote server's IP address or hostname for the OpenVPN client.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   validation: (value) => {
     if (value === "") return true; // Can be empty if not enabled
@@ -9171,7 +9171,7 @@ export const vpn_client_adns: PatternedNvramProperty<
   },
   description:
     "Controls how DNS servers pushed by the OpenVPN server are handled.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -9200,7 +9200,7 @@ export const vpn_client_br: PatternedNvramProperty<
   },
   description:
     "Specifies which LAN bridge to bridge with when the interface type is TAP.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "br0",
   ui: {
@@ -9229,7 +9229,7 @@ export const vpn_client_bridge: PatternedNvramProperty<
   },
   description:
     "Indicates if the OpenVPN server is on the same subnet (bridged mode) for TAP interfaces.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -9252,7 +9252,7 @@ export const vpn_client_ca: PatternedNvramProperty<
     },
   },
   description: "The Certificate Authority (CA) certificate for TLS mode.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   ui: {
     label: "Certificate Authority",
@@ -9274,7 +9274,7 @@ export const vpn_client_cipher: PatternedNvramProperty<
   },
   description:
     "The data channel cipher to use for the OpenVPN client connection.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "default",
   ui: {
@@ -9330,7 +9330,7 @@ export const vpn_client_cn: PatternedNvramProperty<
   },
   description:
     "The specific Common Name, CN Prefix, or Subject to verify against the server certificate.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -9357,7 +9357,7 @@ export const vpn_client_comp: PatternedNvramProperty<
     },
   },
   description: "The compression algorithm to use for the VPN connection.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "-1",
   ui: {
@@ -9387,7 +9387,7 @@ export const vpn_client_crt: PatternedNvramProperty<
     },
   },
   description: "The client certificate for TLS mode.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   ui: {
     label: "Client Certificate",
@@ -9408,7 +9408,7 @@ export const vpn_client_crypt: PatternedNvramProperty<
     },
   },
   description: "The authorization mode for the OpenVPN client.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "tls",
   ui: {
@@ -9435,7 +9435,7 @@ export const vpn_client_custom: PatternedNvramProperty<
     },
   },
   description: "Custom OpenVPN configuration options for the client.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -9458,7 +9458,7 @@ export const vpn_client_digest: PatternedNvramProperty<
   },
   description:
     "The authentication digest/hash algorithm to use for the OpenVPN client.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "default",
   ui: {
@@ -9508,7 +9508,7 @@ export const vpn_client_firewall: PatternedNvramProperty<
     },
   },
   description: "Firewall rule creation mode for the VPN client.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "auto",
   ui: {
@@ -9534,7 +9534,7 @@ export const vpn_client_fw: PatternedNvramProperty<
     },
   },
   description: "Enables inbound firewall rules for the VPN tunnel.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -9558,7 +9558,7 @@ export const vpn_client_gw: PatternedNvramProperty<
   },
   description:
     "Specifies a gateway for TAP mode when 'Redirect Internet traffic' is not 'No'.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "ip",
   defaultValue: "",
   validation: (value) =>
@@ -9586,7 +9586,7 @@ export const vpn_client_hmac: PatternedNvramProperty<
     },
   },
   description: "TLS control channel security mode (tls-auth/tls-crypt).",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "-1",
   ui: {
@@ -9616,7 +9616,7 @@ export const vpn_client_if: PatternedNvramProperty<
     },
   },
   description: "The virtual network interface type for the OpenVPN client.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "tun",
   ui: {
@@ -9642,7 +9642,7 @@ export const vpn_client_key: PatternedNvramProperty<
     },
   },
   description: "The client's private key for TLS mode.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   ui: {
     label: "Client Key",
@@ -9663,7 +9663,7 @@ export const vpn_client_local: PatternedNvramProperty<
     },
   },
   description: "The local endpoint IP address for the VPN tunnel.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "ip",
   validation: (value) =>
     value === "" ||
@@ -9691,7 +9691,7 @@ export const vpn_client_nat: PatternedNvramProperty<
   },
   description:
     "Creates a NAT (Network Address Translation) rule on the VPN tunnel, allowing LAN clients to access the internet through the VPN.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -9715,7 +9715,7 @@ export const vpn_client_ncp_ciphers: PatternedNvramProperty<
   },
   description:
     "A colon-separated list of allowed data channel ciphers for Negotiable Crypto Parameters (NCP).",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   defaultValue:
     "CHACHA20-POLY1305:AES-128-GCM:AES-256-GCM:AES-128-CBC:AES-256-CBC",
@@ -9738,7 +9738,7 @@ export const vpn_client_nm: PatternedNvramProperty<
     },
   },
   description: "The netmask for the VPN tunnel's local endpoint.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "netmask",
   defaultValue: "255.255.255.0",
   validation: netmaskValidator,
@@ -9761,7 +9761,7 @@ export const vpn_client_password: PatternedNvramProperty<
     },
   },
   description: "The password for username/password authentication.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -9784,7 +9784,7 @@ export const vpn_client_poll: PatternedNvramProperty<
   },
   description:
     "The interval in minutes to check if the VPN client is running and restart it if it's down. 0 disables the check.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "integer",
   defaultValue: 0,
   validation: rangeValidator(0, 30),
@@ -9807,7 +9807,7 @@ export const vpn_client_port: PatternedNvramProperty<
     },
   },
   description: "The port number of the remote OpenVPN server.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "integer",
   defaultValue: 1194,
   validation: portValidator,
@@ -9830,7 +9830,7 @@ export const vpn_client_proto: PatternedNvramProperty<
     },
   },
   description: "The transport protocol to use for the VPN connection.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "udp",
   ui: {
@@ -9860,7 +9860,7 @@ export const vpn_client_remote: PatternedNvramProperty<
     },
   },
   description: "The remote endpoint IP address for the VPN tunnel.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "ip",
   validation: (value) =>
     value === "" ||
@@ -9888,7 +9888,7 @@ export const vpn_client_reneg: PatternedNvramProperty<
   },
   description:
     "TLS renegotiation time in seconds. -1 uses the OpenVPN default.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "integer",
   defaultValue: -1,
   validation: (value) =>
@@ -9913,7 +9913,7 @@ export const vpn_client_retry: PatternedNvramProperty<
   },
   description:
     "Connection retry interval in seconds. -1 means infinite retries.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "integer",
   defaultValue: 30,
   validation: (value) =>
@@ -9938,7 +9938,7 @@ export const vpn_client_rgw: PatternedNvramProperty<
   },
   description:
     "Controls if and how internet traffic should be redirected through the VPN tunnel.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -9967,7 +9967,7 @@ export const vpn_client_routing_val: PatternedNvramProperty<
   },
   description:
     "Stores the routing policy rules as a structured string for the client.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "structured-string",
   defaultValue: "",
 };
@@ -9986,7 +9986,7 @@ export const vpn_client_static: PatternedNvramProperty<
     },
   },
   description: "The static key used for 'Static Key' authorization mode.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   ui: {
     label: "Static Key",
@@ -10008,7 +10008,7 @@ export const vpn_client_tlsremote: PatternedNvramProperty<
   },
   description:
     "Enables verification of the server certificate's extended key usage (remote-cert-tls server).",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10032,7 +10032,7 @@ export const vpn_client_tlsvername: PatternedNvramProperty<
   },
   description:
     "Specifies the method for verifying the server certificate's name (verify-x509-name).",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -10061,7 +10061,7 @@ export const vpn_client_userauth: PatternedNvramProperty<
   },
   description:
     "Enables username and password authentication in addition to TLS certificates.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10084,7 +10084,7 @@ export const vpn_client_username: PatternedNvramProperty<
     },
   },
   description: "The username for username/password authentication.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "string",
   defaultValue: "",
   ui: {
@@ -10107,7 +10107,7 @@ export const vpn_client_useronly: PatternedNvramProperty<
   },
   description:
     "If enabled, authentication is based solely on username/password, and client certificate/key are not used.",
-  page: "vpn-client.asp.html",
+  page: "vpn-client.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10195,7 +10195,7 @@ export const vpn_server_dns: NvramProperty<string[]> = {
   key: "vpn_server_dns",
   description:
     "A comma-separated list of OpenVPN server instances that should respond to DNS queries from clients.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "list",
   defaultValue: [],
   transform: {
@@ -10211,7 +10211,7 @@ export const vpn_server_eas: NvramProperty<string[]> = {
   key: "vpn_server_eas",
   description:
     "A comma-separated list of OpenVPN server instances that should start on boot.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "list",
   defaultValue: [],
   transform: {
@@ -10246,7 +10246,7 @@ export const vpn_server_br = vpnServerPatternedProperty<
   "br0" | "br1" | "br2" | "br3"
 >("br", {
   description: "Specifies which LAN bridge to bridge the TAP interface with.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "enum",
   defaultValue: "br0",
   ui: {
@@ -10262,7 +10262,7 @@ export const vpn_server_br = vpnServerPatternedProperty<
 
 export const vpn_server_c2c = vpnServerPatternedProperty<boolean>("c2c", {
   description: "Allow client-to-client traffic within the VPN.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10272,7 +10272,7 @@ export const vpn_server_c2c = vpnServerPatternedProperty<boolean>("c2c", {
 export const vpn_server_ca = vpnServerPatternedProperty<string>("ca", {
   description:
     "The Certificate Authority (CA) certificate for the OpenVPN server.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Certificate Authority" },
@@ -10281,7 +10281,7 @@ export const vpn_server_ca = vpnServerPatternedProperty<string>("ca", {
 export const vpn_server_ca_key = vpnServerPatternedProperty<string>("ca_key", {
   description:
     "The Certificate Authority (CA) private key, used for generating new client certificates.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Certificate Authority Key" },
@@ -10289,7 +10289,7 @@ export const vpn_server_ca_key = vpnServerPatternedProperty<string>("ca_key", {
 
 export const vpn_server_ccd = vpnServerPatternedProperty<boolean>("ccd", {
   description: "Enable management of client-specific configurations.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10301,7 +10301,7 @@ export const vpn_server_ccd_excl = vpnServerPatternedProperty<boolean>(
   {
     description:
       "If enabled, only clients defined in the Client-Specific Configuration list are allowed to connect.",
-    page: "vpn-server.asp.html",
+    page: "vpn-server.asp",
     type: "boolean",
     defaultValue: false,
     transform: booleanTransformer,
@@ -10314,7 +10314,7 @@ export const vpn_server_ccd_val = vpnServerPatternedProperty<
 >("ccd_val", {
   description:
     "List of client-specific configurations (Common Name, Subnet, Netmask, Push Routes).",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "structured-string",
   defaultValue: [],
   transform: vpnServerCcdTransformer,
@@ -10322,7 +10322,7 @@ export const vpn_server_ccd_val = vpnServerPatternedProperty<
 
 export const vpn_server_cipher = vpnServerPatternedProperty<string>("cipher", {
   description: "The data channel cipher to use for the OpenVPN server.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "enum",
   defaultValue: "AES-128-CBC",
   ui: {
@@ -10370,7 +10370,7 @@ export const vpn_server_comp = vpnServerPatternedProperty<
   "-1" | "no" | "lz4" | "lz4-v2" | "stub" | "stub-v2"
 >("comp", {
   description: "Specifies the compression algorithm for the VPN tunnel.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "enum",
   defaultValue: "-1",
   ui: {
@@ -10386,7 +10386,7 @@ export const vpn_server_comp = vpnServerPatternedProperty<
 
 export const vpn_server_crl = vpnServerPatternedProperty<string>("crl", {
   description: "The Certificate Revocation List (CRL) file content.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "CRL file" },
@@ -10394,7 +10394,7 @@ export const vpn_server_crl = vpnServerPatternedProperty<string>("crl", {
 
 export const vpn_server_crt = vpnServerPatternedProperty<string>("crt", {
   description: "The server's public certificate.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Server Certificate" },
@@ -10404,7 +10404,7 @@ export const vpn_server_crypt = vpnServerPatternedProperty<
   "tls" | "secret" | "custom"
 >("crypt", {
   description: "The primary authorization mode for the VPN server.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "enum",
   defaultValue: "tls",
   ui: {
@@ -10419,7 +10419,7 @@ export const vpn_server_crypt = vpnServerPatternedProperty<
 
 export const vpn_server_custom = vpnServerPatternedProperty<string>("custom", {
   description: "Custom OpenVPN server configuration options.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Custom Configuration" },
@@ -10427,7 +10427,7 @@ export const vpn_server_custom = vpnServerPatternedProperty<string>("custom", {
 
 export const vpn_server_dh = vpnServerPatternedProperty<string>("dh", {
   description: "Diffie-Hellman parameters for key exchange.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Diffie-Hellman parameters" },
@@ -10436,7 +10436,7 @@ export const vpn_server_dh = vpnServerPatternedProperty<string>("dh", {
 export const vpn_server_dhcp = vpnServerPatternedProperty<boolean>("dhcp", {
   description:
     "Enable DHCP on the TAP interface to assign addresses to clients.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -10446,7 +10446,7 @@ export const vpn_server_dhcp = vpnServerPatternedProperty<boolean>("dhcp", {
 export const vpn_server_digest = vpnServerPatternedProperty<string>("digest", {
   description:
     "The authentication digest/hash algorithm to use for the OpenVPN server.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "enum",
   defaultValue: "default",
   ui: {
@@ -10469,7 +10469,7 @@ export const vpn_server_digest = vpnServerPatternedProperty<string>("digest", {
 export const vpn_server_ecdh = vpnServerPatternedProperty<boolean>("ecdh", {
   description:
     "Use Elliptic Curve Diffie-Hellman (ECDH) keys instead of standard RSA/DH.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10481,7 +10481,7 @@ export const vpn_server_firewall = vpnServerPatternedProperty<
 >("firewall", {
   description:
     "Controls how firewall rules are automatically configured for the VPN server.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "enum",
   defaultValue: "auto",
   ui: {
@@ -10498,7 +10498,7 @@ export const vpn_server_hmac = vpnServerPatternedProperty<
   "-1" | "0" | "1" | "2" | "3" | "4"
 >("hmac", {
   description: "TLS control channel security mode (tls-auth/tls-crypt).",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "enum",
   defaultValue: "-1",
   ui: {
@@ -10516,7 +10516,7 @@ export const vpn_server_hmac = vpnServerPatternedProperty<
 
 export const vpn_server_if = vpnServerPatternedProperty<"tun" | "tap">("if", {
   description: "The virtual network interface type for the VPN.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "enum",
   defaultValue: "tun",
   ui: {
@@ -10530,7 +10530,7 @@ export const vpn_server_if = vpnServerPatternedProperty<"tun" | "tap">("if", {
 
 export const vpn_server_key = vpnServerPatternedProperty<string>("key", {
   description: "The server's private key.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Server Key" },
@@ -10538,7 +10538,7 @@ export const vpn_server_key = vpnServerPatternedProperty<string>("key", {
 
 export const vpn_server_local = vpnServerPatternedProperty<string>("local", {
   description: "The local endpoint IP address for a TUN-based Static Key VPN.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "ip",
   defaultValue: "10.6.0.1", // Default for server 1
   ui: { label: "Local/remote endpoint addresses" },
@@ -10549,7 +10549,7 @@ export const vpn_server_ncp_ciphers = vpnServerPatternedProperty<string>(
   {
     description:
       "A colon-separated list of allowed data ciphers for Negotiable Crypto Parameters (NCP).",
-    page: "vpn-server.asp.html",
+    page: "vpn-server.asp",
     type: "string",
     defaultValue:
       "CHACHA20-POLY1305:AES-128-GCM:AES-256-GCM:AES-128-CBC:AES-256-CBC",
@@ -10559,7 +10559,7 @@ export const vpn_server_ncp_ciphers = vpnServerPatternedProperty<string>(
 
 export const vpn_server_nm = vpnServerPatternedProperty<string>("nm", {
   description: "The netmask for the VPN subnet.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "netmask",
   defaultValue: "255.255.255.0",
   ui: { label: "VPN subnet/netmask" },
@@ -10568,7 +10568,7 @@ export const vpn_server_nm = vpnServerPatternedProperty<string>("nm", {
 export const vpn_server_nocert = vpnServerPatternedProperty<boolean>("nocert", {
   description:
     "Allow clients to connect using only username/password authentication, without a client certificate.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10577,7 +10577,7 @@ export const vpn_server_nocert = vpnServerPatternedProperty<boolean>("nocert", {
 
 export const vpn_server_pdns = vpnServerPatternedProperty<boolean>("pdns", {
   description: "Push the router's DNS server address to connecting clients.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10587,7 +10587,7 @@ export const vpn_server_pdns = vpnServerPatternedProperty<boolean>("pdns", {
 export const vpn_server_plan = vpnServerPatternedProperty<boolean>("plan", {
   description:
     "Push the LAN0 (br0) route to clients, allowing them to access the LAN.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -10596,7 +10596,7 @@ export const vpn_server_plan = vpnServerPatternedProperty<boolean>("plan", {
 
 export const vpn_server_plan1 = vpnServerPatternedProperty<boolean>("plan1", {
   description: "Push the LAN1 (br1) route to clients.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10605,7 +10605,7 @@ export const vpn_server_plan1 = vpnServerPatternedProperty<boolean>("plan1", {
 
 export const vpn_server_plan2 = vpnServerPatternedProperty<boolean>("plan2", {
   description: "Push the LAN2 (br2) route to clients.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10614,7 +10614,7 @@ export const vpn_server_plan2 = vpnServerPatternedProperty<boolean>("plan2", {
 
 export const vpn_server_plan3 = vpnServerPatternedProperty<boolean>("plan3", {
   description: "Push the LAN3 (br3) route to clients.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10624,7 +10624,7 @@ export const vpn_server_plan3 = vpnServerPatternedProperty<boolean>("plan3", {
 export const vpn_server_poll = vpnServerPatternedProperty<number>("poll", {
   description:
     "Interval in minutes to check and restart the server if it's down. 0 disables this.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "integer",
   defaultValue: 0,
   validation: rangeValidator(0, 30),
@@ -10634,7 +10634,7 @@ export const vpn_server_poll = vpnServerPatternedProperty<number>("poll", {
 export const vpn_server_port = vpnServerPatternedProperty<number>("port", {
   description:
     "The port on which the OpenVPN server will listen for connections.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "integer",
   defaultValue: 1194, // Default for server 1
   validation: portValidator,
@@ -10645,7 +10645,7 @@ export const vpn_server_proto = vpnServerPatternedProperty<
   "udp" | "tcp-server" | "udp4" | "tcp4-server" | "udp6" | "tcp6-server"
 >("proto", {
   description: "The transport protocol for the VPN server.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "enum",
   defaultValue: "udp",
   ui: {
@@ -10663,7 +10663,7 @@ export const vpn_server_proto = vpnServerPatternedProperty<
 
 export const vpn_server_r1 = vpnServerPatternedProperty<string>("r1", {
   description: "The starting IP address of the client address pool.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "ip",
   defaultValue: "192.168.1.50",
   ui: { label: "Client address pool" },
@@ -10671,7 +10671,7 @@ export const vpn_server_r1 = vpnServerPatternedProperty<string>("r1", {
 
 export const vpn_server_r2 = vpnServerPatternedProperty<string>("r2", {
   description: "The ending IP address of the client address pool.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "ip",
   defaultValue: "192.168.1.55",
   ui: { label: "Client address pool" },
@@ -10679,7 +10679,7 @@ export const vpn_server_r2 = vpnServerPatternedProperty<string>("r2", {
 
 export const vpn_server_remote = vpnServerPatternedProperty<string>("remote", {
   description: "The remote endpoint IP address for a TUN-based Static Key VPN.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "ip",
   defaultValue: "10.6.0.2", // Default for server 1
   ui: { label: "Local/remote endpoint addresses" },
@@ -10688,7 +10688,7 @@ export const vpn_server_remote = vpnServerPatternedProperty<string>("remote", {
 export const vpn_server_reneg = vpnServerPatternedProperty<number>("reneg", {
   description:
     "TLS renegotiation time in seconds. -1 uses the OpenVPN default.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "integer",
   defaultValue: -1,
   validation: rangeValidator(-1, 2147483647),
@@ -10697,7 +10697,7 @@ export const vpn_server_reneg = vpnServerPatternedProperty<number>("reneg", {
 
 export const vpn_server_rgw = vpnServerPatternedProperty<boolean>("rgw", {
   description: "Direct all client internet traffic through the VPN.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10706,7 +10706,7 @@ export const vpn_server_rgw = vpnServerPatternedProperty<boolean>("rgw", {
 
 export const vpn_server_sn = vpnServerPatternedProperty<string>("sn", {
   description: "The subnet for the VPN.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "ip",
   defaultValue: "10.6.0.0", // Default for server 1
   ui: { label: "VPN subnet/netmask" },
@@ -10714,7 +10714,7 @@ export const vpn_server_sn = vpnServerPatternedProperty<string>("sn", {
 
 export const vpn_server_static = vpnServerPatternedProperty<string>("static", {
   description: "The static key for a Static Key or TLS-Auth/Crypt VPN.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Static Key" },
@@ -10724,7 +10724,7 @@ export const vpn_server_userpass = vpnServerPatternedProperty<boolean>(
   "userpass",
   {
     description: "Enable username/password authentication for clients.",
-    page: "vpn-server.asp.html",
+    page: "vpn-server.asp",
     type: "boolean",
     defaultValue: false,
     transform: booleanTransformer,
@@ -10736,7 +10736,7 @@ export const vpn_server_users_val = vpnServerPatternedProperty<
   VpnServerUserEntry[]
 >("users_val", {
   description: "List of users for username/password authentication.",
-  page: "vpn-server.asp.html",
+  page: "vpn-server.asp",
   type: "structured-string",
   defaultValue: [],
   transform: vpnServerUserTransformer,
@@ -10746,7 +10746,7 @@ export const wait_time: NvramProperty<number> = {
   key: "wait_time",
   description:
     "The delay in seconds before the bootloader (CFE) starts booting the firmware. Allows for recovery.",
-  page: "advanced-misc.asp.html",
+  page: "advanced-misc.asp",
   type: "integer",
   defaultValue: 3,
   validation: rangeValidator(3, 20),
@@ -10761,7 +10761,7 @@ export const wait_time: NvramProperty<number> = {
 export const wan_addget = vpnServerPatternedProperty<boolean>("addget", {
   description:
     "When enabled, DNS servers received from the WAN DHCP server are added to the list of user-entered DNS servers.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10813,7 +10813,7 @@ const wanPatternedProperty = <T>(
 export const wan_ck_pause = wanPatternedProperty<boolean>("ck_pause", {
   description:
     "Disables the MultiWAN watchdog for this specific WAN interface.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10830,7 +10830,7 @@ export const wan_ck_pause = wanPatternedProperty<boolean>("ck_pause", {
 export const wan_ckmtd = wanPatternedProperty<"1" | "2" | "3">("ckmtd", {
   description:
     "The method used by the MultiWAN watchdog to check for internet connectivity.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "2",
   ui: {
@@ -10854,7 +10854,7 @@ export const wan_dhcp_pass: NvramProperty<boolean> = {
   key: "wan_dhcp_pass",
   description:
     "Accept/process packets from DHCP servers whose IP is different from the one advertised within the DHCP messages. Enabling this lowers security.",
-  page: "advanced-firewall.asp.html",
+  page: "advanced-firewall.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10864,7 +10864,7 @@ export const wan_dhcp_pass: NvramProperty<boolean> = {
 export const wan_dns = wanPatternedProperty<string[]>("dns", {
   description:
     "A space-separated list of static DNS servers for this WAN interface.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "list",
   transform: {
     toUi: (v) => v.split(" "),
@@ -10875,7 +10875,7 @@ export const wan_dns = wanPatternedProperty<string[]>("dns", {
 export const wan_dns_auto = wanPatternedProperty<boolean>("dns_auto", {
   description:
     "If enabled, automatically use DNS servers provided by the ISP for this WAN interface.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -10891,7 +10891,7 @@ export const wan_dns_auto = wanPatternedProperty<boolean>("dns_auto", {
 export const wan_domain = wanPatternedProperty<string>("domain", {
   description:
     "The domain name for the router, often sent to the ISP's DHCP server.",
-  page: "basic-ident.asp.html",
+  page: "basic-ident.asp",
   type: "string",
   defaultValue: "",
   validation: (value) =>
@@ -10901,7 +10901,7 @@ export const wan_domain = wanPatternedProperty<string>("domain", {
 
 export const wan_gateway = wanPatternedProperty<string>("gateway", {
   description: "The gateway IP address for a static IP configuration.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "ip",
   defaultValue: "0.0.0.0",
   ui: { label: "Gateway" },
@@ -10910,14 +10910,14 @@ export const wan_gateway = wanPatternedProperty<string>("gateway", {
 export const wan_gateway_get = wanPatternedProperty<string>("gateway_get", {
   description:
     "Read-only value representing the gateway IP address currently obtained from the ISP.",
-  page: "status-devices.asp.html",
+  page: "status-devices.asp",
   type: "ip",
 });
 
 export const wan_hilink_ip = wanPatternedProperty<string>("hilink_ip", {
   description:
     "IP address of a Huawei HiLink (stick) modem for status querying. 0.0.0.0 to disable.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "ip",
   defaultValue: "0.0.0.0",
   ui: {
@@ -10934,7 +10934,7 @@ export const wan_hilink_ip = wanPatternedProperty<string>("hilink_ip", {
 
 export const wan_hostname = wanPatternedProperty<string>("hostname", {
   description: "The hostname for the router, sent to the ISP's DHCP server.",
-  page: "basic-ident.asp.html",
+  page: "basic-ident.asp",
   type: "string",
   defaultValue: "router",
   validation: (value) =>
@@ -10945,42 +10945,42 @@ export const wan_hostname = wanPatternedProperty<string>("hostname", {
 export const wan_hwaddr = wanPatternedProperty<string>("hwaddr", {
   description:
     "Read-only value showing the current MAC address of the WAN interface.",
-  page: "status-devices.asp.html",
+  page: "status-devices.asp",
   type: "mac",
 });
 
 export const wan_iface = wanPatternedProperty<string>("iface", {
   description:
     "The actual kernel network interface name for the WAN connection (e.g., vlan2, ppp0). Read-only.",
-  page: "advanced-routing.asp.html",
+  page: "advanced-routing.asp",
   type: "string",
 });
 
 export const wan_ifname = wanPatternedProperty<string>("ifname", {
   description:
     "The base physical interface name for the WAN connection (e.g., vlan2, eth1). Read-only.",
-  page: "advanced-routing.asp.html",
+  page: "advanced-routing.asp",
   type: "string",
 });
 
 export const wan_ifnames = wanPatternedProperty<string>("ifnames", {
   description:
     "A space-separated list of all associated interfaces for this logical WAN. Read-only.",
-  page: "status-devices.asp.html",
+  page: "status-devices.asp",
   type: "string",
 });
 
 export const wan_ifnameX = wanPatternedProperty<string>("ifnameX", {
   description:
     "The VLAN interface name assigned to this WAN (e.g., vlan2). Configured via the VLAN page.",
-  page: "advanced-vlan.asp.html",
+  page: "advanced-vlan.asp",
   type: "string",
 });
 
 export const wan_ipaddr = wanPatternedProperty<string>("ipaddr", {
   description:
     "The IP address for a static IP configuration or the currently assigned IP.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "ip",
   defaultValue: "0.0.0.0",
   ui: { label: "IP Address" },
@@ -10990,7 +10990,7 @@ export const wan_l2tp_server_ip = wanPatternedProperty<string>(
   "l2tp_server_ip",
   {
     description: "The IP address or domain name of the L2TP server.",
-    page: "basic-network.asp.html",
+    page: "basic-network.asp",
     type: "string",
     defaultValue: "",
     ui: { label: "L2TP Server" },
@@ -11000,7 +11000,7 @@ export const wan_l2tp_server_ip = wanPatternedProperty<string>(
 export const wan_mac = wanPatternedProperty<string>("mac", {
   description:
     "The MAC address to use for the WAN interface. If empty, the default hardware MAC is used.",
-  page: "advanced-mac.asp.html",
+  page: "advanced-mac.asp",
   type: "mac",
   defaultValue: "",
   ui: { label: "WAN Port" },
@@ -11008,7 +11008,7 @@ export const wan_mac = wanPatternedProperty<string>("mac", {
 
 export const wan_modem_apn = wanPatternedProperty<string>("modem_apn", {
   description: "The Access Point Name (APN) for a 3G/LTE modem connection.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "internet",
   ui: { label: "APN" },
@@ -11016,7 +11016,7 @@ export const wan_modem_apn = wanPatternedProperty<string>("modem_apn", {
 
 export const wan_modem_band = wanPatternedProperty<string>("modem_band", {
   description: "Specifies the preferred LTE band for a non-HiLink modem.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "7FFFFFFFFFFFFFFF",
   ui: {
@@ -11034,7 +11034,7 @@ export const wan_modem_band = wanPatternedProperty<string>("modem_band", {
 
 export const wan_modem_dev = wanPatternedProperty<string>("modem_dev", {
   description: "The device file for the 3G modem (e.g., /dev/ttyUSB0).",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "/dev/ttyUSB0",
   ui: {
@@ -11054,7 +11054,7 @@ export const wan_modem_dev = wanPatternedProperty<string>("modem_dev", {
 
 export const wan_modem_init = wanPatternedProperty<string>("modem_init", {
   description: "The initialization string (AT command) for a 3G modem.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "*99#",
   ui: { label: "Modem init string" },
@@ -11063,7 +11063,7 @@ export const wan_modem_init = wanPatternedProperty<string>("modem_init", {
 export const wan_modem_ipaddr = wanPatternedProperty<string>("modem_ipaddr", {
   description:
     "IP address to route modem's web interface, must be in a different subnet. 0.0.0.0 to disable.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "ip",
   defaultValue: "0.0.0.0",
   ui: { label: "Route Modem IP" },
@@ -11071,7 +11071,7 @@ export const wan_modem_ipaddr = wanPatternedProperty<string>("modem_ipaddr", {
 
 export const wan_modem_pin = wanPatternedProperty<string>("modem_pin", {
   description: "The PIN code for the SIM card in the 3G/LTE modem.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "PIN Code" },
@@ -11081,7 +11081,7 @@ export const wan_modem_roam = wanPatternedProperty<"0" | "1" | "2" | "3">(
   "modem_roam",
   {
     description: "Controls the modem's roaming behavior.",
-    page: "basic-network.asp.html",
+    page: "basic-network.asp",
     type: "enum",
     defaultValue: "2",
     ui: {
@@ -11100,7 +11100,7 @@ export const wan_modem_speed = wanPatternedProperty<
   "00" | "030201" | "0302" | "03" | "02"
 >("modem_speed", {
   description: "Sets the preferred network type for non-HiLink modems.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "00",
   ui: {
@@ -11117,14 +11117,14 @@ export const wan_modem_speed = wanPatternedProperty<
 
 export const wan_modem_type = wanPatternedProperty<string>("modem_type", {
   description: "Specifies the type of 3G/LTE modem being used.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
 });
 
 export const wan_mtu = wanPatternedProperty<number>("mtu", {
   description: "The Maximum Transmission Unit for the WAN interface.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "integer",
   defaultValue: 1500,
   validation: rangeValidator(576, 1500),
@@ -11139,7 +11139,7 @@ export const wan_mtu = wanPatternedProperty<number>("mtu", {
 
 export const wan_mtu_enable = wanPatternedProperty<"0" | "1">("mtu_enable", {
   description: "Enables manual configuration of the MTU for the WAN interface.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -11153,7 +11153,7 @@ export const wan_mtu_enable = wanPatternedProperty<"0" | "1">("mtu_enable", {
 
 export const wan_netmask = wanPatternedProperty<string>("netmask", {
   description: "The subnet mask for a static IP configuration.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "netmask",
   defaultValue: "0.0.0.0",
   ui: { label: "Subnet Mask" },
@@ -11162,7 +11162,7 @@ export const wan_netmask = wanPatternedProperty<string>("netmask", {
 export const wan_ppp_custom = wanPatternedProperty<string>("ppp_custom", {
   description:
     "Custom options to pass to the pppd daemon for PPPoE/PPTP/L2TP connections.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Options" },
@@ -11170,7 +11170,7 @@ export const wan_ppp_custom = wanPatternedProperty<string>("ppp_custom", {
 
 export const wan_ppp_demand = wanPatternedProperty<"0" | "1">("ppp_demand", {
   description: "Controls the connection mode for PPP-based connections.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -11187,7 +11187,7 @@ export const wan_ppp_demand_dnsip = wanPatternedProperty<string>(
   {
     description:
       "An IP address to ping to trigger a 'Connect on Demand' connection.",
-    page: "basic-network.asp.html",
+    page: "basic-network.asp",
     type: "ip",
     defaultValue: "198.51.100.1",
     ui: { label: "IP to trigger Connect" },
@@ -11197,14 +11197,14 @@ export const wan_ppp_demand_dnsip = wanPatternedProperty<string>(
 export const wan_ppp_get_ip = wanPatternedProperty<string>("ppp_get_ip", {
   description:
     "Read-only value of the local IP address assigned by the PPP server.",
-  page: "status-devices.asp.html",
+  page: "status-devices.asp",
   type: "ip",
 });
 
 export const wan_ppp_idletime = wanPatternedProperty<number>("ppp_idletime", {
   description:
     "The maximum idle time in minutes before a 'Connect on Demand' connection is dropped.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "integer",
   defaultValue: 5,
   validation: rangeValidator(3, 1440),
@@ -11213,7 +11213,7 @@ export const wan_ppp_idletime = wanPatternedProperty<number>("ppp_idletime", {
 
 export const wan_ppp_mlppp = wanPatternedProperty<boolean>("ppp_mlppp", {
   description: "Enables Single Line Multilink PPP.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -11223,7 +11223,7 @@ export const wan_ppp_mlppp = wanPatternedProperty<boolean>("ppp_mlppp", {
 export const wan_ppp_passwd = wanPatternedProperty<string>("ppp_passwd", {
   description:
     "The password for a PPP-based connection (PPPoE, PPTP, L2TP, 3G).",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Password" },
@@ -11234,7 +11234,7 @@ export const wan_ppp_redialperiod = wanPatternedProperty<number>(
   {
     description:
       "The interval in seconds between redial attempts for 'Keep Alive' connections.",
-    page: "basic-network.asp.html",
+    page: "basic-network.asp",
     type: "integer",
     defaultValue: 20,
     validation: rangeValidator(1, 86400),
@@ -11244,7 +11244,7 @@ export const wan_ppp_redialperiod = wanPatternedProperty<number>(
 
 export const wan_ppp_service = wanPatternedProperty<string>("ppp_service", {
   description: "The service name for a PPPoE connection (optional).",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Service Name" },
@@ -11253,7 +11253,7 @@ export const wan_ppp_service = wanPatternedProperty<string>("ppp_service", {
 export const wan_ppp_username = wanPatternedProperty<string>("ppp_username", {
   description:
     "The username for a PPP-based connection (PPPoE, PPTP, L2TP, 3G).",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Username" },
@@ -11262,7 +11262,7 @@ export const wan_ppp_username = wanPatternedProperty<string>("ppp_username", {
 export const wan_pppoe_lef = wanPatternedProperty<number>("pppoe_lef", {
   description:
     "LCP Echo Failure limit. After this many unanswered echo requests, the connection is considered down.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "integer",
   defaultValue: 5,
   validation: rangeValidator(1, 10),
@@ -11272,7 +11272,7 @@ export const wan_pppoe_lef = wanPatternedProperty<number>("pppoe_lef", {
 export const wan_pppoe_lei = wanPatternedProperty<number>("pppoe_lei", {
   description:
     "LCP Echo Interval in seconds. Sends an echo request to the peer to check link status.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "integer",
   defaultValue: 10,
   validation: rangeValidator(1, 60),
@@ -11282,7 +11282,7 @@ export const wan_pppoe_lei = wanPatternedProperty<number>("pppoe_lei", {
 export const wan_pptp_dhcp = wanPatternedProperty<boolean>("pptp_dhcp", {
   description:
     "For PPTP/L2TP, enables obtaining an IP address via DHCP over the tunnel.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -11293,7 +11293,7 @@ export const wan_pptp_server_ip = wanPatternedProperty<string>(
   "pptp_server_ip",
   {
     description: "The IP address or domain name of the PPTP server.",
-    page: "basic-network.asp.html",
+    page: "basic-network.asp",
     type: "string",
     defaultValue: "",
     ui: { label: "PPTP Gateway" },
@@ -11304,7 +11304,7 @@ export const wan_proto = wanPatternedProperty<
   "dhcp" | "pppoe" | "static" | "pptp" | "l2tp" | "ppp3g" | "lte" | "disabled"
 >("proto", {
   description: "The connection protocol for the WAN interface.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "dhcp",
   ui: {
@@ -11326,7 +11326,7 @@ export const wan_qos_encap = wanPatternedProperty<"0" | "1" | "2">(
   "qos_encap",
   {
     description: "The link encapsulation type for QoS calculations.",
-    page: "qos-settings.asp.html",
+    page: "qos-settings.asp",
     type: "enum",
     defaultValue: "0",
     ui: {
@@ -11342,7 +11342,7 @@ export const wan_qos_encap = wanPatternedProperty<"0" | "1" | "2">(
 export const wan_qos_ibw = wanPatternedProperty<number>("qos_ibw", {
   description:
     "The maximum available inbound (download) bandwidth in kbit/s for QoS.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "integer",
   defaultValue: 16000,
   validation: rangeValidator(10, 99999999),
@@ -11352,7 +11352,7 @@ export const wan_qos_ibw = wanPatternedProperty<number>("qos_ibw", {
 export const wan_qos_obw = wanPatternedProperty<number>("qos_obw", {
   description:
     "The maximum available outbound (upload) bandwidth in kbit/s for QoS.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "integer",
   defaultValue: 700,
   validation: rangeValidator(10, 99999999),
@@ -11362,7 +11362,7 @@ export const wan_qos_obw = wanPatternedProperty<number>("qos_obw", {
 export const wan_qos_overhead = wanPatternedProperty<string>("qos_overhead", {
   description:
     "The link-layer overhead value for QoS calculations, dependent on the encapsulation type.",
-  page: "qos-settings.asp.html",
+  page: "qos-settings.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -11386,7 +11386,7 @@ export const wan_qos_overhead = wanPatternedProperty<string>("qos_overhead", {
 export const wan_speed: NvramProperty<"0" | "1" | "2" | "3" | "4"> = {
   key: "wan_speed",
   description: "Manually sets the speed and duplex of the WAN port.",
-  page: "advanced-misc.asp.html",
+  page: "advanced-misc.asp",
   type: "enum",
   defaultValue: "4",
   ui: {
@@ -11404,7 +11404,7 @@ export const wan_speed: NvramProperty<"0" | "1" | "2" | "3" | "4"> = {
 export const wan_sta = wanPatternedProperty<string>("sta", {
   description:
     "Specifies which wireless interface to use for a Wireless Client mode WAN connection.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Wireless Client Mode" },
@@ -11415,7 +11415,7 @@ export const wan_status_script = wanPatternedProperty<boolean>(
   {
     description:
       "If enabled, executes a custom script (/www/user/cgi-bin/wan{unit}_status.sh) to display status on the Overview page.",
-    page: "basic-network.asp.html",
+    page: "basic-network.asp",
     type: "boolean",
     defaultValue: false,
     transform: booleanTransformer,
@@ -11426,7 +11426,7 @@ export const wan_status_script = wanPatternedProperty<boolean>(
 export const wan_weight = wanPatternedProperty<number>("weight", {
   description:
     "The weight of this WAN interface for load balancing. A higher value means more traffic. 0 means failover only.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "integer",
   defaultValue: 1,
   validation: rangeValidator(0, 256),
@@ -11444,7 +11444,7 @@ export const wan_wins: NvramProperty<string> = {
   key: "wan_wins",
   description:
     "The IP address of the WINS server to be provided to DHCP clients on the LAN.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "ip",
   defaultValue: "0.0.0.0",
   validation: (value) =>
@@ -11460,7 +11460,7 @@ export const web_adv_scripts: NvramProperty<boolean> = {
   key: "web_adv_scripts",
   description:
     "Enables dynamic, JavaScript-based charts for Bandwidth, IP Traffic, and Wireless pages, supported only by modern browsers.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -11477,7 +11477,7 @@ export const web_adv_scripts: NvramProperty<boolean> = {
 export const web_css: NvramProperty<string> = {
   key: "web_css",
   description: "Selects the visual theme for the FreshTomato web interface.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "enum",
   defaultValue: "default",
   ui: {
@@ -11511,7 +11511,7 @@ export const web_css: NvramProperty<string> = {
 export const web_dir: NvramProperty<"default" | "jffs" | "opt" | "tmp"> = {
   key: "web_dir",
   description: "Sets the file system path for the web interface's UI files.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "enum",
   defaultValue: "default",
   ui: {
@@ -11529,7 +11529,7 @@ export const web_mx: NvramProperty<string[]> = {
   key: "web_mx",
   description:
     "A comma-separated list of top-level menu categories that should be expanded by default on page load.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "list",
   defaultValue: ["status", "bwm"],
   transform: {
@@ -11545,7 +11545,7 @@ export const web_wl_filter: NvramProperty<boolean> = {
   key: "web_wl_filter",
   description:
     "Controls access to the web admin interface from wireless clients. '1' means access is DISALLOWED, '0' means allowed.",
-  page: "admin-access.asp.html",
+  page: "admin-access.asp",
   type: "boolean",
   defaultValue: false,
   transform: {
@@ -11560,7 +11560,7 @@ export const web_wl_filter: NvramProperty<boolean> = {
 export const webmon_bkp: NvramProperty<boolean> = {
   key: "webmon_bkp",
   description: "Enables daily backup of Web Monitor data at midnight.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -11577,7 +11577,7 @@ export const webmon_bkp: NvramProperty<boolean> = {
 export const webmon_dir: NvramProperty<string> = {
   key: "webmon_dir",
   description: "Specifies the directory to store Web Monitor backups.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "string",
   defaultValue: "/tmp",
   ui: {
@@ -11596,7 +11596,7 @@ export const webmon_shrink: NvramProperty<boolean> = {
   key: "webmon_shrink",
   description:
     "If enabled, clears the current Web Monitor data after it has been backed up.",
-  page: "admin-log.asp.html",
+  page: "admin-log.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -11638,7 +11638,7 @@ export const wg_adns: NvramProperty<number[]> = {
   key: "wg_adns",
   description:
     "A comma-separated list of Wireguard interface indices (0, 1, 2) that should respond to DNS requests.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "list",
   defaultValue: [],
   transform: {
@@ -11654,7 +11654,7 @@ export const wg_adns: NvramProperty<number[]> = {
 export const wg_aip = wgProperty<string>("aip", {
   description:
     "Additional Allowed IPs for the router's side of the peer configuration, used when generating peer configs.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Allowed IPs" },
@@ -11663,7 +11663,7 @@ export const wg_aip = wgProperty<string>("aip", {
 export const wg_com = wgProperty<"0" | "1" | "2" | "3">("com", {
   description:
     "Defines the Type of VPN, controlling peer interaction behavior.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -11680,7 +11680,7 @@ export const wg_com = wgProperty<"0" | "1" | "2" | "3">("com", {
 export const wg_dns = wgProperty<string>("dns", {
   description:
     "Comma-separated list of DNS servers to be used by the Wireguard interface itself.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "DNS Servers (out)" },
@@ -11688,7 +11688,7 @@ export const wg_dns = wgProperty<string>("dns", {
 
 export const wg_enable = wgProperty<boolean>("enable", {
   description: "Enables the Wireguard interface to start on boot.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -11698,7 +11698,7 @@ export const wg_enable = wgProperty<boolean>("enable", {
 export const wg_endpoint = wgProperty<string>("endpoint", {
   description:
     "Composite string for the router's public endpoint. Format: 'mode|custom_value'. Mode 0=FQDN, 1=WAN IP, 2=Custom.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "0",
   ui: { label: "Endpoint" },
@@ -11707,7 +11707,7 @@ export const wg_endpoint = wgProperty<string>("endpoint", {
 export const wg_file = wgProperty<string>("file", {
   description:
     "Path to a wg-quick compatible configuration file. If specified, all other settings for this interface are ignored.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Config file" },
@@ -11716,7 +11716,7 @@ export const wg_file = wgProperty<string>("file", {
 export const wg_firewall = wgProperty<"auto" | "custom">("firewall", {
   description:
     "Controls how firewall rules for the Wireguard interface are managed.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "enum",
   defaultValue: "auto",
   ui: {
@@ -11730,7 +11730,7 @@ export const wg_firewall = wgProperty<"auto" | "custom">("firewall", {
 
 export const wg_fw = wgProperty<boolean>("fw", {
   description: "Enables the inbound firewall on the Wireguard tunnel.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -11740,7 +11740,7 @@ export const wg_fw = wgProperty<boolean>("fw", {
 export const wg_fwmark = wgProperty<string>("fwmark", {
   description:
     "Firewall mark for policy-based routing with the Wireguard interface. Hexadecimal value or 0.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "0",
   ui: { label: "FWMark" },
@@ -11749,7 +11749,7 @@ export const wg_fwmark = wgProperty<string>("fwmark", {
 export const wg_ip = wgProperty<string>("ip", {
   description:
     "Comma-separated list of IP addresses in CIDR format for the Wireguard interface.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "10.11.0.1/24", // Default is patterned
   ui: { label: "VPN Interface IP" },
@@ -11758,7 +11758,7 @@ export const wg_ip = wgProperty<string>("ip", {
 export const wg_ka = wgProperty<number>("ka", {
   description:
     "PersistentKeepalive interval in seconds for peers. 0 disables it.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "integer",
   defaultValue: 0,
   validation: rangeValidator(0, 99),
@@ -11767,7 +11767,7 @@ export const wg_ka = wgProperty<number>("ka", {
 
 export const wg_key = wgProperty<string>("key", {
   description: "The private key for the Wireguard interface, in Base64 format.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Private Key" },
@@ -11776,14 +11776,14 @@ export const wg_key = wgProperty<string>("key", {
 export const wg_lan = wgProperty<number>("lan", {
   description:
     "A bitmask indicating which LAN bridges (br0-br3) should be pushed to clients. 1=LAN0, 2=LAN1, 4=LAN2, 8=LAN3.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "integer",
   defaultValue: 0,
 });
 
 export const wg_mtu = wgProperty<number>("mtu", {
   description: "Maximum Transmission Unit for the Wireguard interface.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "integer",
   defaultValue: 1420,
   validation: rangeValidator(0, 1500),
@@ -11792,7 +11792,7 @@ export const wg_mtu = wgProperty<number>("mtu", {
 
 export const wg_nat = wgProperty<boolean>("nat", {
   description: "Creates a NAT rule on the Wireguard tunnel.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -11802,7 +11802,7 @@ export const wg_nat = wgProperty<boolean>("nat", {
 export const wg_peer_dns = wgProperty<string>("peer_dns", {
   description:
     "Comma-separated list of DNS servers to be pushed to Wireguard peers.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "DNS Servers for Peers" },
@@ -11812,7 +11812,7 @@ export const wg_peer_dns = wgProperty<string>("peer_dns", {
 export const wg_peers = wgProperty<string>("peers", {
   description:
     "Stores the list of peers for the Wireguard interface as a composite string.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "structured-string",
   defaultValue: "",
   ui: { label: "Peers" },
@@ -11821,7 +11821,7 @@ export const wg_peers = wgProperty<string>("peers", {
 export const wg_poll = wgProperty<number>("poll", {
   description:
     "The interval in minutes for checking the Wireguard connection status. 0 disables polling.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "integer",
   defaultValue: 0,
   validation: rangeValidator(0, 1440),
@@ -11831,7 +11831,7 @@ export const wg_poll = wgProperty<number>("poll", {
 export const wg_port = wgProperty<string>("port", {
   description:
     "The listening port for the Wireguard interface. Empty means default (51820 + unit).",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "",
   validation: (v) =>
@@ -11844,7 +11844,7 @@ export const wg_port = wgProperty<string>("port", {
 export const wg_postdown = wgProperty<string>("postdown", {
   description:
     "A custom script to run after the Wireguard interface is brought down.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Post-Down Script" },
@@ -11853,7 +11853,7 @@ export const wg_postdown = wgProperty<string>("postdown", {
 export const wg_postup = wgProperty<string>("postup", {
   description:
     "A custom script to run after the Wireguard interface is brought up.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Post-Up Script" },
@@ -11862,7 +11862,7 @@ export const wg_postup = wgProperty<string>("postup", {
 export const wg_predown = wgProperty<string>("predown", {
   description:
     "A custom script to run before the Wireguard interface is brought down.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Pre-Down Script" },
@@ -11871,7 +11871,7 @@ export const wg_predown = wgProperty<string>("predown", {
 export const wg_preup = wgProperty<string>("preup", {
   description:
     "A custom script to run before the Wireguard interface is brought up.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Pre-Up Script" },
@@ -11880,7 +11880,7 @@ export const wg_preup = wgProperty<string>("preup", {
 export const wg_rgw = wgProperty<boolean>("rgw", {
   description:
     "If enabled, all traffic from peers is forwarded through the router's Wireguard interface.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -11890,7 +11890,7 @@ export const wg_rgw = wgProperty<boolean>("rgw", {
 export const wg_rgwr = wgProperty<"1" | "2" | "3">("rgwr", {
   description:
     "Redirects Internet traffic for the 'External - VPN Provider' mode.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "enum",
   defaultValue: "1",
   ui: {
@@ -11906,7 +11906,7 @@ export const wg_rgwr = wgProperty<"1" | "2" | "3">("rgwr", {
 export const wg_route = wgProperty<string>("route", {
   description:
     "Composite string for routing mode. Format: 'mode|custom_table'. Mode 0=Off, 1=Auto, 2=Custom.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "string",
   defaultValue: "1",
   ui: { label: "Routing Mode" },
@@ -11915,7 +11915,7 @@ export const wg_route = wgProperty<string>("route", {
 export const wg_routing_val = wgProperty<string>("routing_val", {
   description:
     "Stores the list of routing policy rules for the Wireguard interface as a composite string.",
-  page: "vpn-wireguard.asp.html",
+  page: "vpn-wireguard.asp",
   type: "structured-string",
   defaultValue: "",
   ui: { label: "Routing Policy Rules" },
@@ -11946,7 +11946,7 @@ const wlProperty = <T>(
 export const wl_ap_isolate = wlProperty<boolean>("ap_isolate", {
   description:
     "Isolates wireless clients from each other on the same interface.",
-  page: "advanced-wlanvifs.asp.html",
+  page: "advanced-wlanvifs.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -11956,7 +11956,7 @@ export const wl_ap_isolate = wlProperty<boolean>("ap_isolate", {
 export const wl_atf = wlProperty<boolean>("atf", {
   description:
     "Enables Air Time Fairness, which attempts to provide equal airtime access to all clients.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -11966,7 +11966,7 @@ export const wl_atf = wlProperty<boolean>("atf", {
 export const wl_auth = wlProperty<boolean>("auth", {
   description:
     "Sets the authentication type for legacy security modes like WEP. '0' for Auto/Open, '1' for Shared Key.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -11976,14 +11976,14 @@ export const wl_auth = wlProperty<boolean>("auth", {
 export const wl_auth_mode = wlProperty<"none" | "radius">("auth_mode", {
   description:
     "Internal setting to differentiate between standard modes and Radius.",
-  page: "advanced-wlanvifs.asp.html",
+  page: "advanced-wlanvifs.asp",
   type: "enum",
   defaultValue: "none",
 });
 
 export const wl_bcn = wlProperty<number>("bcn", {
   description: "Beacon interval in milliseconds.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "integer",
   defaultValue: 100,
   validation: rangeValidator(1, 65535, "beacon interval"),
@@ -11993,7 +11993,7 @@ export const wl_bcn = wlProperty<number>("bcn", {
 export const wl_bss_enabled = wlProperty<boolean>("bss_enabled", {
   description:
     "Internal setting to control if a virtual wireless interface is enabled.",
-  page: "advanced-wlanvifs.asp.html",
+  page: "advanced-wlanvifs.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -12002,7 +12002,7 @@ export const wl_bss_enabled = wlProperty<boolean>("bss_enabled", {
 export const wl_bss_maxassoc = wlProperty<number>("bss_maxassoc", {
   description:
     "Maximum number of clients that can associate with this wireless interface.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "integer",
   defaultValue: 128,
   validation: rangeValidator(0, 255, "maximum clients"),
@@ -12012,7 +12012,7 @@ export const wl_bss_maxassoc = wlProperty<number>("bss_maxassoc", {
 export const wl_btc_mode = wlProperty<"0" | "1" | "2">("btc_mode", {
   description:
     "Bluetooth Coexistence mode to mitigate interference between Wi-Fi and Bluetooth.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -12027,7 +12027,7 @@ export const wl_btc_mode = wlProperty<"0" | "1" | "2">("btc_mode", {
 
 export const wl_channel = wlProperty<string>("channel", {
   description: "The wireless channel for the interface. '0' means Auto.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "6",
   ui: { label: "Channel" },
@@ -12036,7 +12036,7 @@ export const wl_channel = wlProperty<string>("channel", {
 export const wl_clap_hwaddr = wlProperty<string>("clap_hwaddr", {
   description:
     "The MAC address of the upstream AP to connect to in Wireless Client modes (STA, WET, PSTA). Usually not needed.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   validation: (v) =>
@@ -12048,7 +12048,7 @@ export const wl_clap_hwaddr = wlProperty<string>("clap_hwaddr", {
 
 export const wl_closed = wlProperty<boolean>("closed", {
   description: "Hides the SSID from being broadcast. '1' means hidden.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12057,13 +12057,13 @@ export const wl_closed = wlProperty<boolean>("closed", {
 
 export const wl_corerev = wlProperty<string>("corerev", {
   description: "Read-only value indicating the wireless chip's core revision.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "string",
 });
 
 export const wl_country_code = wlProperty<string>("country_code", {
   description: "Specifies the wireless country code for regulatory compliance.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "string",
   defaultValue: "US",
   ui: { label: "Country / Region" },
@@ -12072,7 +12072,7 @@ export const wl_country_code = wlProperty<string>("country_code", {
 export const wl_country_rev = wlProperty<number>("country_rev", {
   description:
     "Specifies the wireless country revision number for regulatory compliance.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "integer",
   defaultValue: 0,
   validation: rangeValidator(0, 999),
@@ -12081,7 +12081,7 @@ export const wl_country_rev = wlProperty<number>("country_rev", {
 
 export const wl_crypto = wlProperty<"aes" | "tkip" | "tkip+aes">("crypto", {
   description: "The encryption algorithm for WPA/WPA2 security modes.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "aes",
   ui: {
@@ -12097,7 +12097,7 @@ export const wl_crypto = wlProperty<"aes" | "tkip" | "tkip+aes">("crypto", {
 export const wl_distance = wlProperty<string>("distance", {
   description:
     "Sets the ACK timing based on distance in meters. '0' uses the default.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "string",
   defaultValue: "",
   validation: (v) =>
@@ -12109,7 +12109,7 @@ export const wl_distance = wlProperty<string>("distance", {
 
 export const wl_dtim = wlProperty<number>("dtim", {
   description: "DTIM (Delivery Traffic Indication Message) Interval.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "integer",
   defaultValue: 1,
   validation: rangeValidator(1, 255),
@@ -12118,7 +12118,7 @@ export const wl_dtim = wlProperty<number>("dtim", {
 
 export const wl_frag = wlProperty<number>("frag", {
   description: "Fragmentation Threshold.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "integer",
   defaultValue: 2346,
   validation: rangeValidator(256, 2346),
@@ -12127,7 +12127,7 @@ export const wl_frag = wlProperty<number>("frag", {
 
 export const wl_frameburst = wlProperty<"on" | "off">("frameburst", {
   description: "Enables or disables frame bursting.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "off",
   ui: {
@@ -12143,7 +12143,7 @@ export const wl_gmode_protection = wlProperty<"off" | "auto">(
   "gmode_protection",
   {
     description: "CTS (Clear-to-Send) Protection Mode.",
-    page: "advanced-wireless.asp.html",
+    page: "advanced-wireless.asp",
     type: "enum",
     defaultValue: "off",
     ui: {
@@ -12158,7 +12158,7 @@ export const wl_gmode_protection = wlProperty<"off" | "auto">(
 
 export const wl_hwaddr = wlProperty<string>("hwaddr", {
   description: "The MAC address of the wireless interface.",
-  page: "advanced-mac.asp.html",
+  page: "advanced-mac.asp",
   type: "mac",
   defaultValue: "00:00:00:00:00:00",
   ui: { label: "MAC Address" },
@@ -12166,14 +12166,14 @@ export const wl_hwaddr = wlProperty<string>("hwaddr", {
 
 export const wl_ifname = wlProperty<string>("ifname", {
   description: "The kernel network interface name (e.g., eth1, eth2, wl0.1).",
-  page: "advanced-wlanvifs.asp.html",
+  page: "advanced-wlanvifs.asp",
   type: "string",
 });
 
 export const wl_igs = wlProperty<boolean>("igs", {
   description:
     "IGMP Snooping. This is an internal setting often tied to Wireless Multicast Forwarding.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12181,7 +12181,7 @@ export const wl_igs = wlProperty<boolean>("igs", {
 
 export const wl_itxbf = wlProperty<boolean>("itxbf", {
   description: "Enables Implicit TX Beamforming.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -12190,7 +12190,7 @@ export const wl_itxbf = wlProperty<boolean>("itxbf", {
 
 export const wl_key = wlProperty<string>("key", {
   description: "The currently active WEP key index (1-4).",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "1",
   ui: { label: "Active WEP Key" },
@@ -12198,7 +12198,7 @@ export const wl_key = wlProperty<string>("key", {
 
 export const wl_key1 = wlProperty<string>("key1", {
   description: "WEP key 1.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Key 1" },
@@ -12206,7 +12206,7 @@ export const wl_key1 = wlProperty<string>("key1", {
 
 export const wl_key2 = wlProperty<string>("key2", {
   description: "WEP key 2.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Key 2" },
@@ -12214,7 +12214,7 @@ export const wl_key2 = wlProperty<string>("key2", {
 
 export const wl_key3 = wlProperty<string>("key3", {
   description: "WEP key 3.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Key 3" },
@@ -12222,7 +12222,7 @@ export const wl_key3 = wlProperty<string>("key3", {
 
 export const wl_key4 = wlProperty<string>("key4", {
   description: "WEP key 4.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Key 4" },
@@ -12230,7 +12230,7 @@ export const wl_key4 = wlProperty<string>("key4", {
 
 export const wl_lazywds = wlProperty<boolean>("lazywds", {
   description: "Enables 'lazy' WDS mode, allowing any WDS peer to connect.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12240,13 +12240,13 @@ export const wl_lazywds = wlProperty<boolean>("lazywds", {
 export const wl_macaddr = wlProperty<string>("macaddr", {
   description:
     "The MAC address of the wireless interface (older/alternative key to wl_hwaddr).",
-  page: "advanced-mac.asp.html",
+  page: "advanced-mac.asp",
   type: "mac",
 });
 
 export const wl_macmode = wlProperty<"disabled" | "deny" | "allow">("macmode", {
   description: "Wireless MAC filter mode.",
-  page: "advanced-wlanvifs.asp.html",
+  page: "advanced-wlanvifs.asp",
   type: "enum",
   defaultValue: "disabled",
   ui: {
@@ -12261,7 +12261,7 @@ export const wl_macmode = wlProperty<"disabled" | "deny" | "allow">("macmode", {
 
 export const wl_maxassoc = wlProperty<number>("maxassoc", {
   description: "Alias for wl_bss_maxassoc. Maximum number of clients.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "integer",
   defaultValue: 128,
   validation: rangeValidator(1, 255),
@@ -12270,7 +12270,7 @@ export const wl_maxassoc = wlProperty<number>("maxassoc", {
 
 export const wl_mfp = wlProperty<"0" | "1" | "2">("mfp", {
   description: "802.11w Protected Management Frames (PMF) setting.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -12287,7 +12287,7 @@ export const wl_mimo_preamble = wlProperty<"auto" | "mm" | "gf" | "gfbcm">(
   "mimo_preamble",
   {
     description: "802.11n preamble type.",
-    page: "advanced-wireless.asp.html",
+    page: "advanced-wireless.asp",
     type: "enum",
     defaultValue: "mm",
     ui: {
@@ -12306,7 +12306,7 @@ export const wl_mitigation = wlProperty<"0" | "1" | "2" | "3" | "4">(
   "mitigation",
   {
     description: "Interference mitigation setting for non-AC PHYs.",
-    page: "advanced-wireless.asp.html",
+    page: "advanced-wireless.asp",
     type: "enum",
     defaultValue: "0",
     ui: {
@@ -12324,7 +12324,7 @@ export const wl_mitigation = wlProperty<"0" | "1" | "2" | "3" | "4">(
 
 export const wl_mitigation_ac = wlProperty<string>("mitigation_ac", {
   description: "Interference mitigation setting for AC PHYs.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -12344,7 +12344,7 @@ export const wl_mitigation_ac = wlProperty<string>("mitigation_ac", {
 
 export const wl_mode = wlProperty<string>("mode", {
   description: "Wireless interface operational mode.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "ap",
   ui: { label: "Wireless Mode" },
@@ -12352,7 +12352,7 @@ export const wl_mode = wlProperty<string>("mode", {
 
 export const wl_mrate = wlProperty<string>("mrate", {
   description: "Multicast rate in bps. '0' for auto.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -12377,21 +12377,21 @@ export const wl_mrate = wlProperty<string>("mrate", {
 
 export const wl_mu_features = wlProperty<string>("mu_features", {
   description: "Internal setting related to MU-MIMO features.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "string",
   defaultValue: "",
 });
 
 export const wl_mumimo = wlProperty<string>("mumimo", {
   description: "Enables or disables MU-MIMO.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "string",
   defaultValue: "",
 });
 
 export const wl_nband = wlProperty<"1" | "2" | "">("nband", {
   description: "Wireless band selection. '1' for 5GHz, '2' for 2.4GHz.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "2",
   ui: {
@@ -12406,7 +12406,7 @@ export const wl_nband = wlProperty<"1" | "2" | "">("nband", {
 
 export const wl_nbw_cap = wlProperty<string>("nbw_cap", {
   description: "Wireless channel width capability.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "1",
   ui: { label: "Channel Width" },
@@ -12414,7 +12414,7 @@ export const wl_nbw_cap = wlProperty<string>("nbw_cap", {
 
 export const wl_nctrlsb = wlProperty<"lower" | "upper">("nctrlsb", {
   description: "Control sideband for 40/80MHz channels.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "lower",
   ui: { label: "Control Sideband" },
@@ -12422,7 +12422,7 @@ export const wl_nctrlsb = wlProperty<"lower" | "upper">("nctrlsb", {
 
 export const wl_net_mode = wlProperty<string>("net_mode", {
   description: "Wireless network mode (e.g., mixed, b-only, n-only).",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "mixed",
   ui: {
@@ -12442,7 +12442,7 @@ export const wl_net_mode = wlProperty<string>("net_mode", {
 
 export const wl_obss_coex = wlProperty<boolean>("obss_coex", {
   description: "Enables Overlapping BSS Coexistence for 802.11n.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12451,7 +12451,7 @@ export const wl_obss_coex = wlProperty<boolean>("obss_coex", {
 
 export const wl_optimizexbox = wlProperty<boolean>("optimizexbox", {
   description: "Enables optimizations for Xbox wireless traffic.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12460,7 +12460,7 @@ export const wl_optimizexbox = wlProperty<boolean>("optimizexbox", {
 
 export const wl_passphrase = wlProperty<string>("passphrase", {
   description: "Passphrase used to generate WEP keys.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Passphrase" },
@@ -12469,13 +12469,13 @@ export const wl_passphrase = wlProperty<string>("passphrase", {
 export const wl_phytype = wlProperty<string>("phytype", {
   description:
     "Read-only value indicating the physical layer type (e.g., n, v for AC).",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "string",
 });
 
 export const wl_plcphdr = wlProperty<"long" | "short">("plcphdr", {
   description: "PLCP header type.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "long",
   ui: {
@@ -12490,7 +12490,7 @@ export const wl_plcphdr = wlProperty<"long" | "short">("plcphdr", {
 export const wl_psta_inact = wlProperty<string>("psta_inact", {
   description:
     "Inactivity timer in seconds for Media Bridge (psta) mode. 0 to disable.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "string",
   defaultValue: "0",
   validation: (v) =>
@@ -12502,7 +12502,7 @@ export const wl_psta_inact = wlProperty<string>("psta_inact", {
 
 export const wl_radio = wlProperty<boolean>("radio", {
   description: "Enables or disables the wireless radio for an interface.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -12511,7 +12511,7 @@ export const wl_radio = wlProperty<boolean>("radio", {
 
 export const wl_radius_ipaddr = wlProperty<string>("radius_ipaddr", {
   description: "IP address of the RADIUS server.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "ip",
   defaultValue: "",
   ui: { label: "Radius Server" },
@@ -12519,7 +12519,7 @@ export const wl_radius_ipaddr = wlProperty<string>("radius_ipaddr", {
 
 export const wl_radius_key = wlProperty<string>("radius_key", {
   description: "Shared secret key for the RADIUS server.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   ui: { label: "Shared Key" },
@@ -12527,7 +12527,7 @@ export const wl_radius_key = wlProperty<string>("radius_key", {
 
 export const wl_radius_port = wlProperty<number>("radius_port", {
   description: "Port of the RADIUS server.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "integer",
   defaultValue: 1812,
   validation: portValidator,
@@ -12536,7 +12536,7 @@ export const wl_radius_port = wlProperty<number>("radius_port", {
 
 export const wl_rate = wlProperty<string>("rate", {
   description: "Fixed transmission rate in bps. '0' for auto.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "0",
   ui: {
@@ -12561,7 +12561,7 @@ export const wl_rate = wlProperty<string>("rate", {
 
 export const wl_rateset = wlProperty<"default" | "12" | "all">("rateset", {
   description: "Controls the set of basic rates advertised by the AP.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "default",
   ui: {
@@ -12576,7 +12576,7 @@ export const wl_rateset = wlProperty<"default" | "12" | "all">("rateset", {
 
 export const wl_reg_mode = wlProperty<"off" | "d" | "h">("reg_mode", {
   description: "Wireless regulatory mode.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "off",
   ui: {
@@ -12591,7 +12591,7 @@ export const wl_reg_mode = wlProperty<"off" | "d" | "h">("reg_mode", {
 
 export const wl_rts = wlProperty<number>("rts", {
   description: "RTS (Request to Send) Threshold.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "integer",
   defaultValue: 2347,
   validation: rangeValidator(0, 2347),
@@ -12601,7 +12601,7 @@ export const wl_rts = wlProperty<number>("rts", {
 export const wl_ssid = wlProperty<string>("ssid", {
   description:
     "The Service Set Identifier (network name) for the wireless interface.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "FreshTomato24",
   validation: (v) =>
@@ -12613,7 +12613,7 @@ export const wl_ssid = wlProperty<string>("ssid", {
 export const wl_turbo_qam = wlProperty<"0" | "1">("turbo_qam", {
   description:
     "Enables TurboQAM (256-QAM) for higher speeds on 802.11n networks.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "1",
   ui: {
@@ -12627,7 +12627,7 @@ export const wl_turbo_qam = wlProperty<"0" | "1">("turbo_qam", {
 
 export const wl_txbf = wlProperty<boolean>("txbf", {
   description: "Enables explicit TX Beamforming.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -12636,7 +12636,7 @@ export const wl_txbf = wlProperty<boolean>("txbf", {
 
 export const wl_txbf_bfe_cap = wlProperty<boolean>("txbf_bfe_cap", {
   description: "Internal setting for Beamformee capability.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -12644,7 +12644,7 @@ export const wl_txbf_bfe_cap = wlProperty<boolean>("txbf_bfe_cap", {
 
 export const wl_txbf_bfr_cap = wlProperty<boolean>("txbf_bfr_cap", {
   description: "Internal setting for Beamformer capability.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -12653,7 +12653,7 @@ export const wl_txbf_bfr_cap = wlProperty<boolean>("txbf_bfr_cap", {
 export const wl_txbf_imp = wlProperty<boolean>("txbf_imp", {
   description:
     "Internal setting for Implicit TX Beamforming, linked to `wl_itxbf`.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -12661,7 +12661,7 @@ export const wl_txbf_imp = wlProperty<boolean>("txbf_imp", {
 
 export const wl_txpwr = wlProperty<string>("txpwr", {
   description: "Transmit power in mW. '0' for country default.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "string",
   defaultValue: "0",
   ui: { label: "Transmit Power" },
@@ -12678,7 +12678,7 @@ export const wl_unit: NvramProperty<string> = {
 export const wl_user_rssi = wlProperty<string>("user_rssi", {
   description:
     "Roaming Assistant threshold. Disconnects clients with RSSI below this value. '0' to disable.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "string",
   defaultValue: "0",
   validation: (v) =>
@@ -12691,21 +12691,21 @@ export const wl_user_rssi = wlProperty<string>("user_rssi", {
 export const wl_vifs = wlProperty<string>("vifs", {
   description:
     "A space-separated list of virtual wireless interfaces (e.g., 'wl0.1 wl0.2') belonging to a primary interface.",
-  page: "advanced-wlanvifs.asp.html",
+  page: "advanced-wlanvifs.asp",
   type: "string",
   defaultValue: "",
 });
 
 export const wl_wds = wlProperty<string>("wds", {
   description: "A space-separated list of MAC addresses of WDS peers.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
 });
 
 export const wl_wds_enable = wlProperty<boolean>("wds_enable", {
   description: "Enables WDS (Wireless Distribution System) mode.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12713,7 +12713,7 @@ export const wl_wds_enable = wlProperty<boolean>("wds_enable", {
 
 export const wl_wep_bit = wlProperty<"64" | "128">("wep_bit", {
   description: "WEP key length.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "128",
   ui: {
@@ -12727,7 +12727,7 @@ export const wl_wep_bit = wlProperty<"64" | "128">("wep_bit", {
 
 export const wl_wme = wlProperty<"auto" | "off" | "on">("wme", {
   description: "WMM (Wireless Multimedia Extensions) setting.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "on",
   ui: {
@@ -12742,7 +12742,7 @@ export const wl_wme = wlProperty<"auto" | "off" | "on">("wme", {
 
 export const wl_wme_apsd = wlProperty<"on" | "off">("wme_apsd", {
   description: "Automatic Power Save Delivery (APSD) mode for WMM.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "on",
   ui: {
@@ -12756,7 +12756,7 @@ export const wl_wme_apsd = wlProperty<"on" | "off">("wme_apsd", {
 
 export const wl_wme_no_ack = wlProperty<"on" | "off">("wme_no_ack", {
   description: "WMM No-Acknowledgement mode.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "enum",
   defaultValue: "off",
   ui: {
@@ -12770,7 +12770,7 @@ export const wl_wme_no_ack = wlProperty<"on" | "off">("wme_no_ack", {
 
 export const wl_wmf_bss_enable = wlProperty<boolean>("wmf_bss_enable", {
   description: "Enables Wireless Multicast Forwarding (WMF).",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12779,7 +12779,7 @@ export const wl_wmf_bss_enable = wlProperty<boolean>("wmf_bss_enable", {
 
 export const wl_wmf_igmpq_filter = wlProperty<boolean>("wmf_igmpq_filter", {
   description: "Internal setting for WMF IGMP query filtering.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12787,7 +12787,7 @@ export const wl_wmf_igmpq_filter = wlProperty<boolean>("wmf_igmpq_filter", {
 
 export const wl_wmf_mdata_sendup = wlProperty<boolean>("wmf_mdata_sendup", {
   description: "Internal setting for WMF multicast data send-up.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12795,7 +12795,7 @@ export const wl_wmf_mdata_sendup = wlProperty<boolean>("wmf_mdata_sendup", {
 
 export const wl_wmf_ucast_upnp = wlProperty<boolean>("wmf_ucast_upnp", {
   description: "Internal setting for WMF unicast UPnP.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12803,7 +12803,7 @@ export const wl_wmf_ucast_upnp = wlProperty<boolean>("wmf_ucast_upnp", {
 
 export const wl_wmf_ucigmp_query = wlProperty<boolean>("wmf_ucigmp_query", {
   description: "Internal setting for WMF unicast IGMP query.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   defaultValue: false,
   transform: booleanTransformer,
@@ -12811,7 +12811,7 @@ export const wl_wmf_ucigmp_query = wlProperty<boolean>("wmf_ucigmp_query", {
 
 export const wl_wpa_gtk_rekey = wlProperty<number>("wpa_gtk_rekey", {
   description: "WPA Group Key Renewal interval in seconds.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "integer",
   defaultValue: 3600,
   validation: rangeValidator(0, 2592000),
@@ -12829,7 +12829,7 @@ export const wl_maclist: PatternedNvramProperty<WlIfaceParam, string[]> = {
   },
   description:
     "A space-separated list of MAC addresses for the wireless filter.",
-  page: "basic-wfilter.asp.html",
+  page: "basic-wfilter.asp",
   type: "list",
   defaultValue: [],
   transform: {
@@ -12849,7 +12849,7 @@ export const wl_security_mode: PatternedNvramProperty<WlIfaceParam, string> = {
     },
   },
   description: "Specifies the wireless security mode.",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "enum",
   defaultValue: "disabled",
   ui: {
@@ -12878,7 +12878,7 @@ export const wl_wpa_psk: PatternedNvramProperty<WlIfaceParam, string> = {
     },
   },
   description: "The WPA/WPA2 Pre-Shared Key (password).",
-  page: "basic-network.asp.html",
+  page: "basic-network.asp",
   type: "string",
   defaultValue: "",
   validation: (v) => {
@@ -12904,7 +12904,7 @@ export const wl_wpa_psk: PatternedNvramProperty<WlIfaceParam, string> = {
 export const wlx_hpamp: NvramProperty<boolean> = {
   key: "wlx_hpamp",
   description: "Enables or disables the High Power Amplifier.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   transform: booleanTransformer,
   defaultValue: true,
@@ -12920,7 +12920,7 @@ export const wlx_hpamp: NvramProperty<boolean> = {
 export const wlx_hperx: NvramProperty<boolean> = {
   key: "wlx_hperx",
   description: "Enables or disables Enhanced RX Sensitivity.",
-  page: "advanced-wireless.asp.html",
+  page: "advanced-wireless.asp",
   type: "boolean",
   transform: booleanTransformer,
   defaultValue: false,
@@ -12937,7 +12937,7 @@ export const zfs_mount_script: NvramProperty<string> = {
   key: "zfs_mount_script",
   description:
     "A custom script to run for mounting ZFS partitions when automatic mounting is disabled.",
-  page: "nas-usb.asp.html",
+  page: "nas-usb.asp",
   type: "string",
   defaultValue: "",
   validation: (v) =>
@@ -12967,7 +12967,7 @@ export const script_mwanup: NvramProperty<string> = {
   key: "script_mwanup",
   description:
     "A shell script that is executed after a MultiWAN interface comes up. The active WAN number is passed as $1.",
-  page: "admin-scripts.asp.html",
+  page: "admin-scripts.asp",
   type: "string",
   defaultValue: "",
   transform: multilineScriptTransformer,
@@ -12986,7 +12986,7 @@ export const stubby_resolvers: NvramProperty<StubbyResolver[]> = {
   key: "stubby_resolvers",
   description:
     "List of upstream resolvers for Stubby (DNS-over-TLS), stored in a custom composite format.",
-  page: "advanced-dhcpdns.asp.html",
+  page: "advanced-dhcpdns.asp",
   type: "structured-string",
   defaultValue: [],
   transform: {
@@ -13020,7 +13020,7 @@ export const ipv6_rtr_addr_auto: NvramProperty<boolean> = {
   key: "ipv6_rtr_addr_auto",
   description:
     "Controls whether the IPv6 Router LAN address is automatically determined (1) or manually specified (0).",
-  page: "basic-ipv6.asp.html",
+  page: "basic-ipv6.asp",
   type: "boolean",
   defaultValue: true,
   transform: booleanTransformer,
@@ -13053,7 +13053,7 @@ export const ddnsx: PatternedNvramProperty<
   },
   description:
     "Configuration for a Dynamic DNS client instance. Stored as a composite string.",
-  page: "basic-ddns.asp.html",
+  page: "basic-ddns.asp",
   type: "structured-string",
   defaultValue: {
     service: "",

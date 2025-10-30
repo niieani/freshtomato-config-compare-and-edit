@@ -252,13 +252,10 @@ export function getAllPages(): Array<{ id: string; title: string }> {
 }
 
 export function prettifyPageId(page: string): string {
-  const withoutExt = page.replace(/\.asp\.html$/i, "");
-  return withoutExt
-    .split(/[-_/]/g)
-    .map((segment) =>
-      segment.length ? segment[0]!.toUpperCase() + segment.slice(1) : segment,
-    )
-    .join(" ");
+  return page
+    .toLowerCase()
+    .replace(/\.asp(?:\.html)?$/i, "")
+    .replace(/\s+/g, "-");
 }
 
 export const UNCATEGORISED_PAGE_ID = "__uncategorised__";
