@@ -7,6 +7,7 @@ import {
   type DragEvent,
 } from "react";
 import { decodeCfg, encodeCfg } from "@/nvram/nvram-cfg";
+import { multilineScriptTransformer } from "@/nvram/nvram-catalog-types";
 import {
   computeDiff,
   type DiffEntry,
@@ -60,10 +61,16 @@ const DIFF_BADGE_THEME: Record<DiffStatus, string> = {
   removed: "bg-rose-500/15 text-rose-200 border border-rose-400/40",
 };
 
+const PRIMARY_DIFF_BADGE_THEME: Record<DiffStatus, string> = {
+  ...DIFF_BADGE_THEME,
+  changed: "bg-indigo-500/20 text-indigo-200 border border-indigo-400/50",
+};
+
 type ControlType = "boolean" | "select" | "number" | "textarea" | "text";
 
 function resolveControlType(field: ResolvedField): ControlType {
   if (field.options && field.options.length > 0) return "select";
+  if (field.transform === multilineScriptTransformer) return "textarea";
   switch (field.type) {
     case "boolean":
       return "boolean";
@@ -750,7 +757,7 @@ export function App() {
                   </button>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {selectedPage.entries.map((entry) => (
                     <FieldCard
                       key={entry.key}
@@ -1044,6 +1051,10 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
   const workingValue = coerceDisplayValue(field, entry.workingRaw, controlType);
 
   const selectionValue = selection?.option ?? (entry.leftRaw !== undefined ? "left" : "remove");
+  const disabledOptions = {
+    left: entry.leftRaw === undefined,
+    right: !hasRight || entry.rightRaw === undefined,
+  } as const;
 
   const handleCustomChange = (value: string) => {
     onSelectionChange(key, { option: "custom", customRaw: field.fromUi(value) });
@@ -1061,10 +1072,20 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
     });
   };
 
+  const handleSelectOption = (option: Exclude<SelectionOption, "custom">) => {
+    if (option === "left" && entry.leftRaw === undefined) return;
+    if (option === "right" && (entry.rightRaw === undefined || !hasRight)) return;
+    onSelectionChange(key, { option });
+  };
+
+  const handleSelectEdited = () => {
+    onSelectionChange(key, { option: "custom", customRaw: field.fromUi(workingValue) });
+  };
+
   const finalBadge = finalDiff.status !== "unchanged" && (
     <span
       className={classNames(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium",
+        "inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium",
         DIFF_BADGE_THEME[finalDiff.status],
       )}
     >
@@ -1073,31 +1094,41 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
   );
 
   return (
-    <article className="rounded-2xl border border-slate-900 bg-slate-900/70 p-5 shadow-sm shadow-slate-950/40">
-      <header className="flex flex-wrap items-start justify-between gap-4">
+    <article className="rounded-xl border border-slate-800 bg-slate-950/60 p-4 shadow-sm shadow-slate-950/30">
+      <header className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-base font-semibold text-white">{field.label}</h3>
-            <span className="rounded-full bg-slate-900 px-2 py-0.5 text-[11px] text-slate-500">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-sm font-semibold text-white" title={field.label}>
               {key}
+            </h3>
+            <span
+              className={classNames(
+                "inline-flex items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium",
+                PRIMARY_DIFF_BADGE_THEME[diff.status],
+              )}
+            >
+              {diff.status === "changed" ? "DIFFERENT" : diff.status.toUpperCase()}
             </span>
           </div>
-          <p className="max-w-3xl text-sm text-slate-400">{field.description}</p>
+          {field.description ? (
+            <p className="text-xs leading-relaxed text-slate-400">{field.description}</p>
+          ) : null}
         </div>
-        <div className="flex items-center gap-2">
-          <span
-            className={classNames(
-              "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium",
-              DIFF_BADGE_THEME[diff.status],
-            )}
-          >
-            {diff.status.toUpperCase()}
-          </span>
-          {finalBadge}
+        <div className="flex flex-col items-start gap-2 md:items-end md:gap-2">
+          <div className="flex flex-wrap items-center gap-2 md:justify-end">
+            <SelectionChips
+              current={selectionValue}
+              onSelect={handleSelectOption}
+              onSelectCustom={handleSelectEdited}
+              disabledOptions={disabledOptions}
+              showEdited={selectionValue === "custom"}
+            />
+            {finalBadge}
+          </div>
         </div>
       </header>
 
-      <div className="mt-5 grid gap-4 md:grid-cols-3">
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
         <ValueColumn
           title="Left"
           controlType={controlType}
@@ -1123,12 +1154,6 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
           controlType={controlType}
           value={workingValue}
           field={field}
-          selection={selectionValue}
-          onSelect={(option) => {
-            if (option === "left" && entry.leftRaw === undefined) return;
-            if (option === "right" && (entry.rightRaw === undefined || !hasRight)) return;
-            onSelectionChange(key, { option });
-          }}
           onCustomChange={handleCustomChange}
           onBooleanChange={handleBooleanChange}
           onNumberChange={handleNumberChange}
@@ -1136,10 +1161,6 @@ function FieldCard({ entry, onSelectionChange, onRemoveCustom, hasRight }: Field
           onRemoveCustom={onRemoveCustom}
           fieldKey={key}
           options={field.options}
-          disabledOptions={{
-            left: entry.leftRaw === undefined,
-            right: !hasRight || entry.rightRaw === undefined,
-          }}
         />
       </div>
     </article>
@@ -1152,9 +1173,7 @@ interface ValueColumnProps {
   field: ResolvedField;
   controlType: ControlType;
   readOnly?: boolean;
-  selection?: SelectionOption;
   hint?: string;
-  onSelect?: (option: Exclude<SelectionOption, "custom">) => void;
   onCustomChange?: (value: string) => void;
   onBooleanChange?: (value: boolean) => void;
   onNumberChange?: (value: string) => void;
@@ -1162,7 +1181,6 @@ interface ValueColumnProps {
   onRemoveCustom?: (key: string) => void;
   fieldKey?: string;
   options?: ResolvedField["options"];
-  disabledOptions?: Partial<Record<Exclude<SelectionOption, "custom">, boolean>>;
 }
 
 function ValueColumn({
@@ -1171,9 +1189,7 @@ function ValueColumn({
   field,
   controlType,
   readOnly,
-  selection,
   hint,
-  onSelect,
   onCustomChange,
   onBooleanChange,
   onNumberChange,
@@ -1181,8 +1197,33 @@ function ValueColumn({
   onRemoveCustom,
   fieldKey,
   options,
-  disabledOptions,
 }: ValueColumnProps) {
+  const renderBooleanVisual = (checked: boolean) => (
+    <div className="flex items-center gap-2">
+      <span
+        className={classNames(
+          "relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border transition-colors duration-200",
+          checked ? "border-sky-500 bg-sky-500/80" : "border-rose-500 bg-rose-500/30",
+        )}
+      >
+        <span
+          className={classNames(
+            "absolute left-[2px] h-4 w-4 translate-x-0 rounded-full bg-white transition-transform duration-200",
+            checked ? "translate-x-4" : "",
+          )}
+        />
+      </span>
+      <span
+        className={classNames(
+          "text-xs font-semibold tracking-wide",
+          checked ? "text-sky-300" : "text-rose-300",
+        )}
+      >
+        {checked ? "ENABLED" : "DISABLED"}
+      </span>
+    </div>
+  );
+
   const renderControl = () => {
     if (readOnly) {
       if (hint) {
@@ -1192,10 +1233,19 @@ function ValueColumn({
           </div>
         );
       }
+      if (controlType === "boolean") {
+        return (
+          <div className="rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2">
+            {renderBooleanVisual(Boolean(value))}
+          </div>
+        );
+      }
       return (
-        <pre className="max-h-40 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-200">
+        <pre className="max-h-40 overflow-y-auto rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-200">
           {(() => {
-            if (value === null || value === undefined || value === "") return "—";
+            if (value === null || value === undefined || value === "") {
+              return <span className="text-slate-500">&lt;EMPTY&gt;</span>;
+            }
             if (controlType === "select" && options && options.length > 0) {
               const match = options.find((option) => String(option.value) === String(value));
               return match ? `${match.label} (${value})` : formatDisplay(value, controlType);
@@ -1208,14 +1258,20 @@ function ValueColumn({
 
     if (controlType === "boolean") {
       return (
-        <label className="flex items-center gap-2">
+        <label className="inline-flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2">
           <input
             type="checkbox"
             checked={Boolean(value)}
             onChange={(event) => onBooleanChange?.(event.target.checked)}
-            className="h-5 w-5 rounded border-slate-700 bg-slate-900 text-sky-500 focus:ring-sky-500"
+            className="peer sr-only"
+            aria-label={field.label || field.key || title}
           />
-          <span className="text-sm text-slate-200">{value ? "Enabled" : "Disabled"}</span>
+          <span className="relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full border border-rose-500/60 bg-rose-500/30 transition-colors duration-200 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-500 peer-checked:border-sky-500 peer-checked:bg-sky-500/80">
+            <span className="absolute left-[2px] h-4 w-4 translate-x-0 rounded-full bg-white transition-transform duration-200 peer-checked:translate-x-4" />
+          </span>
+          <span className="text-xs font-semibold tracking-wide text-rose-300 transition-colors duration-200 peer-checked:text-sky-300">
+            {Boolean(value) ? "ENABLED" : "DISABLED"}
+          </span>
         </label>
       );
     }
@@ -1241,7 +1297,8 @@ function ValueColumn({
         <textarea
           value={value ?? ""}
           onChange={(event) => onCustomChange?.(event.target.value)}
-          className="h-32 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          className="h-32 w-full rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 font-mono text-sm text-slate-100 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+          spellCheck={false}
         />
       );
     }
@@ -1268,13 +1325,8 @@ function ValueColumn({
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between text-xs uppercase tracking-wide text-slate-500">
-        <span>{title}</span>
-        {!readOnly && selection ? (
-          <SelectionChips current={selection} onSelect={onSelect} disabledOptions={disabledOptions} />
-        ) : null}
-      </div>
+    <div className="space-y-2">
+      <div className="text-xs uppercase tracking-wide text-slate-500">{title}</div>
 
       {renderControl()}
 
@@ -1293,10 +1345,18 @@ function ValueColumn({
 interface SelectionChipsProps {
   current: SelectionOption;
   onSelect?: (option: Exclude<SelectionOption, "custom">) => void;
+  onSelectCustom?: () => void;
   disabledOptions?: Partial<Record<Exclude<SelectionOption, "custom">, boolean>>;
+  showEdited?: boolean;
 }
 
-function SelectionChips({ current, onSelect, disabledOptions }: SelectionChipsProps) {
+function SelectionChips({
+  current,
+  onSelect,
+  onSelectCustom,
+  disabledOptions,
+  showEdited,
+}: SelectionChipsProps) {
   const options: Array<{ value: Exclude<SelectionOption, "custom">; label: string }> = [
     { value: "left", label: "Use Left" },
     { value: "right", label: "Use Right" },
@@ -1304,7 +1364,7 @@ function SelectionChips({ current, onSelect, disabledOptions }: SelectionChipsPr
   ];
 
   return (
-    <div className="inline-flex items-center gap-1 rounded-full border border-slate-800 bg-slate-950/70 p-1">
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-slate-800 bg-slate-950/70 p-1">
       {options.map((option) => {
         const active = current === option.value;
         const disabled = disabledOptions?.[option.value] ?? false;
@@ -1329,6 +1389,15 @@ function SelectionChips({ current, onSelect, disabledOptions }: SelectionChipsPr
           </button>
         );
       })}
+      {showEdited ? (
+        <button
+          type="button"
+          onClick={() => onSelectCustom?.()}
+          className="rounded-full bg-amber-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-200 hover:bg-amber-500/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60"
+        >
+          Edited
+        </button>
+      ) : null}
     </div>
   );
 }
