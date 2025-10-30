@@ -29,6 +29,14 @@ import {
   labelFromKey,
   type ResolvedField,
 } from "@/lib/nvramCatalog";
+import {
+  getGroupDisplayMeta,
+  getPageDisplayMeta,
+  PREFERRED_MENU_STRUCTURE,
+  UNCATALOGUED_GROUP_KEY,
+  UNCATALOGUED_GROUP_LABEL,
+  UNCATALOGUED_GROUP_ORDER,
+} from "@/lib/pageOrdering";
 import "./index.css";
 
 type SelectionOption = "left" | "right" | "custom" | "remove";
@@ -60,7 +68,8 @@ function parseStoredConfig(raw: string): LoadedConfig | null {
     if (!data || typeof data !== "object") {
       return null;
     }
-    const { id, name, size, header, fileLength, entries, loadedAt, salt } = data;
+    const { id, name, size, header, fileLength, entries, loadedAt, salt } =
+      data;
     if (
       typeof id !== "string" ||
       typeof name !== "string" ||
@@ -74,8 +83,11 @@ function parseStoredConfig(raw: string): LoadedConfig | null {
       return null;
     }
     const normalised: NvramEntries = {};
-    for (const [key, value] of Object.entries(entries as Record<string, unknown>)) {
-      normalised[key] = typeof value === "string" ? value : value == null ? "" : String(value);
+    for (const [key, value] of Object.entries(
+      entries as Record<string, unknown>,
+    )) {
+      normalised[key] =
+        typeof value === "string" ? value : value == null ? "" : String(value);
     }
     return {
       id,
@@ -108,8 +120,7 @@ interface FieldView {
 }
 
 const DIFF_BADGE_THEME: Record<DiffStatus, string> = {
-  same:
-    "bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800/40 dark:text-slate-200 dark:border-slate-700/60",
+  same: "bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800/40 dark:text-slate-200 dark:border-slate-700/60",
   different:
     "bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:border-amber-400/40",
   added:
@@ -134,12 +145,10 @@ const FINAL_STATUS_LABEL: Record<DiffStatus, string> = {
 type ValueTone = "left" | "right" | "both" | "custom" | "neutral";
 
 const SURFACE_TONE_CLASSES: Record<ValueTone, string> = {
-  left:
-    "border-sky-200/80 bg-sky-50 dark:border-sky-400/40 dark:bg-sky-500/20",
+  left: "border-sky-200/80 bg-sky-50 dark:border-sky-400/40 dark:bg-sky-500/20",
   right:
     "border-rose-200/80 bg-rose-50 dark:border-rose-400/40 dark:bg-rose-500/20",
-  both:
-    "border-violet-200/80 bg-violet-50 dark:border-violet-400/40 dark:bg-violet-500/20",
+  both: "border-violet-200/80 bg-violet-50 dark:border-violet-400/40 dark:bg-violet-500/20",
   custom:
     "border-amber-200/80 bg-amber-50 dark:border-amber-400/40 dark:bg-amber-500/20",
   neutral:
@@ -147,12 +156,10 @@ const SURFACE_TONE_CLASSES: Record<ValueTone, string> = {
 };
 
 const CHIP_TONE_BASE_CLASSES: Record<ValueTone, string> = {
-  left:
-    "border border-sky-300 text-sky-700 hover:bg-sky-100 dark:border-sky-500/40 dark:text-sky-200 dark:hover:bg-sky-500/20",
+  left: "border border-sky-300 text-sky-700 hover:bg-sky-100 dark:border-sky-500/40 dark:text-sky-200 dark:hover:bg-sky-500/20",
   right:
     "border border-rose-300 text-rose-700 hover:bg-rose-100 dark:border-rose-500/40 dark:text-rose-200 dark:hover:bg-rose-500/20",
-  both:
-    "border border-violet-300 text-violet-700 hover:bg-violet-100 dark:border-violet-500/40 dark:text-violet-200 dark:hover:bg-violet-500/20",
+  both: "border border-violet-300 text-violet-700 hover:bg-violet-100 dark:border-violet-500/40 dark:text-violet-200 dark:hover:bg-violet-500/20",
   custom:
     "border border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-500/40 dark:text-amber-200 dark:hover:bg-amber-500/20",
   neutral:
@@ -160,25 +167,20 @@ const CHIP_TONE_BASE_CLASSES: Record<ValueTone, string> = {
 };
 
 const CHIP_TONE_ACTIVE_CLASSES: Record<ValueTone, string> = {
-  left:
-    "bg-sky-200 text-sky-900 shadow-[0_0_0_1px_rgba(56,189,248,0.4)] dark:bg-sky-500/40 dark:text-white dark:shadow-[0_0_0_1px_rgba(56,189,248,0.45)]",
+  left: "bg-sky-200 text-sky-900 shadow-[0_0_0_1px_rgba(56,189,248,0.4)] dark:bg-sky-500/40 dark:text-white dark:shadow-[0_0_0_1px_rgba(56,189,248,0.45)]",
   right:
     "bg-rose-200 text-rose-900 shadow-[0_0_0_1px_rgba(244,114,182,0.35)] dark:bg-rose-500/40 dark:text-white dark:shadow-[0_0_0_1px_rgba(244,114,182,0.45)]",
-  both:
-    "bg-violet-200 text-violet-900 shadow-[0_0_0_1px_rgba(196,181,253,0.4)] dark:bg-violet-500/40 dark:text-white dark:shadow-[0_0_0_1px_rgba(167,139,250,0.45)]",
+  both: "bg-violet-200 text-violet-900 shadow-[0_0_0_1px_rgba(196,181,253,0.4)] dark:bg-violet-500/40 dark:text-white dark:shadow-[0_0_0_1px_rgba(167,139,250,0.45)]",
   custom:
     "bg-amber-200 text-amber-900 shadow-[0_0_0_1px_rgba(251,191,36,0.35)] dark:bg-amber-500/40 dark:text-white dark:shadow-[0_0_0_1px_rgba(250,204,21,0.45)]",
-  neutral:
-    "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-white",
+  neutral: "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-white",
 };
 
 const DROPZONE_TONE_CLASSES = {
-  left:
-    "border-sky-300/80 bg-sky-50 hover:border-sky-400 hover:bg-sky-100 dark:border-sky-500/40 dark:bg-sky-500/15 dark:hover:border-sky-400/70 dark:hover:bg-sky-500/25",
+  left: "border-sky-300/80 bg-sky-50 hover:border-sky-400 hover:bg-sky-100 dark:border-sky-500/40 dark:bg-sky-500/15 dark:hover:border-sky-400/70 dark:hover:bg-sky-500/25",
   right:
     "border-rose-300/80 bg-rose-50 hover:border-rose-400 hover:bg-rose-100 dark:border-rose-500/40 dark:bg-rose-500/15 dark:hover:border-rose-400/70 dark:hover:bg-rose-500/25",
-  both:
-    "border-violet-300/80 bg-violet-50 hover:border-violet-400 hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-500/15 dark:hover:border-violet-400/70 dark:hover:bg-violet-500/25",
+  both: "border-violet-300/80 bg-violet-50 hover:border-violet-400 hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-500/15 dark:hover:border-violet-400/70 dark:hover:bg-violet-500/25",
 } as const;
 
 const LABEL_TONE_CLASSES: Record<ValueTone, string> = {
@@ -272,7 +274,8 @@ function coerceDisplayValue(
       const rawValue = raw ?? "";
       if (rawValue === "-") return rawValue;
       const uiValue = field.toUi(raw);
-      if (uiValue === null || uiValue === undefined || uiValue === "") return "";
+      if (uiValue === null || uiValue === undefined || uiValue === "")
+        return "";
       if (typeof uiValue === "number" && Number.isFinite(uiValue)) {
         return Math.trunc(uiValue);
       }
@@ -286,8 +289,10 @@ function coerceDisplayValue(
       const uiValue = field.toUi(raw);
       const rawValue = raw ?? "";
       const isIntegerField = field.type === "integer";
-      if (rawValue === "-" || rawValue === "." || rawValue === "-.") return rawValue;
-      if (uiValue === null || uiValue === undefined || uiValue === "") return "";
+      if (rawValue === "-" || rawValue === "." || rawValue === "-.")
+        return rawValue;
+      if (uiValue === null || uiValue === undefined || uiValue === "")
+        return "";
       if (typeof uiValue === "number" && Number.isFinite(uiValue)) {
         return isIntegerField ? Math.trunc(uiValue) : uiValue;
       }
@@ -381,22 +386,42 @@ function inferStructuredFieldType(value: unknown): StructuredFieldType {
   return "string";
 }
 
-function primitiveToStructuredFieldType(type: StructuredPrimitiveType): StructuredFieldType {
+function primitiveToStructuredFieldType(
+  type: StructuredPrimitiveType,
+): StructuredFieldType {
   if (type === "boolean") return "boolean";
   if (type === "number" || type === "integer") return "number";
   return "string";
 }
 
 function isStructuredObjectSchemaDefinition(
-  schema: StructuredSchema | StructuredObjectSchemaDefinition | StructuredPrimitiveField | undefined,
+  schema:
+    | StructuredSchema
+    | StructuredObjectSchemaDefinition
+    | StructuredPrimitiveField
+    | undefined,
 ): schema is StructuredObjectSchemaDefinition {
-  return Boolean(schema) && typeof schema === "object" && "kind" in schema && schema.kind === "object";
+  return (
+    Boolean(schema) &&
+    typeof schema === "object" &&
+    "kind" in schema &&
+    schema.kind === "object"
+  );
 }
 
 function isStructuredPrimitiveField(
-  schema: StructuredSchema | StructuredObjectSchemaDefinition | StructuredPrimitiveField | undefined,
+  schema:
+    | StructuredSchema
+    | StructuredObjectSchemaDefinition
+    | StructuredPrimitiveField
+    | undefined,
 ): schema is StructuredPrimitiveField {
-  return Boolean(schema) && typeof schema === "object" && "type" in schema && !("kind" in schema);
+  return (
+    Boolean(schema) &&
+    typeof schema === "object" &&
+    "type" in schema &&
+    !("kind" in schema)
+  );
 }
 
 function defaultValueForPrimitiveField(field: StructuredPrimitiveField) {
@@ -426,7 +451,9 @@ function normaliseRecordWithSchema(
       normalised[key] = defaultValueForPrimitiveField(field);
     }
   }
-  for (const [key, value] of Object.entries(source as Record<string, unknown>)) {
+  for (const [key, value] of Object.entries(
+    source as Record<string, unknown>,
+  )) {
     if (!(key in schema.fields)) {
       normalised[key] = value;
     }
@@ -434,7 +461,10 @@ function normaliseRecordWithSchema(
   return normalised;
 }
 
-function detectStructuredMode(field: ResolvedField, entry: FieldView): StructuredEditorMode {
+function detectStructuredMode(
+  field: ResolvedField,
+  entry: FieldView,
+): StructuredEditorMode {
   const schema = field.structuredSchema;
   if (schema) {
     if (schema.kind === "object") {
@@ -468,7 +498,11 @@ function detectStructuredMode(field: ResolvedField, entry: FieldView): Structure
     }
   }
 
-  if (field.raw && "defaultValue" in field.raw && field.raw.defaultValue !== undefined) {
+  if (
+    field.raw &&
+    "defaultValue" in field.raw &&
+    field.raw.defaultValue !== undefined
+  ) {
     const defaultValue = field.raw.defaultValue;
     if (Array.isArray(defaultValue)) return "array";
     if (isPlainObject(defaultValue)) return "object";
@@ -482,7 +516,9 @@ function formatBytes(bytes: number): string {
   const units = ["B", "KB", "MB", "GB"];
   const idx = Math.floor(Math.log(bytes) / Math.log(1024));
   const value = bytes / 1024 ** idx;
-  return `${value.toFixed(value >= 100 ? 0 : value >= 10 ? 1 : 2)} ${units[idx]}`;
+  return `${value.toFixed(value >= 100 ? 0 : value >= 10 ? 1 : 2)} ${
+    units[idx]
+  }`;
 }
 
 function formatTimestamp(iso: string): string {
@@ -580,7 +616,10 @@ function escapeForShell(value: string): string {
   return value.replace(/'/g, "'\"'\"'");
 }
 
-function generateNvramScript(entries: NvramEntries, diffToLeft: DiffEntry[]): string {
+function generateNvramScript(
+  entries: NvramEntries,
+  diffToLeft: DiffEntry[],
+): string {
   const lines: string[] = [];
   for (const entry of diffToLeft) {
     if (entry.status === "same") continue;
@@ -611,13 +650,21 @@ function buildRouterHref(
   return `http://${credentials}${ipAddress}/${normalisedPath}`;
 }
 
+function compareOrder(a: number, b: number): number {
+  if (a === b) return 0;
+  if (a === Number.POSITIVE_INFINITY) return 1;
+  if (b === Number.POSITIVE_INFINITY) return -1;
+  return a - b;
+}
+
 function fallbackField(key: string): ResolvedField {
   const label = labelFromKey(key);
   return {
     key,
     page: UNCATEGORISED_PAGE_ID,
     label,
-    description: "No catalog metadata available for this key. Displaying raw value.",
+    description:
+      "No catalog metadata available for this key. Displaying raw value.",
     type: "string",
     defaultRaw: undefined,
     transform: undefined,
@@ -666,11 +713,13 @@ const UNCATALOGUED_VARIANT_BY_ID = new Map(
 );
 
 export function App() {
-  const [themePreference, setThemePreference] = useState<ThemePreference>(() => {
-    if (typeof window === "undefined") return "system";
-    const stored = window.localStorage.getItem(THEME_PREFERENCE_STORAGE_KEY);
-    return stored === "light" || stored === "dark" ? stored : "system";
-  });
+  const [themePreference, setThemePreference] = useState<ThemePreference>(
+    () => {
+      if (typeof window === "undefined") return "system";
+      const stored = window.localStorage.getItem(THEME_PREFERENCE_STORAGE_KEY);
+      return stored === "light" || stored === "dark" ? stored : "system";
+    },
+  );
   const [systemPrefersDark, setSystemPrefersDark] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -1127,38 +1176,86 @@ export function App() {
       groupLabel: string;
       hasMatches: boolean;
       sortOrder: number;
+      groupOrder: number;
+      pageOrder: number;
     }> = [];
 
-    const getGroupMeta = (pageId: string, title: string) => {
-      if (
-        pageId === UNCATEGORISED_PAGE_ID ||
-        UNCATALOGUED_VARIANT_BY_ID.has(pageId)
-      ) {
-        return {
-          groupKey: "uncatalogued",
-          groupLabel: "Uncatalogued",
-        };
+    const dynamicGroupOrder = new Map<string, number>();
+    const assignFallbackGroupOrder = (groupKey: string) => {
+      if (groupKey === UNCATALOGUED_GROUP_KEY) {
+        return UNCATALOGUED_GROUP_ORDER;
       }
-      const [group] = title.split(/[-_/]/);
-      const key = group || "other";
-      return {
-        groupKey: key,
-        groupLabel: key.toUpperCase(),
-      };
+      if (!dynamicGroupOrder.has(groupKey)) {
+        dynamicGroupOrder.set(
+          groupKey,
+          PREFERRED_MENU_STRUCTURE.length + dynamicGroupOrder.size,
+        );
+      }
+      return dynamicGroupOrder.get(groupKey)!;
     };
 
     for (const [pageId, entries] of fieldViews.entries()) {
       const variantMeta = UNCATALOGUED_VARIANT_BY_ID.get(pageId);
-      const title = variantMeta
+      const baseTitle = variantMeta
         ? variantMeta.title
         : pageId === UNCATEGORISED_PAGE_ID
         ? UNCATEGORISED_PAGE_LABEL
         : prettifyPageId(pageId);
       const totalCount = entries.length;
+
+      if (totalCount === 0) {
+        continue;
+      }
+
       const pendingCount = entries.reduce(
         (count, entry) => count + (entry.finalDiff.status !== "same" ? 1 : 0),
         0,
       );
+      const preferredMeta = getPageDisplayMeta(pageId);
+
+      let groupKey: string;
+      let groupLabel: string;
+      let groupOrder: number;
+      let pageOrder: number;
+      let title = (preferredMeta?.pageLabel ?? baseTitle).trim();
+
+      if (
+        pageId === UNCATEGORISED_PAGE_ID ||
+        UNCATALOGUED_VARIANT_BY_ID.has(pageId)
+      ) {
+        groupKey = UNCATALOGUED_GROUP_KEY;
+        groupLabel = UNCATALOGUED_GROUP_LABEL;
+        groupOrder = UNCATALOGUED_GROUP_ORDER;
+        pageOrder = variantMeta?.order ?? Number.POSITIVE_INFINITY;
+      } else if (preferredMeta) {
+        groupKey = preferredMeta.groupKey;
+        groupLabel = preferredMeta.groupLabel;
+        groupOrder = preferredMeta.groupOrder;
+        pageOrder = preferredMeta.pageOrder;
+      } else {
+        const pageIdBase = pageId
+          .replace(/\.asp(?:\.html)?$/i, "")
+          .toLowerCase();
+        const [primarySegment] = pageIdBase.split("-");
+        const fallbackGroupKey = primarySegment || "other";
+        const normalisedFallbackKey =
+          fallbackGroupKey && fallbackGroupKey.trim() !== ""
+            ? fallbackGroupKey
+            : "other";
+        const fallbackGroupMeta = getGroupDisplayMeta(normalisedFallbackKey);
+        groupKey = fallbackGroupMeta
+          ? normalisedFallbackKey
+          : normalisedFallbackKey;
+        const fallbackLabel =
+          normalisedFallbackKey
+            .replace(/[-_]/g, " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase())
+            .trim() || "Other";
+        groupLabel = fallbackGroupMeta?.label ?? fallbackLabel;
+        groupOrder =
+          fallbackGroupMeta?.order ?? assignFallbackGroupOrder(groupKey);
+        pageOrder = Number.POSITIVE_INFINITY;
+      }
 
       const filtered = entries.filter((entry) => {
         const isForced = forcedVisibleKey === entry.key;
@@ -1191,12 +1288,17 @@ export function App() {
         return true;
       });
 
-      const { groupKey, groupLabel } = getGroupMeta(pageId, title);
-      const prefix = `${groupKey}-`;
-      const displayTitle = title.startsWith(prefix)
-        ? title.slice(prefix.length)
-        : title;
-      const sortOrder = variantMeta?.order ?? 0;
+      let displayTitle = title;
+      if (groupKey === UNCATALOGUED_GROUP_KEY) {
+        displayTitle =
+          title
+            .replace(/^uncatalogued[-_]?/i, "")
+            .replace(/[-_]/g, " ")
+            .replace(/\b\w/g, (char) => char.toUpperCase())
+            .trim() || title;
+      }
+      const sortOrder =
+        variantMeta?.order ?? pageOrder ?? Number.POSITIVE_INFINITY;
       const hasMatches = filtered.length > 0;
 
       if (hasMatches || pageId === activePageId || showEmptyPages) {
@@ -1211,23 +1313,24 @@ export function App() {
           groupLabel,
           hasMatches,
           sortOrder,
+          groupOrder,
+          pageOrder,
         });
       }
     }
 
-    const normaliseGroupKey = (key: string) =>
-      key === "uncatalogued" ? "zzzzzzzz" : key;
-
     result.sort((a, b) => {
-      const groupCompare = normaliseGroupKey(a.groupKey).localeCompare(
-        normaliseGroupKey(b.groupKey),
-      );
+      const groupCompare = compareOrder(a.groupOrder, b.groupOrder);
       if (groupCompare !== 0) {
         return groupCompare;
       }
-      const orderCompare = a.sortOrder - b.sortOrder;
-      if (orderCompare !== 0) {
-        return orderCompare;
+      const pageCompare = compareOrder(a.pageOrder, b.pageOrder);
+      if (pageCompare !== 0) {
+        return pageCompare;
+      }
+      const sortCompare = compareOrder(a.sortOrder, b.sortOrder);
+      if (sortCompare !== 0) {
+        return sortCompare;
       }
       return a.title.localeCompare(b.title);
     });
@@ -1249,27 +1352,40 @@ export function App() {
         key: string;
         label: string;
         pages: Array<(typeof filteredPages)[number]>;
-        position: number;
+        order: number;
       }
     >();
     for (const page of filteredPages) {
       if (!groups.has(page.groupKey)) {
-        const position =
-          page.groupKey === "__uncatalogued__"
-            ? Number.POSITIVE_INFINITY
-            : groups.size;
         groups.set(page.groupKey, {
           key: page.groupKey,
           label: page.groupLabel,
           pages: [],
-          position,
+          order: page.groupOrder,
         });
       }
       groups.get(page.groupKey)!.pages.push(page);
     }
-    return Array.from(groups.values()).sort(
-      (a, b) => a.position - b.position || a.label.localeCompare(b.label),
-    );
+    for (const group of groups.values()) {
+      group.pages.sort((a, b) => {
+        const pageCompare = compareOrder(a.pageOrder, b.pageOrder);
+        if (pageCompare !== 0) {
+          return pageCompare;
+        }
+        const sortCompare = compareOrder(a.sortOrder, b.sortOrder);
+        if (sortCompare !== 0) {
+          return sortCompare;
+        }
+        return a.title.localeCompare(b.title);
+      });
+    }
+    return Array.from(groups.values()).sort((a, b) => {
+      const groupCompare = compareOrder(a.order, b.order);
+      if (groupCompare !== 0) {
+        return groupCompare;
+      }
+      return a.label.localeCompare(b.label);
+    });
   }, [filteredPages]);
 
   const selectedPage = activePageId
@@ -1671,11 +1787,12 @@ export function App() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
-                FreshTomato Config Compare and Edit
+                🍅 FreshTomato Config Compare and Edit
               </h1>
               <p className="mt-1 max-w-2xl text-sm text-slate-600 dark:text-slate-400">
-                Inspect, compare, and craft configuration backups visually.
-                Start by dropping a FreshTomato Router{" "}
+                Inspect, compare, and craft configuration backups visually. Runs
+                fully locally, in your browser, so your config files never leave
+                your computer. Start by dropping a FreshTomato Router{" "}
                 <code className="rounded bg-slate-200 px-2 py-1 text-slate-900 dark:bg-slate-900 dark:text-slate-100">
                   .cfg
                 </code>{" "}
@@ -1852,15 +1969,15 @@ export function App() {
                   >
                     {group.pages.map((page) => {
                       const isActive = page.id === (selectedPage?.id ?? null);
-                      const pagePath = page.id.endsWith(".asp") ? page.id : null;
+                      const pagePath = page.id.endsWith(".asp")
+                        ? page.id
+                        : null;
                       const pageTitle = page.displayTitle || page.title;
 
                       const externalLinks: JSX.Element[] = [];
                       if (pagePath) {
                         const sharedLan =
-                          leftLanIp &&
-                          rightLanIp &&
-                          leftLanIp === rightLanIp
+                          leftLanIp && rightLanIp && leftLanIp === rightLanIp
                             ? leftLanIp
                             : null;
                         if (sharedLan) {
@@ -1926,7 +2043,7 @@ export function App() {
                         <div
                           key={page.id}
                           className={classNames(
-                            "group flex w-full items-center gap-2 rounded-lg py-2 pl-6 pr-4 text-sm transition",
+                            "group flex w-full items-center gap-2 rounded-lg py-2 pl-6 pr-4 text-[13px] transition",
                             isActive
                               ? "bg-slate-200 text-slate-900 dark:bg-slate-900/80 dark:text-white"
                               : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900/40 dark:hover:text-slate-200",
@@ -1935,7 +2052,7 @@ export function App() {
                           <button
                             type="button"
                             onClick={() => setActivePageId(page.id)}
-                            className="flex flex-1 items-center justify-between gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
+                            className="flex flex-1 items-center justify-between gap-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60"
                           >
                             <span className="flex-1 truncate">
                               {page.displayTitle}
@@ -1997,7 +2114,7 @@ export function App() {
           </div>
         </aside>
 
-      <main className="flex-1">
+        <main className="flex-1">
           <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 px-6 py-4 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-slate-900/60 dark:bg-slate-950/90 dark:supports-[backdrop-filter]:bg-slate-950/70">
             <div className="mx-auto flex max-w-7xl flex-col gap-4">
               <div className="relative">
@@ -2426,17 +2543,11 @@ interface PageExternalLinkProps {
 function PageExternalLink({ href, title, variant }: PageExternalLinkProps) {
   const toneClasses: Record<PageExternalLinkProps["variant"], string> = {
     shared:
-      "text-slate-500 hover:text-slate-600 focus-visible:ring-slate-300/50 dark:text-slate-400 dark:hover:text-slate-200 dark:focus-visible:ring-slate-600/50",
-    left:
-      "text-slate-500 hover:text-sky-500 focus-visible:ring-sky-300/50 dark:text-slate-400 dark:hover:text-sky-300 dark:focus-visible:ring-sky-500/50",
+      "text-slate-400 hover:text-slate-600 focus-visible:ring-slate-300/60 dark:text-slate-500 dark:hover:text-slate-300 dark:focus-visible:ring-slate-600/50",
+    left: "text-slate-400 hover:text-sky-500 focus-visible:ring-sky-300/60 dark:text-slate-500 dark:hover:text-sky-300 dark:focus-visible:ring-sky-500/50",
     right:
-      "text-slate-500 hover:text-rose-500 focus-visible:ring-rose-300/50 dark:text-slate-400 dark:hover:text-rose-300 dark:focus-visible:ring-rose-500/50",
+      "text-slate-400 hover:text-rose-500 focus-visible:ring-rose-300/60 dark:text-slate-500 dark:hover:text-rose-300 dark:focus-visible:ring-rose-500/50",
   };
-  const accentDotClasses: Partial<Record<PageExternalLinkProps["variant"], string>> =
-    {
-      left: "bg-sky-400/70 dark:bg-sky-500/70",
-      right: "bg-rose-400/70 dark:bg-rose-500/70",
-    };
 
   return (
     <a
@@ -2446,21 +2557,11 @@ function PageExternalLink({ href, title, variant }: PageExternalLinkProps) {
       title={title}
       aria-label={title}
       className={classNames(
-        "inline-flex items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-0 transition",
+        "inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-0 transition",
         toneClasses[variant],
       )}
     >
-      <span className="relative inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-300/70 bg-white/80 text-current shadow-sm transition dark:border-slate-700/70 dark:bg-slate-900/70">
-        <ExternalLinkIcon className="h-3.5 w-3.5" />
-        {variant !== "shared" ? (
-          <span
-            className={classNames(
-              "pointer-events-none absolute bottom-0.5 right-0.5 h-1.5 w-1.5 rounded-full",
-              accentDotClasses[variant],
-            )}
-          />
-        ) : null}
-      </span>
+      <ExternalLinkIcon className="h-3.5 w-3.5" />
     </a>
   );
 }
@@ -2730,6 +2831,19 @@ function FieldCard({
   const workingValue = rawModeActive
     ? entry.workingRaw ?? ""
     : coerceDisplayValue(field, entry.workingRaw, controlType);
+  const leftHint =
+    entry.leftRaw === undefined
+      ? "Not present"
+      : controlType === "boolean" && entry.leftRaw === ""
+      ? "Empty"
+      : undefined;
+  const rightHint = hasRight
+    ? entry.rightRaw === undefined
+      ? "Not present"
+      : controlType === "boolean" && entry.rightRaw === ""
+      ? "Empty"
+      : undefined
+    : "No file loaded";
   const sidesIdentical =
     hasRight &&
     entry.leftRaw !== undefined &&
@@ -2739,15 +2853,18 @@ function FieldCard({
     entry.leftRaw !== undefined && entry.workingRaw === entry.leftRaw;
   const workingMatchesRight =
     entry.rightRaw !== undefined && entry.workingRaw === entry.rightRaw;
-  const workingTone: ValueTone = workingMatchesLeft && workingMatchesRight
-    ? "both"
-    : workingMatchesLeft
-    ? "left"
-    : workingMatchesRight
-    ? "right"
-    : entry.workingRaw !== undefined && entry.workingRaw !== null && entry.workingRaw !== ""
-    ? "custom"
-    : "neutral";
+  const workingTone: ValueTone =
+    workingMatchesLeft && workingMatchesRight
+      ? "both"
+      : workingMatchesLeft
+      ? "left"
+      : workingMatchesRight
+      ? "right"
+      : entry.workingRaw !== undefined &&
+        entry.workingRaw !== null &&
+        entry.workingRaw !== ""
+      ? "custom"
+      : "neutral";
 
   const selectionValue =
     selection?.option ?? (entry.leftRaw !== undefined ? "left" : "remove");
@@ -2925,7 +3042,7 @@ function FieldCard({
         <ValueColumn
           title={sidesIdentical ? "Left = Right" : "Left"}
           controlType={controlType}
-          hint={entry.leftRaw === undefined ? "Not present" : undefined}
+          hint={leftHint}
           value={leftValue}
           field={field}
           readOnly
@@ -2940,13 +3057,7 @@ function FieldCard({
           <ValueColumn
             title="Right"
             controlType={controlType}
-            hint={
-              hasRight
-                ? entry.rightRaw === undefined
-                  ? "Not present"
-                  : undefined
-                : "No file loaded"
-            }
+            hint={rightHint}
             value={rightValue}
             field={field}
             readOnly
