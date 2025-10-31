@@ -1,41 +1,57 @@
-# 🍅 FreshTomato Config Compare and Edit NVRAM
+# 🍅 FreshTomato Config Compare & Edit
 
-Interactive browser-based tool for inspecting, comparing, and editing FreshTomato router backups (NVRAM).
-Runs fully locally, in your browser, so your config files never leave your computer.
-Use it to create a new config, or even just to preview your settings and apply them manually via the Web UI.
+Interactive browser-based tool for inspecting, comparing, and editing FreshTomato router `.cfg` backups (NVRAM).
+Runs fully offline and entirely in your browser, so your config files *never* leave your computer.
+Includes a catalog of majority of Tomato's NVRAM settings with descriptions and parsers, and gives you superpowers when it’s time to understand and make changes to your Tomato routers.
 
-## Usage
+## [Try It Now](https://niieani.github.io/freshtomato-config-compare-and-edit/)
 
-- **Primary upload** – Drag a FreshTomato `.cfg` file into the left drop-zone to decode it. The UI hydrates every field with metadata, grouping settings by their firmware page.
-- **Comparison upload** – Drop a second `.cfg` to surface different, added, and removed keys. Filter by change type, search across labels and descriptions, or jump between pages from the sidebar.
-- **Per-field control** – For each key choose _Use Left_, _Use Right_, _Remove_, or customise the value directly. Booleans, enumerations, and numbers render with specialised controls; unknown keys fall back to raw editing.
-- **Exports** – Preview pending edits, generate a curated `.cfg` (HDR1/HDR2) using `encodeCfg`, or copy a CLI script with `nvram set/unset` commands ready for SSH sessions.
-- **Custom keys** – Add adhoc entries that aren’t in the catalog; they appear under “Uncatalogued Keys” and can be edited or removed like any other field.
+[![screenshot](docs/screenshot.png)](https://niieani.github.io/freshtomato-config-compare-and-edit/)
+
+## Use cases
+
+- **Firmware jump with a clean slate.** The official docs recommend wiping NVRAM after a firmware upgrade. Load your “before” backup and a fresh “after reset” dump to selectively reapply only the good bits, or even just to preview your changes and re-apply them manually via the Web UI.
+- **Hardware migration day.** Moving from one Tomato-capable router to another? Diff the old and new configs, grab the essentials, export a curated `.cfg` or an `nvram set/unset` script, and keep the lights on.
+- **Sanity checks.** Preview every setting you’ve ever tweaked, compare a factory-reset baseline against your custom build, and make a backup right after the reset so you can always track what changed.
+
+## Feature Highlights
+
+- 🪄 **Drag, drop, done** Decode `.cfg` files instantly with per-page grouping, human-friendly labels, and description tooltips straight from the FreshTomato catalog.
+- 🔍 **Signal over noise** Filter by added/removed/changed keys, spotlight pending edits, search across labels, values, and descriptions, and jump to any field via deep links.
+- 🎛️ **Smart editors** Toggle booleans, pick from enums, adjust numbers with validation, or drop into raw mode for the weird stuff. Structured arrays/objects are represented with tidy editors.
+- 🔄 **Left/Right/Custom control** Decide per field whether to keep the primary value, switch to the comparison snapshot, remove it entirely, or handcraft a custom override.
+- 🧠 **Persistent workspace** Your last-loaded configs, theme choice, and selection decisions are saved locally so you can pick up where you left off.
+- 📦 **Export** Generate fresh `.cfg` files with proper HDR1/HDR2 headers, or grab an `nvram set/unset` CLI script for SSH sessions. Want a diff report? Review it before you download.
+- 🌙 **Dark mode** Toggle themes on the fly; the UI is tuned for both late-night remote sessions and daylight disaster recovery.
+- 🧭 **Page navigation mirrors FreshTomato’s menu structure** Uncatalogued keys automatically grouped so nothing gets lost.
+
+## Support the Project
+
+Like how this smooths out your FreshTomato workflow? Consider sponsoring development via [GitHub Sponsors](https://github.com/sponsors/niieani).
 
 ## Development
 
-1. Install dependencies
+Contributions welcome.
 
-   ```bash
-   bun install
-   ```
+Requirements: [Bun](https://bun.sh/) ≥ 1.3 installed locally.
 
-2. Run the development server with hot reloading
+```bash
+bun install
+bun run dev   # open http://localhost:3000
+```
 
-   ```bash
-   bun run dev
-   ```
+Build time?
 
-   The server starts at `http://localhost:3000` by default.
+```bash
+bun run build
+```
 
-3. Create a production bundle
+Serve the production bundle:
 
-   ```bash
-   bun run build
-   ```
+```bash
+bun run start
+```
 
-4. Serve the built assets (optional)
+## License
 
-   ```bash
-   bun run start
-   ```
+MIT © 2025 Bazyli Brzóska — see [LICENSE](./LICENSE).
